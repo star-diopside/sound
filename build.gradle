@@ -1,0 +1,9 @@
+apply plugin: "java"
+
+repositories {
+    jcenter()
+}
+
+dependencies {
+    runtime "com.googlecode.soundlibs:mp3spi:1.9.5-1"
+}
