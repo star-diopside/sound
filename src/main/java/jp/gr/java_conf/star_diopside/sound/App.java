@@ -42,7 +42,7 @@ public class App {
     public void play(Stream<Path> paths) {
         paths.forEach(path -> {
             try (Stream<Path> stream = Files.walk(path)) {
-                stream.filter(Files::isRegularFile).forEach(file -> {
+                stream.filter(Files::isRegularFile).sorted().forEach(file -> {
                     try (InputStream is = Files.newInputStream(file)) {
                         play(is, file.getFileName().toString());
                     } catch (IOException e) {
