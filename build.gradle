@@ -1,4 +1,7 @@
 apply plugin: "java"
+apply plugin: "application"
+
+mainClassName = "jp.gr.java_conf.star_diopside.sound.App"
 
 repositories {
     jcenter()
