@@ -45,15 +45,15 @@ public class App {
     }
 
     public void play(Stream<Path> paths) {
-        paths.forEach(path -> {
-            try (Stream<Path> stream = Files.walk(path)) {
-                stream.filter(Files::isRegularFile).sorted().forEach(file -> {
-                    try (InputStream is = Files.newInputStream(file)) {
-                        play(is, file.getFileName().toString());
-                    } catch (IOException e) {
-                        throw new UncheckedIOException(e);
-                    }
-                });
+        paths.flatMap(path -> {
+            try {
+                return Files.find(path, Integer.MAX_VALUE, (p, attr) -> attr.isRegularFile()).sorted();
+            } catch (IOException e) {
+                throw new UncheckedIOException(e);
+            }
+        }).forEach(path -> {
+            try (InputStream is = Files.newInputStream(path)) {
+                play(is, path.getFileName().toString());
             } catch (IOException e) {
                 throw new UncheckedIOException(e);
             }
@@ -67,8 +67,8 @@ public class App {
             AudioFormat baseFormat = baseInputStream.getFormat();
             AudioFormat decodedFormat = new AudioFormat(AudioFormat.Encoding.PCM_SIGNED, baseFormat.getSampleRate(), 16,
                     baseFormat.getChannels(), baseFormat.getChannels() * 2, baseFormat.getSampleRate(), false);
-            logger.info(baseFormat.getClass().toString() + " - " + baseFormat.toString());
-            logger.info(decodedFormat.getClass().toString() + " - " + decodedFormat.toString());
+            logger.info(baseFormat.getClass() + " - " + baseFormat);
+            logger.info(decodedFormat.getClass() + " - " + decodedFormat);
             try (AudioInputStream decodedInputStream = AudioSystem.getAudioInputStream(decodedFormat, baseInputStream);
                     SourceDataLine line = AudioSystem.getSourceDataLine(decodedFormat)) {
                 line.addLineListener(event -> logger.info(event.toString()));
