@@ -28,10 +28,15 @@ public class App {
     private static final Logger logger = Logger.getLogger(App.class.getName());
 
     public static void main(String[] args) {
-        App app = new App();
         ExecutorService executorService = Executors.newSingleThreadExecutor();
-        Future<?> future = executorService.submit(() -> app.play(Arrays.stream(args).map(Paths::get)));
-        executorService.shutdown();
+        Future<?> future;
+
+        try {
+            future = executorService.submit(() -> new App().play(Arrays.stream(args).map(Paths::get)));
+        } finally {
+            executorService.shutdown();
+        }
+
         try {
             future.get();
         } catch (InterruptedException | ExecutionException e) {
