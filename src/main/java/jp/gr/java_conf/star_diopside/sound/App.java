@@ -82,9 +82,7 @@ public class App {
                 line.drain();
                 line.stop();
             }
-        } catch (IOException e) {
-            throw new UncheckedIOException(e);
-        } catch (UnsupportedAudioFileException | LineUnavailableException e) {
+        } catch (IOException | UnsupportedAudioFileException | LineUnavailableException e) {
             logger.log(Level.WARNING, e.getMessage(), e);
         } finally {
             logger.info("End " + name);
