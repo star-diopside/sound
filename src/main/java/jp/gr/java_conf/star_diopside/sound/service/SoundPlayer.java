@@ -90,8 +90,8 @@ public class SoundPlayer {
     }
 
     public void stop() {
-        future.cancel(true);
         stopping.set(true);
+        future.cancel(true);
     }
 
     public void add(Path path) {
