@@ -6,7 +6,6 @@ import java.io.InputStream;
 import java.io.UncheckedIOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.util.Iterator;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -40,7 +39,7 @@ public class SoundPlayer {
                     try {
                         play(queue.take());
                     } catch (InterruptedException e) {
-                        logger.log(Level.INFO, e.getMessage(), e);
+                        logger.log(Level.FINE, e.getMessage(), e);
                         break;
                     } catch (Exception e) {
                         logger.log(Level.WARNING, e.getMessage(), e);
@@ -54,16 +53,8 @@ public class SoundPlayer {
     }
 
     private void play(Path path) {
-        try (Stream<Path> stream = Files.find(path, Integer.MAX_VALUE, (p, attr) -> attr.isRegularFile()).sorted()) {
-            Iterator<Path> iterator = stream.iterator();
-            while (iterator.hasNext() && !stopping.get()) {
-                Path p = iterator.next();
-                try (InputStream is = Files.newInputStream(p)) {
-                    play(is, p.getFileName().toString());
-                } catch (IOException e) {
-                    throw new UncheckedIOException(e);
-                }
-            }
+        try (InputStream is = Files.newInputStream(path)) {
+            play(is, path.getFileName().toString());
         } catch (IOException e) {
             throw new UncheckedIOException(e);
         }
@@ -103,7 +94,11 @@ public class SoundPlayer {
         stopping.set(true);
     }
 
-    public boolean add(Path e) {
-        return queue.add(e);
+    public void add(Path path) {
+        try (Stream<Path> stream = Files.find(path, Integer.MAX_VALUE, (p, attr) -> attr.isRegularFile()).sorted()) {
+            stream.forEach(queue::add);
+        } catch (IOException e) {
+            throw new UncheckedIOException(e);
+        }
     }
 }
