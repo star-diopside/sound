@@ -2,6 +2,7 @@ package jp.gr.java_conf.star_diopside.sound.controller;
 
 import java.io.File;
 import java.net.URL;
+import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ResourceBundle;
@@ -46,6 +47,16 @@ public class SoundController implements Initializable {
     @FXML
     private void onSelectDirectory(ActionEvent event) {
         DirectoryChooser chooser = new DirectoryChooser();
+
+        if (model.getSelectedFile() != null) {
+            Path path = Paths.get(model.getSelectedFile());
+            if (Files.isDirectory(path)) {
+                chooser.setInitialDirectory(path.toFile());
+            } else if (Files.isRegularFile(path)) {
+                chooser.setInitialDirectory(path.getParent().toFile());
+            }
+        }
+
         File file = chooser.showDialog(getWindow());
         if (file != null) {
             model.setSelectedFile(file.toString());
@@ -55,6 +66,17 @@ public class SoundController implements Initializable {
     @FXML
     private void onSelectFile(ActionEvent event) {
         FileChooser chooser = new FileChooser();
+
+        if (model.getSelectedFile() != null) {
+            Path path = Paths.get(model.getSelectedFile());
+            if (Files.isDirectory(path)) {
+                chooser.setInitialDirectory(path.toFile());
+            } else if (Files.isRegularFile(path)) {
+                chooser.setInitialDirectory(path.getParent().toFile());
+                chooser.setInitialFileName(path.getFileName().toString());
+            }
+        }
+
         File file = chooser.showOpenDialog(getWindow());
         if (file != null) {
             model.setSelectedFile(file.toString());
