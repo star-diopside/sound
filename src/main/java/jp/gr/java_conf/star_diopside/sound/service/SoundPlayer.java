@@ -31,8 +31,8 @@ public class SoundPlayer {
     private Future<?> future;
 
     public void play() {
-        if (stopping.get()) {
-            throw new IllegalStateException();
+        if (future != null || stopping.get()) {
+            return;
         }
 
         ExecutorService executorService = Executors.newSingleThreadExecutor();
@@ -49,6 +49,7 @@ public class SoundPlayer {
                         logger.log(Level.WARNING, e.getMessage(), e);
                     }
                 }
+                future = null;
                 stopping.set(false);
             });
         } finally {
@@ -94,8 +95,10 @@ public class SoundPlayer {
     }
 
     public void stop() {
-        stopping.set(true);
-        future.cancel(true);
+        if (future != null) {
+            stopping.set(true);
+            future.cancel(true);
+        }
     }
 
     public void add(Path path) {

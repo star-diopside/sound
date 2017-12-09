@@ -67,4 +67,14 @@ public class SoundController implements Initializable {
         player.add(path);
         model.getFiles().add(path);
     }
+
+    @FXML
+    private void onStart(ActionEvent event) {
+        player.play();
+    }
+
+    @FXML
+    private void onStop(ActionEvent event) {
+        player.stop();
+    }
 }
