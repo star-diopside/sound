@@ -9,4 +9,5 @@ repositories {
 
 dependencies {
     runtime "com.googlecode.soundlibs:mp3spi:1.9.5-1"
+    runtime "net.sourceforge.jaadec:jaad:0.8.5"
 }

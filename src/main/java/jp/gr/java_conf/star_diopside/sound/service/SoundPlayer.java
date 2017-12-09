@@ -28,9 +28,13 @@ public class SoundPlayer {
     private static final Logger logger = Logger.getLogger(SoundPlayer.class.getName());
     private BlockingQueue<Path> queue = new LinkedBlockingQueue<>();
     private AtomicBoolean stopping = new AtomicBoolean();
-    Future<?> future;
+    private Future<?> future;
 
     public void play() {
+        if (stopping.get()) {
+            throw new IllegalStateException();
+        }
+
         ExecutorService executorService = Executors.newSingleThreadExecutor();
 
         try {
