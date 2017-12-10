@@ -99,4 +99,20 @@ public class SoundController implements Initializable {
     private void onStop(ActionEvent event) {
         player.stop();
     }
+
+    @FXML
+    private void onBack(ActionEvent event) {
+        player.back();
+    }
+
+    @FXML
+    private void onSkip(ActionEvent event) {
+        player.skip();
+    }
+
+    @FXML
+    private void onClear(ActionEvent event) {
+        player.clear();
+        model.getFiles().clear();
+    }
 }

@@ -42,6 +42,9 @@
                         <Button mnemonicParsing="false" onAction="#onFileAdd" text="追加" />
                         <Button mnemonicParsing="false" onAction="#onStart" text="開始" />
                         <Button mnemonicParsing="false" onAction="#onStop" text="終了" />
+                        <Button mnemonicParsing="false" onAction="#onBack" text="前へ" />
+                        <Button mnemonicParsing="false" onAction="#onSkip" text="次へ" />
+                        <Button mnemonicParsing="false" onAction="#onClear" text="クリア" />
                     </children>
                 </HBox>
                 <ListView fx:id="files" GridPane.columnSpan="2" GridPane.rowIndex="2" />
