@@ -70,9 +70,9 @@ public class SoundPlayer {
     }
 
     private Path beforePlay() throws InterruptedException {
+        Path path = beforeFiles.takeFirst();
         lock.lock();
         try {
-            Path path = beforeFiles.takeFirst();
             nowPlayingFile.set(path);
             return path;
         } finally {
@@ -148,7 +148,10 @@ public class SoundPlayer {
         try {
             Path path = afterFiles.pollLast();
             if (path != null) {
-                beforeFiles.addFirst(nowPlayingFile.getAndSet(null));
+                Path now = nowPlayingFile.getAndSet(null);
+                if (now != null) {
+                    beforeFiles.addFirst(now);
+                }
                 beforeFiles.addFirst(path);
                 skipping.set(true);
             }
