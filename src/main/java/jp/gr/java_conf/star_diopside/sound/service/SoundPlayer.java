@@ -9,14 +9,8 @@ import java.nio.file.Path;
 import java.util.Deque;
 import java.util.concurrent.BlockingDeque;
 import java.util.concurrent.ConcurrentLinkedDeque;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
-import java.util.concurrent.Future;
 import java.util.concurrent.LinkedBlockingDeque;
 import java.util.concurrent.atomic.AtomicBoolean;
-import java.util.concurrent.atomic.AtomicReference;
-import java.util.concurrent.locks.Lock;
-import java.util.concurrent.locks.ReentrantLock;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.stream.Stream;
@@ -31,65 +25,47 @@ import javax.sound.sampled.UnsupportedAudioFileException;
 public class SoundPlayer {
 
     private static final Logger logger = Logger.getLogger(SoundPlayer.class.getName());
-    private final Lock lock = new ReentrantLock();
     private BlockingDeque<Path> beforeFiles = new LinkedBlockingDeque<>();
     private Deque<Path> afterFiles = new ConcurrentLinkedDeque<>();
-    private AtomicReference<Path> nowPlayingFile = new AtomicReference<>();
     private AtomicBoolean stopping = new AtomicBoolean();
     private AtomicBoolean skipping = new AtomicBoolean();
-    private Future<?> future;
+    private TaskExecutor taskExecutor = new TaskExecutor();
+
+    private class Task implements Runnable {
+        @Override
+        public void run() {
+            try {
+                play(getPath());
+            } catch (InterruptedException e) {
+                logger.log(Level.FINE, e.getMessage(), e);
+            } catch (Exception e) {
+                logger.log(Level.WARNING, e.getMessage(), e);
+            } finally {
+                if (!stopping.get()) {
+                    taskExecutor.add(new Task());
+                }
+            }
+        }
+    }
+
+    public SoundPlayer() {
+        taskExecutor.start();
+    }
+
+    public void terminate() {
+        stop();
+        taskExecutor.terminate();
+    }
 
     public void play() {
-        if (future != null) {
-            return;
-        }
-
-        ExecutorService executorService = Executors.newSingleThreadExecutor();
-
-        try {
-            future = executorService.submit(() -> {
-                stopping.set(false);
-                while (!stopping.get()) {
-                    try {
-                        play(beforePlay());
-                    } catch (InterruptedException e) {
-                        logger.log(Level.FINE, e.getMessage(), e);
-                        break;
-                    } catch (Exception e) {
-                        logger.log(Level.WARNING, e.getMessage(), e);
-                    } finally {
-                        afterPlay();
-                    }
-                }
-                future = null;
-                stopping.set(false);
-            });
-        } finally {
-            executorService.shutdown();
-        }
+        stopping.set(false);
+        taskExecutor.add(new Task());
     }
 
-    private Path beforePlay() throws InterruptedException {
+    private Path getPath() throws InterruptedException {
         Path path = beforeFiles.takeFirst();
-        lock.lock();
-        try {
-            nowPlayingFile.set(path);
-            return path;
-        } finally {
-            lock.unlock();
-        }
-    }
-
-    private void afterPlay() {
-        lock.lock();
-        try {
-            Path path = nowPlayingFile.getAndSet(null);
-            if (path != null) {
-                afterFiles.addLast(path);
-            }
-        } finally {
-            lock.unlock();
-        }
+        afterFiles.addLast(path);
+        return path;
     }
 
     private void play(Path path) {
@@ -131,45 +107,32 @@ public class SoundPlayer {
         }
     }
 
-    public void stop() {
-        if (future != null) {
-            stopping.set(true);
-            skipping.set(true);
-            future.cancel(true);
-        }
-    }
-
     public void skip() {
         skipping.set(true);
+        taskExecutor.interrupt();
+    }
+
+    public void stop() {
+        stopping.set(true);
+        skip();
     }
 
     public void back() {
-        lock.lock();
-        try {
+        taskExecutor.add(() -> {
             Path path = afterFiles.pollLast();
             if (path != null) {
-                Path now = nowPlayingFile.getAndSet(null);
-                if (now != null) {
-                    beforeFiles.addFirst(now);
-                }
                 beforeFiles.addFirst(path);
-                skipping.set(true);
             }
-        } finally {
-            lock.unlock();
-        }
+        });
+        skip();
     }
 
     public void clear() {
-        lock.lock();
-        try {
+        taskExecutor.add(() -> {
             beforeFiles.clear();
             afterFiles.clear();
-            nowPlayingFile.set(null);
-            skipping.set(true);
-        } finally {
-            lock.unlock();
-        }
+        });
+        skip();
     }
 
     public void add(Path path) {

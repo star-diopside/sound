@@ -37,7 +37,7 @@ public class SoundController implements Initializable {
     }
 
     public void stop() {
-        player.stop();
+        player.terminate();
     }
 
     private Window getWindow() {
