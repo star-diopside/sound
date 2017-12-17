@@ -7,9 +7,11 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ResourceBundle;
 
+import javafx.application.Platform;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
+import javafx.scene.control.Label;
 import javafx.scene.control.ListView;
 import javafx.scene.control.TextField;
 import javafx.stage.DirectoryChooser;
@@ -27,12 +29,23 @@ public class SoundController implements Initializable {
     private TextField selectedFile;
 
     @FXML
+    private Label status;
+
+    @FXML
     private ListView<Path> files;
+
+    @FXML
+    private ListView<String> history;
 
     @Override
     public void initialize(URL location, ResourceBundle resources) {
         selectedFile.textProperty().bindBidirectional(model.selectedFileProperty());
+        status.textProperty().bind(model.statusProperty());
         files.setItems(model.getFiles());
+        history.setItems(model.getHistory());
+        player.setLineListener(event -> Platform.runLater(() -> model.getHistory().add(event.toString())));
+        player.setEventListener(event -> Platform.runLater(() -> model.getHistory().add(event)));
+        player.setPositionListener(position -> Platform.runLater(() -> model.setPosition(position)));
         player.play();
     }
 

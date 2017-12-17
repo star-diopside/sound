@@ -6,11 +6,14 @@ import java.io.InputStream;
 import java.io.UncheckedIOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.time.Duration;
+import java.time.temporal.ChronoUnit;
 import java.util.Deque;
 import java.util.concurrent.BlockingDeque;
 import java.util.concurrent.ConcurrentLinkedDeque;
 import java.util.concurrent.LinkedBlockingDeque;
 import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.function.Consumer;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.stream.Stream;
@@ -18,6 +21,7 @@ import java.util.stream.Stream;
 import javax.sound.sampled.AudioFormat;
 import javax.sound.sampled.AudioInputStream;
 import javax.sound.sampled.AudioSystem;
+import javax.sound.sampled.LineListener;
 import javax.sound.sampled.LineUnavailableException;
 import javax.sound.sampled.SourceDataLine;
 import javax.sound.sampled.UnsupportedAudioFileException;
@@ -30,6 +34,22 @@ public class SoundPlayer {
     private AtomicBoolean stopping = new AtomicBoolean();
     private AtomicBoolean skipping = new AtomicBoolean();
     private TaskExecutor taskExecutor = new TaskExecutor();
+
+    private LineListener lineListener;
+    private Consumer<String> eventListener;
+    private Consumer<Duration> positionListener;
+
+    public void setLineListener(LineListener lineListener) {
+        this.lineListener = lineListener;
+    }
+
+    public void setEventListener(Consumer<String> eventListener) {
+        this.eventListener = eventListener;
+    }
+
+    public void setPositionListener(Consumer<Duration> positionListener) {
+        this.positionListener = positionListener;
+    }
 
     private class Task implements Runnable {
         @Override
@@ -77,33 +97,43 @@ public class SoundPlayer {
     }
 
     private void play(InputStream is, String name) {
-        logger.info("Begin " + name);
+        callListener(eventListener, "Begin " + name);
         skipping.set(false);
         try (AudioInputStream baseInputStream = AudioSystem
                 .getAudioInputStream(is.markSupported() ? is : new BufferedInputStream(is))) {
             AudioFormat baseFormat = baseInputStream.getFormat();
             AudioFormat decodedFormat = new AudioFormat(AudioFormat.Encoding.PCM_SIGNED, baseFormat.getSampleRate(), 16,
                     baseFormat.getChannels(), baseFormat.getChannels() * 2, baseFormat.getSampleRate(), false);
-            logger.info(baseFormat.getClass() + " - " + baseFormat);
-            logger.info(decodedFormat.getClass() + " - " + decodedFormat);
+            callListener(eventListener, baseFormat.getClass() + " - " + baseFormat);
+            callListener(eventListener, decodedFormat.getClass() + " - " + decodedFormat);
             try (AudioInputStream decodedInputStream = AudioSystem.getAudioInputStream(decodedFormat, baseInputStream);
                     SourceDataLine line = AudioSystem.getSourceDataLine(decodedFormat)) {
-                line.addLineListener(event -> logger.info(event.toString()));
+                if (lineListener != null) {
+                    line.addLineListener(lineListener);
+                }
                 line.open(decodedFormat);
                 line.start();
                 byte[] data = new byte[line.getBufferSize()];
                 int size;
                 while (!skipping.get() && (size = decodedInputStream.read(data, 0, data.length)) != -1) {
                     line.write(data, 0, size);
+                    callListener(positionListener, Duration.of(line.getMicrosecondPosition(), ChronoUnit.MICROS));
                 }
                 line.drain();
                 line.stop();
+                callListener(positionListener, null);
             }
         } catch (IOException | UnsupportedAudioFileException | LineUnavailableException e) {
             logger.log(Level.WARNING, e.getMessage(), e);
         } finally {
             skipping.set(false);
-            logger.info("End " + name);
+            callListener(eventListener, "End " + name);
+        }
+    }
+
+    private static <T> void callListener(Consumer<T> listener, T param) {
+        if (listener != null) {
+            listener.accept(param);
         }
     }
 
