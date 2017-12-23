@@ -2,6 +2,8 @@ package jp.gr.java_conf.star_diopside.sound.model;
 
 import java.nio.file.Path;
 import java.time.Duration;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 
 import javafx.beans.property.SimpleStringProperty;
 import javafx.beans.property.StringProperty;
@@ -10,6 +12,7 @@ import javafx.collections.ObservableList;
 
 public class SoundData {
 
+    private static final DateTimeFormatter HISTORY_FORMATTER = DateTimeFormatter.ofPattern("uuuu/MM/dd HH:mm:ss.SSS");
     private StringProperty selectedFile = new SimpleStringProperty();
     private StringProperty status = new SimpleStringProperty();
     private ObservableList<Path> files = FXCollections.observableArrayList();
@@ -45,6 +48,10 @@ public class SoundData {
 
     public ObservableList<String> getHistory() {
         return history;
+    }
+
+    public void addHistory(Object event) {
+        history.add(LocalDateTime.now().format(HISTORY_FORMATTER) + " - " + event);
     }
 
     public void setPosition(Duration position) {

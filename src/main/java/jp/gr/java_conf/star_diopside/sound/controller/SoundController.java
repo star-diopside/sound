@@ -43,8 +43,8 @@ public class SoundController implements Initializable {
         status.textProperty().bind(model.statusProperty());
         files.setItems(model.getFiles());
         history.setItems(model.getHistory());
-        player.setLineListener(event -> Platform.runLater(() -> model.getHistory().add(event.toString())));
-        player.setEventListener(event -> Platform.runLater(() -> model.getHistory().add(event)));
+        player.setLineListener(event -> Platform.runLater(() -> model.addHistory(event)));
+        player.setEventListener(event -> Platform.runLater(() -> model.addHistory(event)));
         player.setPositionListener(position -> Platform.runLater(() -> model.setPosition(position)));
         player.play();
     }

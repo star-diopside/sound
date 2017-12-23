@@ -12,7 +12,6 @@ import java.util.Deque;
 import java.util.concurrent.BlockingDeque;
 import java.util.concurrent.ConcurrentLinkedDeque;
 import java.util.concurrent.LinkedBlockingDeque;
-import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.function.Consumer;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -29,25 +28,28 @@ import javax.sound.sampled.UnsupportedAudioFileException;
 public class SoundPlayer {
 
     private static final Logger logger = Logger.getLogger(SoundPlayer.class.getName());
+    private static final Duration BACK_THRESHOLD = Duration.ofSeconds(2);
     private BlockingDeque<Path> beforeFiles = new LinkedBlockingDeque<>();
     private Deque<Path> afterFiles = new ConcurrentLinkedDeque<>();
-    private AtomicBoolean stopping = new AtomicBoolean();
-    private AtomicBoolean skipping = new AtomicBoolean();
+    private volatile boolean isOpWaiting;
+    private volatile boolean stopping;
+    private volatile boolean skipping;
+    private volatile Duration position;
     private TaskExecutor taskExecutor = new TaskExecutor();
 
     private LineListener lineListener;
-    private Consumer<String> eventListener;
-    private Consumer<Duration> positionListener;
+    private Consumer<? super String> eventListener;
+    private Consumer<? super Duration> positionListener;
 
     public void setLineListener(LineListener lineListener) {
         this.lineListener = lineListener;
     }
 
-    public void setEventListener(Consumer<String> eventListener) {
+    public void setEventListener(Consumer<? super String> eventListener) {
         this.eventListener = eventListener;
     }
 
-    public void setPositionListener(Consumer<Duration> positionListener) {
+    public void setPositionListener(Consumer<? super Duration> positionListener) {
         this.positionListener = positionListener;
     }
 
@@ -61,7 +63,7 @@ public class SoundPlayer {
             } catch (Exception e) {
                 logger.log(Level.WARNING, e.getMessage(), e);
             } finally {
-                if (!stopping.get()) {
+                if (!stopping) {
                     taskExecutor.add(new Task());
                 }
             }
@@ -78,7 +80,7 @@ public class SoundPlayer {
     }
 
     public void play() {
-        stopping.set(false);
+        stopping = false;
         taskExecutor.add(new Task());
     }
 
@@ -98,14 +100,14 @@ public class SoundPlayer {
 
     private void play(InputStream is, String name) {
         callListener(eventListener, "Begin " + name);
-        skipping.set(false);
+        skipping = false;
         try (AudioInputStream baseInputStream = AudioSystem
                 .getAudioInputStream(is.markSupported() ? is : new BufferedInputStream(is))) {
             AudioFormat baseFormat = baseInputStream.getFormat();
             AudioFormat decodedFormat = new AudioFormat(AudioFormat.Encoding.PCM_SIGNED, baseFormat.getSampleRate(), 16,
                     baseFormat.getChannels(), baseFormat.getChannels() * 2, baseFormat.getSampleRate(), false);
-            callListener(eventListener, baseFormat.getClass() + " - " + baseFormat);
-            callListener(eventListener, decodedFormat.getClass() + " - " + decodedFormat);
+            callListener(eventListener, "INPUT: " + baseFormat.getClass() + " - " + baseFormat);
+            callListener(eventListener, "DECODED: " + decodedFormat.getClass() + " - " + decodedFormat);
             try (AudioInputStream decodedInputStream = AudioSystem.getAudioInputStream(decodedFormat, baseInputStream);
                     SourceDataLine line = AudioSystem.getSourceDataLine(decodedFormat)) {
                 if (lineListener != null) {
@@ -115,44 +117,58 @@ public class SoundPlayer {
                 line.start();
                 byte[] data = new byte[line.getBufferSize()];
                 int size;
-                while (!skipping.get() && (size = decodedInputStream.read(data, 0, data.length)) != -1) {
+                while (!skipping && (size = decodedInputStream.read(data, 0, data.length)) != -1) {
                     line.write(data, 0, size);
-                    callListener(positionListener, Duration.of(line.getMicrosecondPosition(), ChronoUnit.MICROS));
+                    position = Duration.of(line.getMicrosecondPosition(), ChronoUnit.MICROS);
+                    callListener(positionListener, position);
                 }
                 line.drain();
                 line.stop();
+                position = null;
                 callListener(positionListener, null);
             }
         } catch (IOException | UnsupportedAudioFileException | LineUnavailableException e) {
             logger.log(Level.WARNING, e.getMessage(), e);
         } finally {
-            skipping.set(false);
+            skipping = false;
             callListener(eventListener, "End " + name);
         }
     }
 
-    private static <T> void callListener(Consumer<T> listener, T param) {
+    private static <T> void callListener(Consumer<? super T> listener, T param) {
         if (listener != null) {
             listener.accept(param);
         }
     }
 
     public void skip() {
-        skipping.set(true);
+        skipping = true;
         taskExecutor.interrupt();
     }
 
     public void stop() {
-        stopping.set(true);
+        stopping = true;
         skip();
     }
 
     public void back() {
+        if (isOpWaiting) {
+            return;
+        }
+        isOpWaiting = true;
+        Duration nowPosition = position;
         taskExecutor.add(() -> {
             Path path = afterFiles.pollLast();
             if (path != null) {
                 beforeFiles.addFirst(path);
+                if (nowPosition != null && nowPosition.compareTo(BACK_THRESHOLD) < 0) {
+                    path = afterFiles.pollLast();
+                    if (path != null) {
+                        beforeFiles.addFirst(path);
+                    }
+                }
             }
+            isOpWaiting = false;
         });
         skip();
     }
