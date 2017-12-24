@@ -45,6 +45,8 @@ public class SoundController implements Initializable {
         history.setItems(model.getHistory());
         player.setLineListener(event -> Platform.runLater(() -> model.addHistory(event)));
         player.setEventListener(event -> Platform.runLater(() -> model.addHistory(event)));
+        player.setExceptionListener(
+                e -> Platform.runLater(() -> model.addHistory("Error: thrown " + e.getClass().getName())));
         player.setPositionListener(position -> Platform.runLater(() -> model.setPosition(position)));
         player.play();
     }

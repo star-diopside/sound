@@ -5,7 +5,6 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 import java.util.concurrent.LinkedBlockingQueue;
-import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -13,7 +12,7 @@ public class TaskExecutor {
 
     private static final Logger logger = Logger.getLogger(TaskExecutor.class.getName());
     private BlockingQueue<Runnable> taskQueue = new LinkedBlockingQueue<>();
-    private AtomicBoolean isRunning = new AtomicBoolean();
+    private volatile boolean running;
     private ExecutorService executorService;
     private Future<?> future;
 
@@ -22,14 +21,14 @@ public class TaskExecutor {
     }
 
     public void start() {
-        isRunning.set(true);
+        running = true;
         if (future == null) {
             future = executorService.submit(new Task());
         }
     }
 
     public void stop() {
-        isRunning.set(false);
+        running = false;
     }
 
     public void interrupt() {
@@ -58,7 +57,7 @@ public class TaskExecutor {
             } catch (Exception e) {
                 logger.log(Level.WARNING, e.getMessage(), e);
             } finally {
-                if (isRunning.get()) {
+                if (running) {
                     future = executorService.submit(new Task());
                 } else {
                     future = null;

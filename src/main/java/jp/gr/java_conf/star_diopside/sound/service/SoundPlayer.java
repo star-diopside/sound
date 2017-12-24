@@ -31,7 +31,7 @@ public class SoundPlayer {
     private static final Duration BACK_THRESHOLD = Duration.ofSeconds(2);
     private BlockingDeque<Path> beforeFiles = new LinkedBlockingDeque<>();
     private Deque<Path> afterFiles = new ConcurrentLinkedDeque<>();
-    private volatile boolean isOpWaiting;
+    private volatile boolean operationWaiting;
     private volatile boolean stopping;
     private volatile boolean skipping;
     private volatile Duration position;
@@ -39,6 +39,7 @@ public class SoundPlayer {
 
     private LineListener lineListener;
     private Consumer<? super String> eventListener;
+    private Consumer<? super Exception> exceptionListener;
     private Consumer<? super Duration> positionListener;
 
     public void setLineListener(LineListener lineListener) {
@@ -47,6 +48,10 @@ public class SoundPlayer {
 
     public void setEventListener(Consumer<? super String> eventListener) {
         this.eventListener = eventListener;
+    }
+
+    public void setExceptionListener(Consumer<? super Exception> exceptionListener) {
+        this.exceptionListener = exceptionListener;
     }
 
     public void setPositionListener(Consumer<? super Duration> positionListener) {
@@ -61,6 +66,7 @@ public class SoundPlayer {
             } catch (InterruptedException e) {
                 logger.log(Level.FINE, e.getMessage(), e);
             } catch (Exception e) {
+                callListener(exceptionListener, e);
                 logger.log(Level.WARNING, e.getMessage(), e);
             } finally {
                 if (!stopping) {
@@ -94,44 +100,58 @@ public class SoundPlayer {
         try (InputStream is = Files.newInputStream(path)) {
             play(is, path.getFileName().toString());
         } catch (IOException e) {
+            callListener(exceptionListener, e);
             throw new UncheckedIOException(e);
         }
     }
 
     private void play(InputStream is, String name) {
         callListener(eventListener, "Begin " + name);
-        skipping = false;
         try (AudioInputStream baseInputStream = AudioSystem
                 .getAudioInputStream(is.markSupported() ? is : new BufferedInputStream(is))) {
             AudioFormat baseFormat = baseInputStream.getFormat();
-            AudioFormat decodedFormat = new AudioFormat(AudioFormat.Encoding.PCM_SIGNED, baseFormat.getSampleRate(), 16,
-                    baseFormat.getChannels(), baseFormat.getChannels() * 2, baseFormat.getSampleRate(), false);
             callListener(eventListener, "INPUT: " + baseFormat.getClass() + " - " + baseFormat);
-            callListener(eventListener, "DECODED: " + decodedFormat.getClass() + " - " + decodedFormat);
-            try (AudioInputStream decodedInputStream = AudioSystem.getAudioInputStream(decodedFormat, baseInputStream);
-                    SourceDataLine line = AudioSystem.getSourceDataLine(decodedFormat)) {
-                if (lineListener != null) {
-                    line.addLineListener(lineListener);
+            if (baseFormat.getEncoding().equals(AudioFormat.Encoding.PCM_SIGNED)
+                    || baseFormat.getEncoding().equals(AudioFormat.Encoding.PCM_UNSIGNED)) {
+                play(baseInputStream, baseFormat);
+            } else {
+                AudioFormat decodedFormat = new AudioFormat(AudioFormat.Encoding.PCM_SIGNED, baseFormat.getSampleRate(),
+                        16, baseFormat.getChannels(), baseFormat.getChannels() * 2, baseFormat.getSampleRate(), false);
+                callListener(eventListener, "DECODED: " + decodedFormat.getClass() + " - " + decodedFormat);
+                try (AudioInputStream decodedInputStream = AudioSystem.getAudioInputStream(decodedFormat,
+                        baseInputStream)) {
+                    play(decodedInputStream, decodedFormat);
                 }
-                line.open(decodedFormat);
-                line.start();
-                byte[] data = new byte[line.getBufferSize()];
-                int size;
-                while (!skipping && (size = decodedInputStream.read(data, 0, data.length)) != -1) {
-                    line.write(data, 0, size);
-                    position = Duration.of(line.getMicrosecondPosition(), ChronoUnit.MICROS);
-                    callListener(positionListener, position);
-                }
-                line.drain();
-                line.stop();
-                position = null;
-                callListener(positionListener, null);
             }
         } catch (IOException | UnsupportedAudioFileException | LineUnavailableException e) {
             logger.log(Level.WARNING, e.getMessage(), e);
+            callListener(exceptionListener, e);
+        } finally {
+            callListener(eventListener, "End " + name);
+        }
+    }
+
+    private void play(AudioInputStream inputStream, AudioFormat format) throws IOException, LineUnavailableException {
+        try (SourceDataLine line = AudioSystem.getSourceDataLine(format)) {
+            skipping = false;
+            if (lineListener != null) {
+                line.addLineListener(lineListener);
+            }
+            line.open(format);
+            line.start();
+            byte[] data = new byte[line.getBufferSize()];
+            int size;
+            while (!skipping && (size = inputStream.read(data, 0, data.length)) != -1) {
+                line.write(data, 0, size);
+                position = Duration.of(line.getMicrosecondPosition(), ChronoUnit.MICROS);
+                callListener(positionListener, position);
+            }
+            line.drain();
+            line.stop();
+            position = null;
+            callListener(positionListener, null);
         } finally {
             skipping = false;
-            callListener(eventListener, "End " + name);
         }
     }
 
@@ -152,10 +172,10 @@ public class SoundPlayer {
     }
 
     public void back() {
-        if (isOpWaiting) {
+        if (operationWaiting) {
             return;
         }
-        isOpWaiting = true;
+        operationWaiting = true;
         Duration nowPosition = position;
         taskExecutor.add(() -> {
             Path path = afterFiles.pollLast();
@@ -168,7 +188,7 @@ public class SoundPlayer {
                     }
                 }
             }
-            isOpWaiting = false;
+            operationWaiting = false;
         });
         skip();
     }
@@ -185,6 +205,7 @@ public class SoundPlayer {
         try (Stream<Path> stream = Files.find(path, Integer.MAX_VALUE, (p, attr) -> attr.isRegularFile()).sorted()) {
             stream.forEach(beforeFiles::addLast);
         } catch (IOException e) {
+            callListener(exceptionListener, e);
             throw new UncheckedIOException(e);
         }
     }
