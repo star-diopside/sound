@@ -1,6 +1,9 @@
 apply plugin: "java"
 apply plugin: "application"
 
+sourceCompatibility = 9
+targetCompatibility = 9
+
 mainClassName = "jp.gr.java_conf.star_diopside.sound.App"
 
 repositories {
@@ -9,4 +12,5 @@ repositories {
 
 dependencies {
     runtime "com.googlecode.soundlibs:mp3spi:1.9.5-1"
+    runtime "net.sourceforge.jaadec:jaad:0.8.5"
 }
