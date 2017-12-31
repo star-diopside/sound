@@ -1,16 +1,34 @@
-apply plugin: "java"
-apply plugin: "application"
+subprojects {
+    apply plugin: "java"
 
-sourceCompatibility = 9
-targetCompatibility = 9
-
-mainClassName = "jp.gr.java_conf.star_diopside.sound.App"
-
-repositories {
-    jcenter()
+    repositories {
+        jcenter()
+    }
 }
 
-dependencies {
-    runtime "com.googlecode.soundlibs:mp3spi:1.9.5-1"
-    runtime "net.sourceforge.jaadec:jaad:0.8.5"
+project(":sound-service") {
+}
+
+project(":sound-app") {
+    apply plugin: "application"
+
+    mainClassName = "jp.gr.java_conf.star_diopside.sound.App"
+
+    dependencies {
+        compile project(":sound-service")
+        runtime "com.googlecode.soundlibs:mp3spi:1.9.5-1"
+        runtime "net.sourceforge.jaadec:jaad:0.8.5"
+    }
+}
+
+project(":sound-console") {
+    apply plugin: "application"
+
+    mainClassName = "jp.gr.java_conf.star_diopside.sound.Console"
+
+    dependencies {
+        compile project(":sound-service")
+        runtime "com.googlecode.soundlibs:mp3spi:1.9.5-1"
+        runtime "net.sourceforge.jaadec:jaad:0.8.5"
+    }
 }
