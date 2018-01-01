@@ -1,3 +1,13 @@
+buildscript {
+    repositories {
+        jcenter()
+    }
+
+    dependencies {
+        classpath "org.springframework.boot:spring-boot-gradle-plugin:1.5.9.RELEASE"
+    }
+}
+
 subprojects {
     apply plugin: "java"
 
@@ -10,9 +20,7 @@ project(":sound-service") {
 }
 
 project(":sound-app") {
-    apply plugin: "application"
-
-    mainClassName = "jp.gr.java_conf.star_diopside.sound.App"
+    apply plugin: "org.springframework.boot"
 
     dependencies {
         compile project(":sound-service")
@@ -22,9 +30,7 @@ project(":sound-app") {
 }
 
 project(":sound-console") {
-    apply plugin: "application"
-
-    mainClassName = "jp.gr.java_conf.star_diopside.sound.Console"
+    apply plugin: "org.springframework.boot"
 
     dependencies {
         compile project(":sound-service")
