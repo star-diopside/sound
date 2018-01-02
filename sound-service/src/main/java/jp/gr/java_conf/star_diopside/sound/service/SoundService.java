@@ -59,10 +59,11 @@ public class SoundService {
         }
     }
 
-    private void play(InputStream is, String name) {
-        callListener(eventListener, "Begin " + name);
-        try (AudioInputStream baseInputStream = AudioSystem
-                .getAudioInputStream(is.markSupported() ? is : new BufferedInputStream(is))) {
+    public void play(InputStream inputStream, String name) {
+        String title = (name == null ? "untitled" : name);
+        callListener(eventListener, "Begin " + title);
+        try (AudioInputStream baseInputStream = AudioSystem.getAudioInputStream(
+                inputStream.markSupported() ? inputStream : new BufferedInputStream(inputStream))) {
             AudioFormat baseFormat = baseInputStream.getFormat();
             callListener(eventListener, "INPUT: " + baseFormat.getClass() + " - " + baseFormat);
             if (baseFormat.getEncoding().equals(AudioFormat.Encoding.PCM_SIGNED)
@@ -81,7 +82,7 @@ public class SoundService {
             logger.log(Level.WARNING, e.getMessage(), e);
             callListener(exceptionListener, e);
         } finally {
-            callListener(eventListener, "End " + name);
+            callListener(eventListener, "End " + title);
         }
     }
 
@@ -97,8 +98,9 @@ public class SoundService {
             int size;
             while (!skipping && (size = inputStream.read(data, 0, data.length)) != -1) {
                 line.write(data, 0, size);
-                position = Duration.of(line.getMicrosecondPosition(), ChronoUnit.MICROS);
-                callListener(positionListener, position);
+                Duration pos = Duration.of(line.getMicrosecondPosition(), ChronoUnit.MICROS);
+                position = pos;
+                callListener(positionListener, pos);
             }
             line.drain();
             line.stop();
