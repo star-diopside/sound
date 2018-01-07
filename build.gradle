@@ -10,17 +10,27 @@ buildscript {
 
 subprojects {
     apply plugin: "java"
+    apply plugin: "org.springframework.boot"
 
     repositories {
         jcenter()
     }
+
+    bootRepackage {
+        enabled = false
+    }
 }
 
 project(":sound-service") {
+    dependencies {
+        compile "org.springframework.boot:spring-boot-starter"
+    }
 }
 
 project(":sound-app") {
-    apply plugin: "org.springframework.boot"
+    bootRepackage {
+        enabled = true
+    }
 
     dependencies {
         compile project(":sound-service")
@@ -30,7 +40,9 @@ project(":sound-app") {
 }
 
 project(":sound-console") {
-    apply plugin: "org.springframework.boot"
+    bootRepackage {
+        enabled = true
+    }
 
     dependencies {
         compile project(":sound-service")

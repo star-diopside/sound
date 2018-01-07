@@ -7,6 +7,9 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ResourceBundle;
 
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Controller;
+
 import javafx.application.Platform;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
@@ -20,10 +23,13 @@ import javafx.stage.Window;
 import jp.gr.java_conf.star_diopside.sound.model.SoundData;
 import jp.gr.java_conf.star_diopside.sound.service.SoundPlayer;
 
+@Controller
 public class SoundController implements Initializable {
 
+    @Autowired
+    private SoundPlayer player;
+
     private SoundData model = new SoundData();
-    private SoundPlayer player = new SoundPlayer();
 
     @FXML
     private TextField selectedFile;
