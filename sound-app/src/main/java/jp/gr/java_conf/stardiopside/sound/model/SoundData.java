@@ -1,4 +1,4 @@
-package jp.gr.java_conf.star_diopside.sound.model;
+package jp.gr.java_conf.stardiopside.sound.model;
 
 import java.nio.file.Path;
 import java.time.Duration;

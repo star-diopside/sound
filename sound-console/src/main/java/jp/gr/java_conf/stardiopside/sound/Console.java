@@ -1,4 +1,4 @@
-package jp.gr.java_conf.star_diopside.sound;
+package jp.gr.java_conf.stardiopside.sound;
 
 import java.io.IOException;
 import java.io.UncheckedIOException;
@@ -13,7 +13,7 @@ import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.context.ConfigurableApplicationContext;
 
-import jp.gr.java_conf.star_diopside.sound.service.SoundService;
+import jp.gr.java_conf.stardiopside.sound.service.SoundService;
 
 @SpringBootApplication
 public class Console implements CommandLineRunner {

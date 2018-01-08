@@ -1,4 +1,4 @@
-package jp.gr.java_conf.star_diopside.sound;
+package jp.gr.java_conf.stardiopside.sound;
 
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
@@ -8,7 +8,7 @@ import javafx.application.Application;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Scene;
 import javafx.stage.Stage;
-import jp.gr.java_conf.star_diopside.sound.controller.SoundController;
+import jp.gr.java_conf.stardiopside.sound.controller.SoundController;
 
 @SpringBootApplication
 public class App extends Application {

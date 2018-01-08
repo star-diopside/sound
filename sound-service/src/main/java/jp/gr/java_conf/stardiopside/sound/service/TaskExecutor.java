@@ -1,4 +1,4 @@
-package jp.gr.java_conf.star_diopside.sound.service;
+package jp.gr.java_conf.stardiopside.sound.service;
 
 public interface TaskExecutor {
 

@@ -1,4 +1,4 @@
-package jp.gr.java_conf.star_diopside.sound.controller;
+package jp.gr.java_conf.stardiopside.sound.controller;
 
 import java.io.File;
 import java.net.URL;
@@ -20,8 +20,8 @@ import javafx.scene.control.TextField;
 import javafx.stage.DirectoryChooser;
 import javafx.stage.FileChooser;
 import javafx.stage.Window;
-import jp.gr.java_conf.star_diopside.sound.model.SoundData;
-import jp.gr.java_conf.star_diopside.sound.service.SoundPlayer;
+import jp.gr.java_conf.stardiopside.sound.model.SoundData;
+import jp.gr.java_conf.stardiopside.sound.service.SoundPlayer;
 
 @Controller
 public class SoundController implements Initializable {
