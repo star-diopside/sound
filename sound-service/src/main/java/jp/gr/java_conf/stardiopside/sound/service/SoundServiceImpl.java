@@ -3,7 +3,6 @@ package jp.gr.java_conf.stardiopside.sound.service;
 import java.io.BufferedInputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.UncheckedIOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.time.Duration;
@@ -37,17 +36,18 @@ public class SoundServiceImpl implements SoundService {
     private SoundListeners listeners;
 
     @Override
-    public void play(Path path) {
+    public boolean play(Path path) {
         try (InputStream is = Files.newInputStream(path)) {
-            play(is, path.getFileName().toString());
+            return play(is, path.getFileName().toString());
         } catch (IOException e) {
+            logger.log(Level.WARNING, e.getMessage(), e);
             callListener(listeners.getExceptionListener(), e);
-            throw new UncheckedIOException(e);
+            return false;
         }
     }
 
     @Override
-    public void play(InputStream inputStream, String name) {
+    public boolean play(InputStream inputStream, String name) {
         String title = (name == null ? "untitled" : name);
         callListener(listeners.getEventListener(), "Begin " + title);
         try (AudioInputStream baseInputStream = AudioSystem.getAudioInputStream(
@@ -70,9 +70,11 @@ public class SoundServiceImpl implements SoundService {
         } catch (IOException | UnsupportedAudioFileException | LineUnavailableException e) {
             logger.log(Level.WARNING, e.getMessage(), e);
             callListener(listeners.getExceptionListener(), e);
+            return false;
         } finally {
             callListener(listeners.getEventListener(), "End " + title);
         }
+        return true;
     }
 
     private void play(AudioInputStream inputStream, AudioFormat format) throws IOException, LineUnavailableException {

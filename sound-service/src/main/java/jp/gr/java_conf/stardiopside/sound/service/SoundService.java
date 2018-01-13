@@ -8,9 +8,9 @@ public interface SoundService {
 
     Duration getPosition();
 
-    void play(Path path);
+    boolean play(Path path);
 
-    void play(InputStream inputStream, String name);
+    boolean play(InputStream inputStream, String name);
 
     void skip();
 

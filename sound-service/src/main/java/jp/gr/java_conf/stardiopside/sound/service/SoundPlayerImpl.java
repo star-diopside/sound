@@ -52,7 +52,10 @@ public class SoundPlayerImpl implements SoundPlayer, InitializingBean, Disposabl
         @Override
         public void run() {
             try {
-                soundService.play(getPath());
+                Path path = beforeFiles.takeFirst();
+                if (soundService.play(path)) {
+                    afterFiles.addLast(path);
+                }
             } catch (InterruptedException e) {
                 logger.log(Level.FINE, e.getMessage(), e);
             } catch (Exception e) {
@@ -76,12 +79,6 @@ public class SoundPlayerImpl implements SoundPlayer, InitializingBean, Disposabl
     public void play() {
         stopping = false;
         taskExecutor.add(new Task());
-    }
-
-    private Path getPath() throws InterruptedException {
-        Path path = beforeFiles.takeFirst();
-        afterFiles.addLast(path);
-        return path;
     }
 
     private static <T> void callListener(Consumer<? super T> listener, T param) {
