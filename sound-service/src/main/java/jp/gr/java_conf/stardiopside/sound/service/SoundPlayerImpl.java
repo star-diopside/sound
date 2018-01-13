@@ -1,4 +1,4 @@
-package jp.gr.java_conf.star_diopside.sound.service;
+package jp.gr.java_conf.stardiopside.sound.service;
 
 import java.io.IOException;
 import java.io.UncheckedIOException;
@@ -14,46 +14,52 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.stream.Stream;
 
-import javax.sound.sampled.LineListener;
+import org.springframework.beans.factory.DisposableBean;
+import org.springframework.beans.factory.InitializingBean;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
 
-public class SoundPlayer {
+@Service
+public class SoundPlayerImpl implements SoundPlayer, InitializingBean, DisposableBean {
 
-    private static final Logger logger = Logger.getLogger(SoundPlayer.class.getName());
+    private static final Logger logger = Logger.getLogger(SoundPlayerImpl.class.getName());
     private static final Duration BACK_THRESHOLD = Duration.ofSeconds(2);
     private BlockingDeque<Path> beforeFiles = new LinkedBlockingDeque<>();
     private Deque<Path> afterFiles = new ConcurrentLinkedDeque<>();
     private volatile boolean operationWaiting;
     private volatile boolean stopping;
-    private TaskExecutor taskExecutor = new TaskExecutor();
-    private SoundService soundService = new SoundService();
-    private Consumer<? super Exception> exceptionListener;
 
-    public void setLineListener(LineListener lineListener) {
-        soundService.setLineListener(lineListener);
+    @Autowired
+    private TaskExecutor taskExecutor;
+
+    @Autowired
+    private SoundService soundService;
+
+    @Autowired
+    private SoundListeners listeners;
+
+    @Override
+    public void afterPropertiesSet() throws Exception {
+        taskExecutor.start();
     }
 
-    public void setEventListener(Consumer<? super String> eventListener) {
-        soundService.setEventListener(eventListener);
-    }
-
-    public void setExceptionListener(Consumer<? super Exception> exceptionListener) {
-        soundService.setExceptionListener(exceptionListener);
-        this.exceptionListener = exceptionListener;
-    }
-
-    public void setPositionListener(Consumer<? super Duration> positionListener) {
-        soundService.setPositionListener(positionListener);
+    @Override
+    public void destroy() throws Exception {
+        terminate();
     }
 
     private class Task implements Runnable {
         @Override
         public void run() {
             try {
-                soundService.play(getPath());
+                Path path = beforeFiles.takeFirst();
+                if (soundService.play(path)) {
+                    afterFiles.addLast(path);
+                }
             } catch (InterruptedException e) {
                 logger.log(Level.FINE, e.getMessage(), e);
             } catch (Exception e) {
-                callListener(exceptionListener, e);
+                callListener(listeners.getExceptionListener(), e);
                 logger.log(Level.WARNING, e.getMessage(), e);
             } finally {
                 if (!stopping) {
@@ -63,24 +69,16 @@ public class SoundPlayer {
         }
     }
 
-    public SoundPlayer() {
-        taskExecutor.start();
-    }
-
+    @Override
     public void terminate() {
         stop();
         taskExecutor.terminate();
     }
 
+    @Override
     public void play() {
         stopping = false;
         taskExecutor.add(new Task());
-    }
-
-    private Path getPath() throws InterruptedException {
-        Path path = beforeFiles.takeFirst();
-        afterFiles.addLast(path);
-        return path;
     }
 
     private static <T> void callListener(Consumer<? super T> listener, T param) {
@@ -89,16 +87,19 @@ public class SoundPlayer {
         }
     }
 
+    @Override
     public void skip() {
         soundService.skip();
         taskExecutor.interrupt();
     }
 
+    @Override
     public void stop() {
         stopping = true;
         skip();
     }
 
+    @Override
     public void back() {
         if (operationWaiting) {
             return;
@@ -121,6 +122,7 @@ public class SoundPlayer {
         skip();
     }
 
+    @Override
     public void clear() {
         taskExecutor.add(() -> {
             beforeFiles.clear();
@@ -129,11 +131,12 @@ public class SoundPlayer {
         skip();
     }
 
+    @Override
     public void add(Path path) {
         try (Stream<Path> stream = Files.find(path, Integer.MAX_VALUE, (p, attr) -> attr.isRegularFile()).sorted()) {
             stream.forEach(beforeFiles::addLast);
         } catch (IOException e) {
-            callListener(exceptionListener, e);
+            callListener(listeners.getExceptionListener(), e);
             throw new UncheckedIOException(e);
         }
     }

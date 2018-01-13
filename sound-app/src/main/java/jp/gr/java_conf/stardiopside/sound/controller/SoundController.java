@@ -1,4 +1,4 @@
-package jp.gr.java_conf.star_diopside.sound.controller;
+package jp.gr.java_conf.stardiopside.sound.controller;
 
 import java.io.File;
 import java.net.URL;
@@ -6,6 +6,9 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ResourceBundle;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Controller;
 
 import javafx.application.Platform;
 import javafx.event.ActionEvent;
@@ -17,13 +20,20 @@ import javafx.scene.control.TextField;
 import javafx.stage.DirectoryChooser;
 import javafx.stage.FileChooser;
 import javafx.stage.Window;
-import jp.gr.java_conf.star_diopside.sound.model.SoundData;
-import jp.gr.java_conf.star_diopside.sound.service.SoundPlayer;
+import jp.gr.java_conf.stardiopside.sound.model.SoundData;
+import jp.gr.java_conf.stardiopside.sound.service.SoundListeners;
+import jp.gr.java_conf.stardiopside.sound.service.SoundPlayer;
 
+@Controller
 public class SoundController implements Initializable {
 
+    @Autowired
+    private SoundPlayer player;
+
+    @Autowired
+    private SoundListeners listeners;
+
     private SoundData model = new SoundData();
-    private SoundPlayer player = new SoundPlayer();
 
     @FXML
     private TextField selectedFile;
@@ -43,11 +53,11 @@ public class SoundController implements Initializable {
         status.textProperty().bind(model.statusProperty());
         files.setItems(model.getFiles());
         history.setItems(model.getHistory());
-        player.setLineListener(event -> Platform.runLater(() -> model.addHistory(event)));
-        player.setEventListener(event -> Platform.runLater(() -> model.addHistory(event)));
-        player.setExceptionListener(
+        listeners.setLineListener(event -> Platform.runLater(() -> model.addHistory(event)));
+        listeners.setEventListener(event -> Platform.runLater(() -> model.addHistory(event)));
+        listeners.setExceptionListener(
                 e -> Platform.runLater(() -> model.addHistory("Error: thrown " + e.getClass().getName())));
-        player.setPositionListener(position -> Platform.runLater(() -> model.setPosition(position)));
+        listeners.setPositionListener(position -> Platform.runLater(() -> model.setPosition(position)));
         player.play();
     }
 
