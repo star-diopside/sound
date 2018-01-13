@@ -13,6 +13,7 @@ import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.context.ConfigurableApplicationContext;
 
+import jp.gr.java_conf.stardiopside.sound.service.SoundListeners;
 import jp.gr.java_conf.stardiopside.sound.service.SoundService;
 
 @SpringBootApplication
@@ -23,6 +24,9 @@ public class Console implements CommandLineRunner {
     @Autowired
     private SoundService service;
 
+    @Autowired
+    private SoundListeners listeners;
+
     public static void main(String[] args) {
         try (ConfigurableApplicationContext context = SpringApplication.run(Console.class, args)) {
         }
@@ -30,9 +34,9 @@ public class Console implements CommandLineRunner {
 
     @Override
     public void run(String... args) {
-        service.setLineListener(event -> logger.info(event.toString()));
-        service.setEventListener(logger::info);
-        service.setExceptionListener(e -> logger.info("Error: thrown " + e.getClass().getName()));
+        listeners.setLineListener(event -> logger.info(event.toString()));
+        listeners.setEventListener(logger::info);
+        listeners.setExceptionListener(e -> logger.info("Error: thrown " + e.getClass().getName()));
 
         Arrays.stream(args).map(Paths::get).flatMap(path -> {
             try {

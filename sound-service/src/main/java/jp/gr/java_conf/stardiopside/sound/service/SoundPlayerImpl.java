@@ -14,8 +14,6 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.stream.Stream;
 
-import javax.sound.sampled.LineListener;
-
 import org.springframework.beans.factory.DisposableBean;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -30,13 +28,15 @@ public class SoundPlayerImpl implements SoundPlayer, InitializingBean, Disposabl
     private Deque<Path> afterFiles = new ConcurrentLinkedDeque<>();
     private volatile boolean operationWaiting;
     private volatile boolean stopping;
-    private Consumer<? super Exception> exceptionListener;
 
     @Autowired
     private TaskExecutor taskExecutor;
 
     @Autowired
     private SoundService soundService;
+
+    @Autowired
+    private SoundListeners listeners;
 
     @Override
     public void afterPropertiesSet() throws Exception {
@@ -48,27 +48,6 @@ public class SoundPlayerImpl implements SoundPlayer, InitializingBean, Disposabl
         terminate();
     }
 
-    @Override
-    public void setLineListener(LineListener lineListener) {
-        soundService.setLineListener(lineListener);
-    }
-
-    @Override
-    public void setEventListener(Consumer<? super String> eventListener) {
-        soundService.setEventListener(eventListener);
-    }
-
-    @Override
-    public void setExceptionListener(Consumer<? super Exception> exceptionListener) {
-        soundService.setExceptionListener(exceptionListener);
-        this.exceptionListener = exceptionListener;
-    }
-
-    @Override
-    public void setPositionListener(Consumer<? super Duration> positionListener) {
-        soundService.setPositionListener(positionListener);
-    }
-
     private class Task implements Runnable {
         @Override
         public void run() {
@@ -77,7 +56,7 @@ public class SoundPlayerImpl implements SoundPlayer, InitializingBean, Disposabl
             } catch (InterruptedException e) {
                 logger.log(Level.FINE, e.getMessage(), e);
             } catch (Exception e) {
-                callListener(exceptionListener, e);
+                callListener(listeners.getExceptionListener(), e);
                 logger.log(Level.WARNING, e.getMessage(), e);
             } finally {
                 if (!stopping) {
@@ -160,7 +139,7 @@ public class SoundPlayerImpl implements SoundPlayer, InitializingBean, Disposabl
         try (Stream<Path> stream = Files.find(path, Integer.MAX_VALUE, (p, attr) -> attr.isRegularFile()).sorted()) {
             stream.forEach(beforeFiles::addLast);
         } catch (IOException e) {
-            callListener(exceptionListener, e);
+            callListener(listeners.getExceptionListener(), e);
             throw new UncheckedIOException(e);
         }
     }

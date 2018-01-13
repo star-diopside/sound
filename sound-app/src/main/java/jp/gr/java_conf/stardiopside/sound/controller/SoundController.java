@@ -21,6 +21,7 @@ import javafx.stage.DirectoryChooser;
 import javafx.stage.FileChooser;
 import javafx.stage.Window;
 import jp.gr.java_conf.stardiopside.sound.model.SoundData;
+import jp.gr.java_conf.stardiopside.sound.service.SoundListeners;
 import jp.gr.java_conf.stardiopside.sound.service.SoundPlayer;
 
 @Controller
@@ -28,6 +29,9 @@ public class SoundController implements Initializable {
 
     @Autowired
     private SoundPlayer player;
+
+    @Autowired
+    private SoundListeners listeners;
 
     private SoundData model = new SoundData();
 
@@ -49,11 +53,11 @@ public class SoundController implements Initializable {
         status.textProperty().bind(model.statusProperty());
         files.setItems(model.getFiles());
         history.setItems(model.getHistory());
-        player.setLineListener(event -> Platform.runLater(() -> model.addHistory(event)));
-        player.setEventListener(event -> Platform.runLater(() -> model.addHistory(event)));
-        player.setExceptionListener(
+        listeners.setLineListener(event -> Platform.runLater(() -> model.addHistory(event)));
+        listeners.setEventListener(event -> Platform.runLater(() -> model.addHistory(event)));
+        listeners.setExceptionListener(
                 e -> Platform.runLater(() -> model.addHistory("Error: thrown " + e.getClass().getName())));
-        player.setPositionListener(position -> Platform.runLater(() -> model.setPosition(position)));
+        listeners.setPositionListener(position -> Platform.runLater(() -> model.setPosition(position)));
         player.play();
     }
 

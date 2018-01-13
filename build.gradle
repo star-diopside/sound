@@ -12,8 +12,14 @@ subprojects {
     apply plugin: "java"
     apply plugin: "org.springframework.boot"
 
+    ext["lombok.version"] = "1.16.20"
+
     repositories {
         jcenter()
+    }
+
+    dependencies {
+        compileOnly "org.projectlombok:lombok"
     }
 
     bootRepackage {
