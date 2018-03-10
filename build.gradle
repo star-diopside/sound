@@ -4,26 +4,26 @@ buildscript {
     }
 
     dependencies {
-        classpath "org.springframework.boot:spring-boot-gradle-plugin:1.5.9.RELEASE"
+        classpath "org.springframework.boot:spring-boot-gradle-plugin:2.0.0.RELEASE"
     }
 }
 
 subprojects {
     apply plugin: "java"
-    apply plugin: "org.springframework.boot"
-
-    ext["lombok.version"] = "1.16.20"
+    apply plugin: "io.spring.dependency-management"
 
     repositories {
         jcenter()
     }
 
-    dependencies {
-        compileOnly "org.projectlombok:lombok"
+    dependencyManagement {
+        imports {
+            mavenBom org.springframework.boot.gradle.plugin.SpringBootPlugin.BOM_COORDINATES
+        }
     }
 
-    bootRepackage {
-        enabled = false
+    dependencies {
+        compileOnly "org.projectlombok:lombok"
     }
 }
 
@@ -34,25 +34,21 @@ project(":sound-service") {
 }
 
 project(":sound-app") {
-    bootRepackage {
-        enabled = true
-    }
+    apply plugin: "org.springframework.boot"
 
     dependencies {
         compile project(":sound-service")
-        runtime "com.googlecode.soundlibs:mp3spi:1.9.5-1"
+        runtime "com.googlecode.soundlibs:mp3spi:1.9.5.4"
         runtime "net.sourceforge.jaadec:jaad:0.8.5"
     }
 }
 
 project(":sound-console") {
-    bootRepackage {
-        enabled = true
-    }
+    apply plugin: "org.springframework.boot"
 
     dependencies {
         compile project(":sound-service")
-        runtime "com.googlecode.soundlibs:mp3spi:1.9.5-1"
+        runtime "com.googlecode.soundlibs:mp3spi:1.9.5.4"
         runtime "net.sourceforge.jaadec:jaad:0.8.5"
     }
 }
