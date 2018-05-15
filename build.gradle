@@ -1,15 +1,14 @@
-buildscript {
-    repositories {
-        jcenter()
-    }
-
-    dependencies {
-        classpath "org.springframework.boot:spring-boot-gradle-plugin:2.0.0.RELEASE"
-    }
+plugins {
+    id "org.springframework.boot" version "2.0.2.RELEASE"
 }
 
 subprojects {
-    apply plugin: "java"
+    ext {
+        mp3spiVersion = "1.9.5.4"
+        jaadVersion = "0.8.5"
+    }
+
+    apply plugin: "java-library"
     apply plugin: "io.spring.dependency-management"
 
     repositories {
@@ -24,12 +23,13 @@ subprojects {
 
     dependencies {
         compileOnly "org.projectlombok:lombok"
+        annotationProcessor "org.projectlombok:lombok"
     }
 }
 
 project(":sound-service") {
     dependencies {
-        compile "org.springframework.boot:spring-boot-starter"
+        api "org.springframework.boot:spring-boot-starter"
     }
 }
 
@@ -37,9 +37,9 @@ project(":sound-app") {
     apply plugin: "org.springframework.boot"
 
     dependencies {
-        compile project(":sound-service")
-        runtime "com.googlecode.soundlibs:mp3spi:1.9.5.4"
-        runtime "net.sourceforge.jaadec:jaad:0.8.5"
+        implementation project(":sound-service")
+        runtimeOnly "com.googlecode.soundlibs:mp3spi:${mp3spiVersion}"
+        runtimeOnly "net.sourceforge.jaadec:jaad:${jaadVersion}"
     }
 }
 
@@ -47,8 +47,8 @@ project(":sound-console") {
     apply plugin: "org.springframework.boot"
 
     dependencies {
-        compile project(":sound-service")
-        runtime "com.googlecode.soundlibs:mp3spi:1.9.5.4"
-        runtime "net.sourceforge.jaadec:jaad:0.8.5"
+        implementation project(":sound-service")
+        runtimeOnly "com.googlecode.soundlibs:mp3spi:${mp3spiVersion}"
+        runtimeOnly "net.sourceforge.jaadec:jaad:${jaadVersion}"
     }
 }
