@@ -74,7 +74,7 @@ public class TaskExecutorImpl implements TaskExecutor, InitializingBean, Disposa
                 logger.log(Level.WARNING, e.getMessage(), e);
             } finally {
                 if (running) {
-                    future = executorService.submit(new Task());
+                    future = executorService.submit(this);
                 } else {
                     future = null;
                 }

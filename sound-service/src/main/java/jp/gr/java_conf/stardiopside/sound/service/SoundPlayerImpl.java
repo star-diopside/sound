@@ -63,7 +63,7 @@ public class SoundPlayerImpl implements SoundPlayer, InitializingBean, Disposabl
                 logger.log(Level.WARNING, e.getMessage(), e);
             } finally {
                 if (!stopping) {
-                    taskExecutor.add(new Task());
+                    taskExecutor.add(this);
                 }
             }
         }

@@ -8,13 +8,11 @@ import javafx.application.Application;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Scene;
 import javafx.stage.Stage;
-import jp.gr.java_conf.stardiopside.sound.controller.SoundController;
 
 @SpringBootApplication
 public class App extends Application {
 
     private ConfigurableApplicationContext applicationContext;
-    private SoundController controller;
 
     public static void main(String[] args) {
         launch(args);
@@ -31,12 +29,10 @@ public class App extends Application {
         loader.setControllerFactory(applicationContext::getBean);
         primaryStage.setScene(new Scene(loader.load()));
         primaryStage.show();
-        controller = loader.getController();
     }
 
     @Override
     public void stop() throws Exception {
-        controller.stop();
         applicationContext.close();
     }
 }

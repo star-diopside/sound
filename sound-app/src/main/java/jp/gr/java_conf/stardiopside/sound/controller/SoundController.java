@@ -7,6 +7,7 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ResourceBundle;
 
+import org.springframework.beans.factory.DisposableBean;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 
@@ -25,7 +26,7 @@ import jp.gr.java_conf.stardiopside.sound.service.SoundListeners;
 import jp.gr.java_conf.stardiopside.sound.service.SoundPlayer;
 
 @Controller
-public class SoundController implements Initializable {
+public class SoundController implements Initializable, DisposableBean {
 
     @Autowired
     private SoundPlayer player;
@@ -59,6 +60,11 @@ public class SoundController implements Initializable {
                 e -> Platform.runLater(() -> model.addHistory("Error: thrown " + e.getClass().getName())));
         listeners.setPositionListener(position -> Platform.runLater(() -> model.setPosition(position)));
         player.play();
+    }
+
+    @Override
+    public void destroy() throws Exception {
+        stop();
     }
 
     public void stop() {

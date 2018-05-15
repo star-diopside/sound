@@ -1,3 +1,5 @@
 spring:
   main:
     banner-mode: 'off'
+  aop:
+    proxy-target-class: false
