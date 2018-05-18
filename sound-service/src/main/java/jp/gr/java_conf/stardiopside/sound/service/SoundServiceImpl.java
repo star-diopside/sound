@@ -7,10 +7,12 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.time.Duration;
 import java.time.temporal.ChronoUnit;
+import java.util.Optional;
 import java.util.function.Consumer;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
+import javax.sound.sampled.AudioFileFormat;
 import javax.sound.sampled.AudioFormat;
 import javax.sound.sampled.AudioInputStream;
 import javax.sound.sampled.AudioSystem;
@@ -48,10 +50,19 @@ public class SoundServiceImpl implements SoundService {
 
     @Override
     public boolean play(InputStream inputStream, String name) {
-        String title = (name == null ? "untitled" : name);
+        InputStream is = markSupportedInputStream(inputStream);
+        String title = getTitle(is).orElse(name == null ? "untitled" : name);
         callListener(listeners.getEventListener(), "Begin " + title);
-        try (AudioInputStream baseInputStream = AudioSystem.getAudioInputStream(
-                inputStream.markSupported() ? inputStream : new BufferedInputStream(inputStream))) {
+        try {
+            return play(is);
+        } finally {
+            callListener(listeners.getEventListener(), "End " + title);
+        }
+    }
+
+    private boolean play(InputStream inputStream) {
+        try (AudioInputStream baseInputStream = AudioSystem
+                .getAudioInputStream(markSupportedInputStream(inputStream))) {
             AudioFormat baseFormat = baseInputStream.getFormat();
             callListener(listeners.getEventListener(), "INPUT: " + baseFormat.getClass() + " - " + baseFormat);
             if (baseFormat.getEncoding().equals(AudioFormat.Encoding.PCM_SIGNED)
@@ -71,8 +82,6 @@ public class SoundServiceImpl implements SoundService {
             logger.log(Level.WARNING, e.getMessage(), e);
             callListener(listeners.getExceptionListener(), e);
             return false;
-        } finally {
-            callListener(listeners.getEventListener(), "End " + title);
         }
         return true;
     }
@@ -100,6 +109,22 @@ public class SoundServiceImpl implements SoundService {
         } finally {
             skipping = false;
         }
+    }
+
+    private Optional<String> getTitle(InputStream inputStream) {
+        try {
+            AudioFileFormat audioFileFormat = AudioSystem.getAudioFileFormat(markSupportedInputStream(inputStream));
+            Object title = audioFileFormat.properties().get("title");
+            return title == null ? Optional.empty() : Optional.of(title.toString());
+        } catch (IOException | UnsupportedAudioFileException e) {
+            logger.log(Level.WARNING, e.getMessage(), e);
+            callListener(listeners.getExceptionListener(), e);
+            return Optional.empty();
+        }
+    }
+
+    private static InputStream markSupportedInputStream(InputStream inputStream) {
+        return inputStream.markSupported() ? inputStream : new BufferedInputStream(inputStream);
     }
 
     private static <T> void callListener(Consumer<? super T> listener, T param) {
