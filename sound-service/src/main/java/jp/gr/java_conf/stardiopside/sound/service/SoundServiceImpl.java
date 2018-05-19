@@ -57,17 +57,24 @@ public class SoundServiceImpl implements SoundService {
 
     @Override
     public boolean play(InputStream inputStream, String name) {
-        InputStream is = markSupportedInputStream(inputStream);
-        String title = getTitle(is).orElse(name == null ? "untitled" : name);
+        String title = (name == null ? "unnamed" : name);
         publisher.publishEvent(new SoundActionEvent("Begin " + title));
         try {
-            return play(is);
+            InputStream is = markSupportedInputStream(inputStream);
+            getTitle(is).ifPresent(s -> publisher.publishEvent(new SoundActionEvent("Title: " + s)));
+            play(is);
+            return true;
+        } catch (IOException | UnsupportedAudioFileException | LineUnavailableException e) {
+            logger.log(Level.WARNING, e.getMessage(), e);
+            publisher.publishEvent(new SoundExceptionEvent(e));
+            return false;
         } finally {
             publisher.publishEvent(new SoundActionEvent("End " + title));
         }
     }
 
-    private boolean play(InputStream inputStream) {
+    private void play(InputStream inputStream)
+            throws IOException, UnsupportedAudioFileException, LineUnavailableException {
         try (AudioInputStream baseInputStream = AudioSystem
                 .getAudioInputStream(markSupportedInputStream(inputStream))) {
             AudioFormat baseFormat = baseInputStream.getFormat();
@@ -85,12 +92,7 @@ public class SoundServiceImpl implements SoundService {
                     play(decodedInputStream, decodedFormat);
                 }
             }
-        } catch (IOException | UnsupportedAudioFileException | LineUnavailableException e) {
-            logger.log(Level.WARNING, e.getMessage(), e);
-            publisher.publishEvent(new SoundExceptionEvent(e));
-            return false;
         }
-        return true;
     }
 
     private void play(AudioInputStream inputStream, AudioFormat format) throws IOException, LineUnavailableException {
@@ -116,16 +118,10 @@ public class SoundServiceImpl implements SoundService {
         }
     }
 
-    private Optional<String> getTitle(InputStream inputStream) {
-        try {
-            AudioFileFormat audioFileFormat = AudioSystem.getAudioFileFormat(markSupportedInputStream(inputStream));
-            Object title = audioFileFormat.properties().get("title");
-            return title == null ? Optional.empty() : Optional.of(title.toString());
-        } catch (IOException | UnsupportedAudioFileException e) {
-            logger.log(Level.WARNING, e.getMessage(), e);
-            publisher.publishEvent(new SoundExceptionEvent(e));
-            return Optional.empty();
-        }
+    private Optional<String> getTitle(InputStream inputStream) throws IOException, UnsupportedAudioFileException {
+        AudioFileFormat audioFileFormat = AudioSystem.getAudioFileFormat(markSupportedInputStream(inputStream));
+        Object title = audioFileFormat.properties().get("title");
+        return title == null ? Optional.empty() : Optional.of(title.toString());
     }
 
     private static InputStream markSupportedInputStream(InputStream inputStream) {
