@@ -9,15 +9,16 @@ import java.util.Deque;
 import java.util.concurrent.BlockingDeque;
 import java.util.concurrent.ConcurrentLinkedDeque;
 import java.util.concurrent.LinkedBlockingDeque;
-import java.util.function.Consumer;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.stream.Stream;
 
 import org.springframework.beans.factory.DisposableBean;
 import org.springframework.beans.factory.InitializingBean;
-import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;
+
+import jp.gr.java_conf.stardiopside.sound.event.SoundExceptionEvent;
 
 @Service
 public class SoundPlayerImpl implements SoundPlayer, InitializingBean, DisposableBean {
@@ -29,14 +30,15 @@ public class SoundPlayerImpl implements SoundPlayer, InitializingBean, Disposabl
     private volatile boolean operationWaiting;
     private volatile boolean stopping;
 
-    @Autowired
-    private TaskExecutor taskExecutor;
+    private final TaskExecutor taskExecutor;
+    private final SoundService soundService;
+    private final ApplicationEventPublisher publisher;
 
-    @Autowired
-    private SoundService soundService;
-
-    @Autowired
-    private SoundListeners listeners;
+    public SoundPlayerImpl(TaskExecutor taskExecutor, SoundService soundService, ApplicationEventPublisher publisher) {
+        this.taskExecutor = taskExecutor;
+        this.soundService = soundService;
+        this.publisher = publisher;
+    }
 
     @Override
     public void afterPropertiesSet() throws Exception {
@@ -59,7 +61,7 @@ public class SoundPlayerImpl implements SoundPlayer, InitializingBean, Disposabl
             } catch (InterruptedException e) {
                 logger.log(Level.FINE, e.getMessage(), e);
             } catch (Exception e) {
-                callListener(listeners.getExceptionListener(), e);
+                publisher.publishEvent(new SoundExceptionEvent(e));
                 logger.log(Level.WARNING, e.getMessage(), e);
             } finally {
                 if (!stopping) {
@@ -79,12 +81,6 @@ public class SoundPlayerImpl implements SoundPlayer, InitializingBean, Disposabl
     public void play() {
         stopping = false;
         taskExecutor.add(new Task());
-    }
-
-    private static <T> void callListener(Consumer<? super T> listener, T param) {
-        if (listener != null) {
-            listener.accept(param);
-        }
     }
 
     @Override
@@ -136,7 +132,7 @@ public class SoundPlayerImpl implements SoundPlayer, InitializingBean, Disposabl
         try (Stream<Path> stream = Files.find(path, Integer.MAX_VALUE, (p, attr) -> attr.isRegularFile()).sorted()) {
             stream.forEach(beforeFiles::addLast);
         } catch (IOException e) {
-            callListener(listeners.getExceptionListener(), e);
+            publisher.publishEvent(new SoundExceptionEvent(e));
             throw new UncheckedIOException(e);
         }
     }

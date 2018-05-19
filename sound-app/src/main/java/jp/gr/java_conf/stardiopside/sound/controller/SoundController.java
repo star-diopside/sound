@@ -8,7 +8,7 @@ import java.nio.file.Paths;
 import java.util.ResourceBundle;
 
 import org.springframework.beans.factory.DisposableBean;
-import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.event.EventListener;
 import org.springframework.stereotype.Controller;
 
 import javafx.application.Platform;
@@ -21,19 +21,17 @@ import javafx.scene.control.TextField;
 import javafx.stage.DirectoryChooser;
 import javafx.stage.FileChooser;
 import javafx.stage.Window;
+import jp.gr.java_conf.stardiopside.sound.event.SoundActionEvent;
+import jp.gr.java_conf.stardiopside.sound.event.SoundExceptionEvent;
+import jp.gr.java_conf.stardiopside.sound.event.SoundLineEvent;
+import jp.gr.java_conf.stardiopside.sound.event.SoundPositionEvent;
 import jp.gr.java_conf.stardiopside.sound.model.SoundData;
-import jp.gr.java_conf.stardiopside.sound.service.SoundListeners;
 import jp.gr.java_conf.stardiopside.sound.service.SoundPlayer;
 
 @Controller
 public class SoundController implements Initializable, DisposableBean {
 
-    @Autowired
-    private SoundPlayer player;
-
-    @Autowired
-    private SoundListeners listeners;
-
+    private final SoundPlayer player;
     private SoundData model = new SoundData();
 
     @FXML
@@ -48,23 +46,42 @@ public class SoundController implements Initializable, DisposableBean {
     @FXML
     private ListView<String> history;
 
+    public SoundController(SoundPlayer player) {
+        this.player = player;
+    }
+
     @Override
     public void initialize(URL location, ResourceBundle resources) {
         selectedFile.textProperty().bindBidirectional(model.selectedFileProperty());
         status.textProperty().bind(model.statusProperty());
         files.setItems(model.getFiles());
         history.setItems(model.getHistory());
-        listeners.setLineListener(event -> Platform.runLater(() -> model.addHistory(event)));
-        listeners.setEventListener(event -> Platform.runLater(() -> model.addHistory(event)));
-        listeners.setExceptionListener(
-                e -> Platform.runLater(() -> model.addHistory("Error: thrown " + e.getClass().getName())));
-        listeners.setPositionListener(position -> Platform.runLater(() -> model.setPosition(position)));
         player.play();
     }
 
     @Override
     public void destroy() throws Exception {
         stop();
+    }
+
+    @EventListener
+    public void onSoundLineEvent(SoundLineEvent event) {
+        Platform.runLater(() -> model.addHistory(event.getLineEvent()));
+    }
+
+    @EventListener
+    public void onSoundActionEvent(SoundActionEvent event) {
+        Platform.runLater(() -> model.addHistory(event.getAction()));
+    }
+
+    @EventListener
+    public void onSoundExceptionEvent(SoundExceptionEvent event) {
+        Platform.runLater(() -> model.addHistory("Error: thrown " + event.getException().getClass().getName()));
+    }
+
+    @EventListener
+    public void onSoundPositionEvent(SoundPositionEvent event) {
+        Platform.runLater(() -> model.setPosition(event.getPosition()));
     }
 
     public void stop() {

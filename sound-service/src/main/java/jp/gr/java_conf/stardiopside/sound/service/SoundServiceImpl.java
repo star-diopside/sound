@@ -8,7 +8,6 @@ import java.nio.file.Path;
 import java.time.Duration;
 import java.time.temporal.ChronoUnit;
 import java.util.Optional;
-import java.util.function.Consumer;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -20,9 +19,14 @@ import javax.sound.sampled.LineUnavailableException;
 import javax.sound.sampled.SourceDataLine;
 import javax.sound.sampled.UnsupportedAudioFileException;
 
-import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;
 
+import jp.gr.java_conf.stardiopside.sound.event.SoundActionEvent;
+import jp.gr.java_conf.stardiopside.sound.event.SoundExceptionEvent;
+import jp.gr.java_conf.stardiopside.sound.event.SoundFinishEvent;
+import jp.gr.java_conf.stardiopside.sound.event.SoundLineEvent;
+import jp.gr.java_conf.stardiopside.sound.event.SoundPositionEvent;
 import lombok.Getter;
 
 @Service
@@ -34,8 +38,11 @@ public class SoundServiceImpl implements SoundService {
     @Getter
     private volatile Duration position;
 
-    @Autowired
-    private SoundListeners listeners;
+    private final ApplicationEventPublisher publisher;
+
+    public SoundServiceImpl(ApplicationEventPublisher publisher) {
+        this.publisher = publisher;
+    }
 
     @Override
     public boolean play(Path path) {
@@ -43,7 +50,7 @@ public class SoundServiceImpl implements SoundService {
             return play(is, path.getFileName().toString());
         } catch (IOException e) {
             logger.log(Level.WARNING, e.getMessage(), e);
-            callListener(listeners.getExceptionListener(), e);
+            publisher.publishEvent(new SoundExceptionEvent(e));
             return false;
         }
     }
@@ -52,11 +59,11 @@ public class SoundServiceImpl implements SoundService {
     public boolean play(InputStream inputStream, String name) {
         InputStream is = markSupportedInputStream(inputStream);
         String title = getTitle(is).orElse(name == null ? "untitled" : name);
-        callListener(listeners.getEventListener(), "Begin " + title);
+        publisher.publishEvent(new SoundActionEvent("Begin " + title));
         try {
             return play(is);
         } finally {
-            callListener(listeners.getEventListener(), "End " + title);
+            publisher.publishEvent(new SoundActionEvent("End " + title));
         }
     }
 
@@ -64,15 +71,15 @@ public class SoundServiceImpl implements SoundService {
         try (AudioInputStream baseInputStream = AudioSystem
                 .getAudioInputStream(markSupportedInputStream(inputStream))) {
             AudioFormat baseFormat = baseInputStream.getFormat();
-            callListener(listeners.getEventListener(), "INPUT: " + baseFormat.getClass() + " - " + baseFormat);
+            publisher.publishEvent(new SoundActionEvent("INPUT: " + baseFormat.getClass() + " - " + baseFormat));
             if (baseFormat.getEncoding().equals(AudioFormat.Encoding.PCM_SIGNED)
                     || baseFormat.getEncoding().equals(AudioFormat.Encoding.PCM_UNSIGNED)) {
                 play(baseInputStream, baseFormat);
             } else {
                 AudioFormat decodedFormat = new AudioFormat(AudioFormat.Encoding.PCM_SIGNED, baseFormat.getSampleRate(),
                         16, baseFormat.getChannels(), baseFormat.getChannels() * 2, baseFormat.getSampleRate(), false);
-                callListener(listeners.getEventListener(),
-                        "DECODED: " + decodedFormat.getClass() + " - " + decodedFormat);
+                publisher.publishEvent(
+                        new SoundActionEvent("DECODED: " + decodedFormat.getClass() + " - " + decodedFormat));
                 try (AudioInputStream decodedInputStream = AudioSystem.getAudioInputStream(decodedFormat,
                         baseInputStream)) {
                     play(decodedInputStream, decodedFormat);
@@ -80,7 +87,7 @@ public class SoundServiceImpl implements SoundService {
             }
         } catch (IOException | UnsupportedAudioFileException | LineUnavailableException e) {
             logger.log(Level.WARNING, e.getMessage(), e);
-            callListener(listeners.getExceptionListener(), e);
+            publisher.publishEvent(new SoundExceptionEvent(e));
             return false;
         }
         return true;
@@ -89,9 +96,7 @@ public class SoundServiceImpl implements SoundService {
     private void play(AudioInputStream inputStream, AudioFormat format) throws IOException, LineUnavailableException {
         try (SourceDataLine line = AudioSystem.getSourceDataLine(format)) {
             skipping = false;
-            if (listeners.getLineListener() != null) {
-                line.addLineListener(listeners.getLineListener());
-            }
+            line.addLineListener(event -> publisher.publishEvent(new SoundLineEvent(event)));
             line.open(format);
             line.start();
             byte[] data = new byte[line.getBufferSize()];
@@ -100,12 +105,12 @@ public class SoundServiceImpl implements SoundService {
                 line.write(data, 0, size);
                 Duration pos = Duration.of(line.getMicrosecondPosition(), ChronoUnit.MICROS);
                 position = pos;
-                callListener(listeners.getPositionListener(), pos);
+                publisher.publishEvent(new SoundPositionEvent(pos));
             }
             line.drain();
             line.stop();
             position = null;
-            callListener(listeners.getPositionListener(), null);
+            publisher.publishEvent(SoundFinishEvent.INSTANCE);
         } finally {
             skipping = false;
         }
@@ -118,19 +123,13 @@ public class SoundServiceImpl implements SoundService {
             return title == null ? Optional.empty() : Optional.of(title.toString());
         } catch (IOException | UnsupportedAudioFileException e) {
             logger.log(Level.WARNING, e.getMessage(), e);
-            callListener(listeners.getExceptionListener(), e);
+            publisher.publishEvent(new SoundExceptionEvent(e));
             return Optional.empty();
         }
     }
 
     private static InputStream markSupportedInputStream(InputStream inputStream) {
         return inputStream.markSupported() ? inputStream : new BufferedInputStream(inputStream);
-    }
-
-    private static <T> void callListener(Consumer<? super T> listener, T param) {
-        if (listener != null) {
-            listener.accept(param);
-        }
     }
 
     @Override
