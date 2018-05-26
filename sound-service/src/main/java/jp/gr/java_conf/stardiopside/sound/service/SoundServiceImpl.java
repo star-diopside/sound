@@ -21,12 +21,13 @@ import javax.sound.sampled.UnsupportedAudioFileException;
 
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;
+import org.springframework.util.Assert;
 
 import jp.gr.java_conf.stardiopside.sound.event.SoundActionEvent;
 import jp.gr.java_conf.stardiopside.sound.event.SoundExceptionEvent;
-import jp.gr.java_conf.stardiopside.sound.event.SoundFinishEvent;
 import jp.gr.java_conf.stardiopside.sound.event.SoundLineEvent;
 import jp.gr.java_conf.stardiopside.sound.event.SoundPositionEvent;
+import jp.gr.java_conf.stardiopside.sound.event.SoundPositionFinishEvent;
 import lombok.Getter;
 
 @Service
@@ -60,7 +61,7 @@ public class SoundServiceImpl implements SoundService {
         String title = (name == null ? "unnamed" : name);
         publisher.publishEvent(new SoundActionEvent("Begin " + title));
         try {
-            InputStream is = markSupportedInputStream(inputStream);
+            InputStream is = inputStream.markSupported() ? inputStream : new BufferedInputStream(inputStream);
             getTitle(is).ifPresent(s -> publisher.publishEvent(new SoundActionEvent("Title: " + s)));
             play(is);
             return true;
@@ -75,8 +76,8 @@ public class SoundServiceImpl implements SoundService {
 
     private void play(InputStream inputStream)
             throws IOException, UnsupportedAudioFileException, LineUnavailableException {
-        try (AudioInputStream baseInputStream = AudioSystem
-                .getAudioInputStream(markSupportedInputStream(inputStream))) {
+        Assert.isTrue(inputStream.markSupported(), "inputStream does not support mark.");
+        try (AudioInputStream baseInputStream = AudioSystem.getAudioInputStream(inputStream)) {
             AudioFormat baseFormat = baseInputStream.getFormat();
             publisher.publishEvent(new SoundActionEvent("INPUT: " + baseFormat.getClass() + " - " + baseFormat));
             if (baseFormat.getEncoding().equals(AudioFormat.Encoding.PCM_SIGNED)
@@ -112,20 +113,18 @@ public class SoundServiceImpl implements SoundService {
             line.drain();
             line.stop();
             position = null;
-            publisher.publishEvent(SoundFinishEvent.INSTANCE);
+            publisher.publishEvent(SoundPositionFinishEvent.INSTANCE);
         } finally {
             skipping = false;
         }
     }
 
-    private Optional<String> getTitle(InputStream inputStream) throws IOException, UnsupportedAudioFileException {
-        AudioFileFormat audioFileFormat = AudioSystem.getAudioFileFormat(markSupportedInputStream(inputStream));
+    private static Optional<String> getTitle(InputStream inputStream)
+            throws IOException, UnsupportedAudioFileException {
+        Assert.isTrue(inputStream.markSupported(), "inputStream does not support mark.");
+        AudioFileFormat audioFileFormat = AudioSystem.getAudioFileFormat(inputStream);
         Object title = audioFileFormat.properties().get("title");
         return title == null ? Optional.empty() : Optional.of(title.toString());
-    }
-
-    private static InputStream markSupportedInputStream(InputStream inputStream) {
-        return inputStream.markSupported() ? inputStream : new BufferedInputStream(inputStream);
     }
 
     @Override

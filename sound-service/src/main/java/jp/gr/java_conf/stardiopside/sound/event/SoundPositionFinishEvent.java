@@ -3,11 +3,11 @@ package jp.gr.java_conf.stardiopside.sound.event;
 import java.time.Duration;
 
 @SuppressWarnings("serial")
-public class SoundFinishEvent extends SoundPositionEvent {
+public class SoundPositionFinishEvent extends SoundPositionEvent {
 
-    public static final SoundFinishEvent INSTANCE = new SoundFinishEvent();
+    public static final SoundPositionFinishEvent INSTANCE = new SoundPositionFinishEvent();
 
-    private SoundFinishEvent() {
+    private SoundPositionFinishEvent() {
         super(Duration.ZERO);
     }
 
