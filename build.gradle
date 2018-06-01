@@ -8,6 +8,8 @@ subprojects {
         jaadVersion = "0.8.5"
     }
 
+    ext["lombok.version"] = "1.16.22"
+
     apply plugin: "java-library"
     apply plugin: "io.spring.dependency-management"
 
