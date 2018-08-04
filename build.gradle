@@ -1,5 +1,5 @@
 plugins {
-    id "org.springframework.boot" version "2.0.2.RELEASE"
+    id "org.springframework.boot" version "2.0.3.RELEASE"
 }
 
 subprojects {
@@ -8,7 +8,7 @@ subprojects {
         jaadVersion = "0.8.5"
     }
 
-    ext["lombok.version"] = "1.16.22"
+    ext["lombok.version"] = "1.18.2"
 
     apply plugin: "java-library"
     apply plugin: "io.spring.dependency-management"
@@ -40,6 +40,7 @@ project(":sound-app") {
 
     dependencies {
         implementation project(":sound-service")
+        implementation "org.controlsfx:controlsfx:9.0.0"
         runtimeOnly "com.googlecode.soundlibs:mp3spi:${mp3spiVersion}"
         runtimeOnly "net.sourceforge.jaadec:jaad:${jaadVersion}"
     }

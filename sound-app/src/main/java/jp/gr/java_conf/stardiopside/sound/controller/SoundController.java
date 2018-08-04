@@ -4,7 +4,6 @@ import java.io.File;
 import java.net.URL;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.util.ResourceBundle;
 
 import org.springframework.beans.factory.DisposableBean;
@@ -27,6 +26,7 @@ import jp.gr.java_conf.stardiopside.sound.event.SoundLineEvent;
 import jp.gr.java_conf.stardiopside.sound.event.SoundPositionEvent;
 import jp.gr.java_conf.stardiopside.sound.model.SoundData;
 import jp.gr.java_conf.stardiopside.sound.service.SoundPlayer;
+import jp.gr.java_conf.stardiopside.sound.util.PathStringConverter;
 
 @Controller
 public class SoundController implements Initializable, DisposableBean {
@@ -52,10 +52,10 @@ public class SoundController implements Initializable, DisposableBean {
 
     @Override
     public void initialize(URL location, ResourceBundle resources) {
-        selectedFile.textProperty().bindBidirectional(model.selectedFileProperty());
+        selectedFile.textProperty().bindBidirectional(model.selectedFileProperty(), new PathStringConverter());
         status.textProperty().bind(model.statusProperty());
-        files.setItems(model.getFiles());
-        history.setItems(model.getHistory());
+        files.itemsProperty().bind(model.filesProperty());
+        history.itemsProperty().bind(model.historyProperty());
         player.play();
     }
 
@@ -97,7 +97,7 @@ public class SoundController implements Initializable, DisposableBean {
         DirectoryChooser chooser = new DirectoryChooser();
 
         if (model.getSelectedFile() != null) {
-            Path path = Paths.get(model.getSelectedFile());
+            Path path = model.getSelectedFile().toAbsolutePath();
             if (Files.isDirectory(path)) {
                 chooser.setInitialDirectory(path.toFile());
             } else if (Files.isRegularFile(path)) {
@@ -107,7 +107,7 @@ public class SoundController implements Initializable, DisposableBean {
 
         File file = chooser.showDialog(getWindow());
         if (file != null) {
-            model.setSelectedFile(file.toString());
+            model.setSelectedFile(file.toPath());
         }
     }
 
@@ -116,7 +116,7 @@ public class SoundController implements Initializable, DisposableBean {
         FileChooser chooser = new FileChooser();
 
         if (model.getSelectedFile() != null) {
-            Path path = Paths.get(model.getSelectedFile());
+            Path path = model.getSelectedFile().toAbsolutePath();
             if (Files.isDirectory(path)) {
                 chooser.setInitialDirectory(path.toFile());
             } else if (Files.isRegularFile(path)) {
@@ -127,13 +127,13 @@ public class SoundController implements Initializable, DisposableBean {
 
         File file = chooser.showOpenDialog(getWindow());
         if (file != null) {
-            model.setSelectedFile(file.toString());
+            model.setSelectedFile(file.toPath());
         }
     }
 
     @FXML
     private void onFileAdd(ActionEvent event) {
-        Path path = Paths.get(model.getSelectedFile());
+        Path path = model.getSelectedFile();
         player.add(path);
         model.getFiles().add(path);
     }
