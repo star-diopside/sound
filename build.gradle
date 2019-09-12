@@ -1,18 +1,15 @@
 plugins {
-    id "org.springframework.boot" version "2.0.6.RELEASE"
-    id "com.google.osdetector" version "1.4.0"
-    //id "com.google.osdetector" version "1.6.0"
+    id "org.springframework.boot" version "2.1.8.RELEASE"
+    id "com.google.osdetector" version "1.6.2"
 }
 
 subprojects {
     ext {
-        javafxVersion = "11"
-        controlsfxVersion = "9.0.0"
+        javafxVersion = "13"
+        controlsfxVersion = "11.0.0"
         mp3spiVersion = "1.9.5.4"
         jaadVersion = "0.8.5"
     }
-
-    ext["lombok.version"] = "1.18.2"
 
     apply plugin: "java-library"
     apply plugin: "io.spring.dependency-management"
