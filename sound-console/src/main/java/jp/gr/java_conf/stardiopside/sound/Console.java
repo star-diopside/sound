@@ -5,6 +5,7 @@ import java.io.UncheckedIOException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.Arrays;
+import java.util.Map;
 import java.util.logging.Logger;
 
 import org.springframework.boot.CommandLineRunner;
@@ -15,6 +16,7 @@ import org.springframework.context.event.EventListener;
 
 import jp.gr.java_conf.stardiopside.sound.event.SoundActionEvent;
 import jp.gr.java_conf.stardiopside.sound.event.SoundExceptionEvent;
+import jp.gr.java_conf.stardiopside.sound.event.SoundInformationEvent;
 import jp.gr.java_conf.stardiopside.sound.event.SoundLineEvent;
 import jp.gr.java_conf.stardiopside.sound.service.SoundService;
 
@@ -42,6 +44,14 @@ public class Console implements CommandLineRunner {
                 throw new UncheckedIOException(e);
             }
         }).forEach(service::play);
+    }
+
+    @EventListener
+    public void onSoundInformationEvent(SoundInformationEvent event) {
+        Map<String, Object> tags = event.getAudioTags();
+        tags.keySet().stream().mapToInt(String::length).max().ifPresent(i -> {
+            tags.forEach((k, v) -> logger.info(String.format("%" + i + "s: %s", k, v)));
+        });
     }
 
     @EventListener
