@@ -5,9 +5,9 @@ import java.io.UncheckedIOException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.Arrays;
+import java.util.Map;
 import java.util.logging.Logger;
 
-import org.jaudiotagger.tag.FieldKey;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
@@ -48,12 +48,10 @@ public class Console implements CommandLineRunner {
 
     @EventListener
     public void onSoundInformationEvent(SoundInformationEvent event) {
-        logger.info("       TRACK: " + event.getTag().getFields(FieldKey.TRACK));
-        logger.info("       TITLE: " + event.getTag().getFields(FieldKey.TITLE));
-        logger.info("      ARTIST: " + event.getTag().getFields(FieldKey.ARTIST));
-        logger.info("     DISC_NO: " + event.getTag().getFields(FieldKey.DISC_NO));
-        logger.info("       ALBUM: " + event.getTag().getFields(FieldKey.ALBUM));
-        logger.info("ALBUM_ARTIST: " + event.getTag().getFields(FieldKey.ALBUM_ARTIST));
+        Map<String, Object> tags = event.getAudioTags();
+        tags.keySet().stream().mapToInt(String::length).max().ifPresent(i -> {
+            tags.forEach((k, v) -> logger.info(String.format("%" + i + "s: %s", k, v)));
+        });
     }
 
     @EventListener

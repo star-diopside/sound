@@ -36,7 +36,7 @@ subprojects {
 project(":sound-service") {
     dependencies {
         api "org.springframework.boot:spring-boot-starter"
-        api "org:jaudiotagger:${jaudiotaggerVersion}"
+        implementation "org:jaudiotagger:${jaudiotaggerVersion}"
     }
 }
 
