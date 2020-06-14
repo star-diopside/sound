@@ -54,22 +54,30 @@ public class SoundServiceImpl implements SoundService {
 
     @Override
     public boolean play(Path path) {
-        try {
-            AudioFile audioFile = AudioFileIO.read(path.toFile());
-            publisher.publishEvent(new SoundInformationEvent(audioFile));
-        } catch (CannotReadException | IOException | TagException | ReadOnlyFileException
-                | InvalidAudioFrameException e) {
-            logger.log(Level.WARNING, e.getMessage(), e);
-            publisher.publishEvent(new SoundExceptionEvent(e));
-            return false;
-        }
+        String title = path.getFileName().toString();
+        publisher.publishEvent(new SoundActionEvent("Begin " + title));
 
-        try (InputStream is = Files.newInputStream(path)) {
-            return play(is, path.getFileName().toString());
-        } catch (IOException e) {
-            logger.log(Level.WARNING, e.getMessage(), e);
-            publisher.publishEvent(new SoundExceptionEvent(e));
-            return false;
+        try {
+            try {
+                AudioFile audioFile = AudioFileIO.read(path.toFile());
+                publisher.publishEvent(new SoundInformationEvent(audioFile));
+            } catch (CannotReadException | IOException | TagException | ReadOnlyFileException
+                    | InvalidAudioFrameException e) {
+                logger.log(Level.WARNING, e.getMessage(), e);
+                publisher.publishEvent(new SoundExceptionEvent(e));
+                return false;
+            }
+
+            try (InputStream is = Files.newInputStream(path)) {
+                return playInternal(is);
+            } catch (IOException e) {
+                logger.log(Level.WARNING, e.getMessage(), e);
+                publisher.publishEvent(new SoundExceptionEvent(e));
+                return false;
+            }
+
+        } finally {
+            publisher.publishEvent(new SoundActionEvent("End " + title));
         }
     }
 
@@ -77,21 +85,28 @@ public class SoundServiceImpl implements SoundService {
     public boolean play(InputStream inputStream, String name) {
         String title = (name == null ? "unnamed" : name);
         publisher.publishEvent(new SoundActionEvent("Begin " + title));
+
         try {
-            InputStream is = inputStream.markSupported() ? inputStream : new BufferedInputStream(inputStream);
-            getTitle(is).ifPresent(s -> publisher.publishEvent(new SoundActionEvent("Title: " + s)));
-            play(is);
-            return true;
-        } catch (IOException | UnsupportedAudioFileException | LineUnavailableException e) {
-            logger.log(Level.WARNING, e.getMessage(), e);
-            publisher.publishEvent(new SoundExceptionEvent(e));
-            return false;
+            return playInternal(inputStream);
         } finally {
             publisher.publishEvent(new SoundActionEvent("End " + title));
         }
     }
 
-    private void play(InputStream inputStream)
+    private boolean playInternal(InputStream inputStream) {
+        try {
+            InputStream is = inputStream.markSupported() ? inputStream : new BufferedInputStream(inputStream);
+            getTitle(is).ifPresent(s -> publisher.publishEvent(new SoundActionEvent("Title: " + s)));
+            playBufferedInputStream(is);
+            return true;
+        } catch (IOException | UnsupportedAudioFileException | LineUnavailableException e) {
+            logger.log(Level.WARNING, e.getMessage(), e);
+            publisher.publishEvent(new SoundExceptionEvent(e));
+            return false;
+        }
+    }
+
+    private void playBufferedInputStream(InputStream inputStream)
             throws IOException, UnsupportedAudioFileException, LineUnavailableException {
         Assert.isTrue(inputStream.markSupported(), "inputStream does not support mark.");
         try (AudioInputStream baseInputStream = AudioSystem.getAudioInputStream(inputStream)) {
@@ -99,7 +114,7 @@ public class SoundServiceImpl implements SoundService {
             publisher.publishEvent(new SoundActionEvent("INPUT: " + baseFormat.getClass() + " - " + baseFormat));
             if (baseFormat.getEncoding().equals(AudioFormat.Encoding.PCM_SIGNED)
                     || baseFormat.getEncoding().equals(AudioFormat.Encoding.PCM_UNSIGNED)) {
-                play(baseInputStream, baseFormat);
+                playAudioInputStream(baseInputStream, baseFormat);
             } else {
                 AudioFormat decodedFormat = new AudioFormat(AudioFormat.Encoding.PCM_SIGNED, baseFormat.getSampleRate(),
                         16, baseFormat.getChannels(), baseFormat.getChannels() * 2, baseFormat.getSampleRate(), false);
@@ -107,13 +122,14 @@ public class SoundServiceImpl implements SoundService {
                         new SoundActionEvent("DECODED: " + decodedFormat.getClass() + " - " + decodedFormat));
                 try (AudioInputStream decodedInputStream = AudioSystem.getAudioInputStream(decodedFormat,
                         baseInputStream)) {
-                    play(decodedInputStream, decodedFormat);
+                    playAudioInputStream(decodedInputStream, decodedFormat);
                 }
             }
         }
     }
 
-    private void play(AudioInputStream inputStream, AudioFormat format) throws IOException, LineUnavailableException {
+    private void playAudioInputStream(AudioInputStream inputStream, AudioFormat format)
+            throws IOException, LineUnavailableException {
         try (SourceDataLine line = AudioSystem.getSourceDataLine(format)) {
             skipping = false;
             line.addLineListener(event -> publisher.publishEvent(new SoundLineEvent(event)));
