@@ -11,21 +11,23 @@ import org.springframework.context.ApplicationEvent;
 @SuppressWarnings("serial")
 public class SoundInformationEvent extends ApplicationEvent {
 
-    private Map<String, Object> audioTags;
+    private Map<String, Object> information;
 
     public SoundInformationEvent(AudioFile audioFile) {
         super(audioFile);
         Tag tag = audioFile.getTag();
-        audioTags = new LinkedHashMap<>();
-        audioTags.put("TRACK", tag.getFields(FieldKey.TRACK));
-        audioTags.put("TITLE", tag.getFields(FieldKey.TITLE));
-        audioTags.put("ARTIST", tag.getFields(FieldKey.ARTIST));
-        audioTags.put("DISC_NO", tag.getFields(FieldKey.DISC_NO));
-        audioTags.put("ALBUM", tag.getFields(FieldKey.ALBUM));
-        audioTags.put("ALBUM_ARTIST", tag.getFields(FieldKey.ALBUM_ARTIST));
+        information = new LinkedHashMap<>();
+        information.put("TRACK", tag.getFirst(FieldKey.TRACK));
+        information.put("TRACK_TOTAL", tag.getFirst(FieldKey.TRACK_TOTAL));
+        information.put("TITLE", tag.getFirst(FieldKey.TITLE));
+        information.put("ARTIST", tag.getFirst(FieldKey.ARTIST));
+        information.put("DISC_NO", tag.getFirst(FieldKey.DISC_NO));
+        information.put("DISC_TOTAL", tag.getFirst(FieldKey.DISC_TOTAL));
+        information.put("ALBUM", tag.getFirst(FieldKey.ALBUM));
+        information.put("ALBUM_ARTIST", tag.getFirst(FieldKey.ALBUM_ARTIST));
     }
 
-    public Map<String, Object> getAudioTags() {
-        return audioTags;
+    public Map<String, Object> getInformation() {
+        return information;
     }
 }

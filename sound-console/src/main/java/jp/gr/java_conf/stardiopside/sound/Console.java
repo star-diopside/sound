@@ -48,10 +48,16 @@ public class Console implements CommandLineRunner {
 
     @EventListener
     public void onSoundInformationEvent(SoundInformationEvent event) {
-        Map<String, Object> tags = event.getAudioTags();
-        tags.keySet().stream().mapToInt(String::length).max().ifPresent(i -> {
-            tags.forEach((k, v) -> logger.info(String.format("%" + i + "s: %s", k, v)));
-        });
+        Map<String, Object> info = event.getInformation();
+        info.keySet()
+            .stream()
+            .mapToInt(String::length)
+            .max()
+            .ifPresent(i ->
+                info.forEach((k, v) ->
+                    logger.info(String.format("%" + i + "s: %s", k, v))
+                )
+            );
     }
 
     @EventListener
