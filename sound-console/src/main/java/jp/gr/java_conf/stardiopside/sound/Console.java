@@ -7,6 +7,7 @@ import java.nio.file.Paths;
 import java.util.Arrays;
 import java.util.logging.Logger;
 
+import org.jaudiotagger.tag.FieldKey;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
@@ -15,6 +16,7 @@ import org.springframework.context.event.EventListener;
 
 import jp.gr.java_conf.stardiopside.sound.event.SoundActionEvent;
 import jp.gr.java_conf.stardiopside.sound.event.SoundExceptionEvent;
+import jp.gr.java_conf.stardiopside.sound.event.SoundInformationEvent;
 import jp.gr.java_conf.stardiopside.sound.event.SoundLineEvent;
 import jp.gr.java_conf.stardiopside.sound.service.SoundService;
 
@@ -42,6 +44,16 @@ public class Console implements CommandLineRunner {
                 throw new UncheckedIOException(e);
             }
         }).forEach(service::play);
+    }
+
+    @EventListener
+    public void onSoundInformationEvent(SoundInformationEvent event) {
+        logger.info("       TRACK: " + event.getTag().getFields(FieldKey.TRACK));
+        logger.info("       TITLE: " + event.getTag().getFields(FieldKey.TITLE));
+        logger.info("      ARTIST: " + event.getTag().getFields(FieldKey.ARTIST));
+        logger.info("     DISC_NO: " + event.getTag().getFields(FieldKey.DISC_NO));
+        logger.info("       ALBUM: " + event.getTag().getFields(FieldKey.ALBUM));
+        logger.info("ALBUM_ARTIST: " + event.getTag().getFields(FieldKey.ALBUM_ARTIST));
     }
 
     @EventListener

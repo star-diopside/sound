@@ -19,12 +19,19 @@ import javax.sound.sampled.LineUnavailableException;
 import javax.sound.sampled.SourceDataLine;
 import javax.sound.sampled.UnsupportedAudioFileException;
 
+import org.jaudiotagger.audio.AudioFile;
+import org.jaudiotagger.audio.AudioFileIO;
+import org.jaudiotagger.audio.exceptions.CannotReadException;
+import org.jaudiotagger.audio.exceptions.InvalidAudioFrameException;
+import org.jaudiotagger.audio.exceptions.ReadOnlyFileException;
+import org.jaudiotagger.tag.TagException;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;
 import org.springframework.util.Assert;
 
 import jp.gr.java_conf.stardiopside.sound.event.SoundActionEvent;
 import jp.gr.java_conf.stardiopside.sound.event.SoundExceptionEvent;
+import jp.gr.java_conf.stardiopside.sound.event.SoundInformationEvent;
 import jp.gr.java_conf.stardiopside.sound.event.SoundLineEvent;
 import jp.gr.java_conf.stardiopside.sound.event.SoundPositionEvent;
 import jp.gr.java_conf.stardiopside.sound.event.SoundPositionFinishEvent;
@@ -47,6 +54,16 @@ public class SoundServiceImpl implements SoundService {
 
     @Override
     public boolean play(Path path) {
+        try {
+            AudioFile audioFile = AudioFileIO.read(path.toFile());
+            publisher.publishEvent(new SoundInformationEvent(audioFile));
+        } catch (CannotReadException | IOException | TagException | ReadOnlyFileException
+                | InvalidAudioFrameException e) {
+            logger.log(Level.WARNING, e.getMessage(), e);
+            publisher.publishEvent(new SoundExceptionEvent(e));
+            return false;
+        }
+
         try (InputStream is = Files.newInputStream(path)) {
             return play(is, path.getFileName().toString());
         } catch (IOException e) {

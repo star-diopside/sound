@@ -1,18 +1,21 @@
 plugins {
-    id "org.springframework.boot" version "2.2.1.RELEASE"
+    id "org.springframework.boot" version "2.3.1.RELEASE"
     id "com.google.osdetector" version "1.6.2"
 }
 
 subprojects {
     ext {
-        javafxVersion = "13"
-        controlsfxVersion = "11.0.0"
+        javafxVersion = "14.0.1"
+        controlsfxVersion = "11.0.1"
         mp3spiVersion = "1.9.5.4"
         jaadVersion = "0.8.5"
+        jaudiotaggerVersion = "2.0.3"
     }
 
     apply plugin: "java-library"
     apply plugin: "io.spring.dependency-management"
+
+    sourceCompatibility = "14"
 
     repositories {
         jcenter()
@@ -33,6 +36,7 @@ subprojects {
 project(":sound-service") {
     dependencies {
         api "org.springframework.boot:spring-boot-starter"
+        api "org:jaudiotagger:${jaudiotaggerVersion}"
     }
 }
 
