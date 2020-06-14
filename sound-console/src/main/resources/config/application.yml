@@ -3,3 +3,8 @@ spring:
     banner-mode: 'off'
   aop:
     proxy-target-class: false
+
+logging:
+  level:
+    root: 'WARN'
+    jp.gr.java_conf.stardiopside.sound: 'INFO'
