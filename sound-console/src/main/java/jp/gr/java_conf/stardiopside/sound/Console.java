@@ -9,6 +9,8 @@ import java.time.LocalDateTime;
 import java.util.Arrays;
 import java.util.logging.Logger;
 
+import javax.annotation.PreDestroy;
+
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
@@ -26,6 +28,7 @@ public class Console implements CommandLineRunner {
 
     private static final Logger logger = Logger.getLogger(Console.class.getName());
     private final SoundService service;
+    private LocalDateTime start;
     private boolean stopped = false;
 
     public Console(SoundService service) {
@@ -39,12 +42,7 @@ public class Console implements CommandLineRunner {
 
     @Override
     public void run(String... args) {
-        var start = LocalDateTime.now();
-        Runtime.getRuntime().addShutdownHook(new Thread(() -> {
-            if (!stopped) {
-                System.err.println("Execution Time: " + getExecutionTimeString(start));
-            }
-        }));
+        start = LocalDateTime.now();
 
         try {
             Arrays.stream(args).map(Paths::get).flatMap(path -> {
@@ -57,6 +55,13 @@ public class Console implements CommandLineRunner {
         } finally {
             logger.info("Execution Time: " + getExecutionTimeString(start));
             stopped = true;
+        }
+    }
+
+    @PreDestroy
+    public void onDestroy() {
+        if (start != null && !stopped) {
+            System.err.println("Execution Time: " + getExecutionTimeString(start));
         }
     }
 
