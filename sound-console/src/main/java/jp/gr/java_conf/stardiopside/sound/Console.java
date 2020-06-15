@@ -4,8 +4,9 @@ import java.io.IOException;
 import java.io.UncheckedIOException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
+import java.time.Duration;
+import java.time.LocalDateTime;
 import java.util.Arrays;
-import java.util.Map;
 import java.util.logging.Logger;
 
 import org.springframework.boot.CommandLineRunner;
@@ -25,6 +26,7 @@ public class Console implements CommandLineRunner {
 
     private static final Logger logger = Logger.getLogger(Console.class.getName());
     private final SoundService service;
+    private boolean stopped = false;
 
     public Console(SoundService service) {
         this.service = service;
@@ -37,18 +39,36 @@ public class Console implements CommandLineRunner {
 
     @Override
     public void run(String... args) {
-        Arrays.stream(args).map(Paths::get).flatMap(path -> {
-            try {
-                return Files.find(path, Integer.MAX_VALUE, (p, attr) -> attr.isRegularFile()).sorted();
-            } catch (IOException e) {
-                throw new UncheckedIOException(e);
+        var start = LocalDateTime.now();
+        Runtime.getRuntime().addShutdownHook(new Thread(() -> {
+            if (!stopped) {
+                System.err.println("Execution Time: " + getExecutionTimeString(start));
             }
-        }).forEach(service::play);
+        }));
+
+        try {
+            Arrays.stream(args).map(Paths::get).flatMap(path -> {
+                try {
+                    return Files.find(path, Integer.MAX_VALUE, (p, attr) -> attr.isRegularFile()).sorted();
+                } catch (IOException e) {
+                    throw new UncheckedIOException(e);
+                }
+            }).forEach(service::play);
+        } finally {
+            logger.info("Execution Time: " + getExecutionTimeString(start));
+            stopped = true;
+        }
+    }
+
+    private static String getExecutionTimeString(LocalDateTime start) {
+        var end = LocalDateTime.now();
+        var d = Duration.between(start, end);
+        return String.format("%02d:%02d:%02d", d.toHours(), d.toMinutesPart(), d.toSecondsPart());
     }
 
     @EventListener
     public void onSoundInformationEvent(SoundInformationEvent event) {
-        Map<String, Object> info = event.getInformation();
+        var info = event.getInformation();
         info.keySet()
             .stream()
             .mapToInt(String::length)

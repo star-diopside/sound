@@ -15,8 +15,6 @@ subprojects {
     apply plugin: "java-library"
     apply plugin: "io.spring.dependency-management"
 
-    sourceCompatibility = "14"
-
     repositories {
         jcenter()
     }
