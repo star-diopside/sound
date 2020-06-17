@@ -16,11 +16,9 @@ import java.util.stream.Stream;
 import org.springframework.beans.factory.DisposableBean;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.context.ApplicationEventPublisher;
-import org.springframework.stereotype.Service;
 
 import jp.gr.java_conf.stardiopside.sound.event.SoundExceptionEvent;
 
-@Service
 public class SoundPlayerImpl implements SoundPlayer, InitializingBean, DisposableBean {
 
     private static final Logger logger = Logger.getLogger(SoundPlayerImpl.class.getName());

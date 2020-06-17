@@ -10,9 +10,7 @@ import java.util.logging.Logger;
 
 import org.springframework.beans.factory.DisposableBean;
 import org.springframework.beans.factory.InitializingBean;
-import org.springframework.stereotype.Service;
 
-@Service
 public class TaskExecutorImpl implements TaskExecutor, InitializingBean, DisposableBean {
 
     private static final Logger logger = Logger.getLogger(TaskExecutorImpl.class.getName());

@@ -26,7 +26,6 @@ import org.jaudiotagger.audio.exceptions.InvalidAudioFrameException;
 import org.jaudiotagger.audio.exceptions.ReadOnlyFileException;
 import org.jaudiotagger.tag.TagException;
 import org.springframework.context.ApplicationEventPublisher;
-import org.springframework.stereotype.Service;
 import org.springframework.util.Assert;
 
 import jp.gr.java_conf.stardiopside.sound.event.SoundActionEvent;
@@ -37,7 +36,6 @@ import jp.gr.java_conf.stardiopside.sound.event.SoundPositionEvent;
 import jp.gr.java_conf.stardiopside.sound.event.SoundPositionFinishEvent;
 import lombok.Getter;
 
-@Service
 public class SoundServiceImpl implements SoundService {
 
     private static final Logger logger = Logger.getLogger(SoundServiceImpl.class.getName());
