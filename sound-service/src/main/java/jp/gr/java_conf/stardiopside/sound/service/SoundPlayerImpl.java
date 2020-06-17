@@ -13,13 +13,14 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.stream.Stream;
 
-import org.springframework.beans.factory.DisposableBean;
-import org.springframework.beans.factory.InitializingBean;
+import javax.annotation.PostConstruct;
+import javax.annotation.PreDestroy;
+
 import org.springframework.context.ApplicationEventPublisher;
 
 import jp.gr.java_conf.stardiopside.sound.event.SoundExceptionEvent;
 
-public class SoundPlayerImpl implements SoundPlayer, InitializingBean, DisposableBean {
+public class SoundPlayerImpl implements SoundPlayer {
 
     private static final Logger logger = Logger.getLogger(SoundPlayerImpl.class.getName());
     private static final Duration BACK_THRESHOLD = Duration.ofSeconds(2);
@@ -38,13 +39,13 @@ public class SoundPlayerImpl implements SoundPlayer, InitializingBean, Disposabl
         this.publisher = publisher;
     }
 
-    @Override
-    public void afterPropertiesSet() throws Exception {
+    @PostConstruct
+    public void onConstruct() {
         taskExecutor.start();
     }
 
-    @Override
-    public void destroy() throws Exception {
+    @PreDestroy
+    public void onDestroy() {
         terminate();
     }
 

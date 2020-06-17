@@ -8,10 +8,10 @@ import java.util.concurrent.LinkedBlockingQueue;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-import org.springframework.beans.factory.DisposableBean;
-import org.springframework.beans.factory.InitializingBean;
+import javax.annotation.PostConstruct;
+import javax.annotation.PreDestroy;
 
-public class TaskExecutorImpl implements TaskExecutor, InitializingBean, DisposableBean {
+public class TaskExecutorImpl implements TaskExecutor {
 
     private static final Logger logger = Logger.getLogger(TaskExecutorImpl.class.getName());
     private BlockingQueue<Runnable> taskQueue = new LinkedBlockingQueue<>();
@@ -19,13 +19,13 @@ public class TaskExecutorImpl implements TaskExecutor, InitializingBean, Disposa
     private ExecutorService executorService;
     private Future<?> future;
 
-    @Override
-    public void afterPropertiesSet() throws Exception {
+    @PostConstruct
+    public void onConstruct() {
         executorService = Executors.newSingleThreadExecutor();
     }
 
-    @Override
-    public void destroy() throws Exception {
+    @PreDestroy
+    public void onDestroy() {
         terminate();
     }
 

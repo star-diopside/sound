@@ -6,7 +6,8 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.ResourceBundle;
 
-import org.springframework.beans.factory.DisposableBean;
+import javax.annotation.PreDestroy;
+
 import org.springframework.context.event.EventListener;
 import org.springframework.stereotype.Controller;
 
@@ -29,7 +30,7 @@ import jp.gr.java_conf.stardiopside.sound.service.SoundPlayer;
 import jp.gr.java_conf.stardiopside.sound.util.PathStringConverter;
 
 @Controller
-public class SoundController implements Initializable, DisposableBean {
+public class SoundController implements Initializable {
 
     private final SoundPlayer player;
     private SoundData model = new SoundData();
@@ -59,8 +60,8 @@ public class SoundController implements Initializable, DisposableBean {
         player.play();
     }
 
-    @Override
-    public void destroy() throws Exception {
+    @PreDestroy
+    public void onDestroy() {
         stop();
     }
 
