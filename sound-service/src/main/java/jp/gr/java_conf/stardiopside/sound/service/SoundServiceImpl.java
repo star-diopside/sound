@@ -55,7 +55,6 @@ public class SoundServiceImpl implements SoundService {
             } catch (Exception e) {
                 logger.log(Level.WARNING, e.getMessage(), e);
                 publisher.publishEvent(new SoundExceptionEvent(e));
-                return false;
             }
 
             try (InputStream is = Files.newInputStream(path)) {
