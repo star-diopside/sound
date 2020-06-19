@@ -10,6 +10,6 @@ public class SoundExceptionEvent extends ApplicationEvent {
     }
 
     public Exception getException() {
-        return (Exception) super.getSource();
+        return (Exception) getSource();
     }
 }

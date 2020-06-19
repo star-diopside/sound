@@ -10,6 +10,6 @@ public class SoundActionEvent extends ApplicationEvent {
     }
 
     public String getAction() {
-        return (String) super.getSource();
+        return (String) getSource();
     }
 }

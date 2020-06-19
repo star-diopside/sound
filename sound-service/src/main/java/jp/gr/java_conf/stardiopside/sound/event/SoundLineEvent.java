@@ -12,6 +12,6 @@ public class SoundLineEvent extends ApplicationEvent {
     }
 
     public LineEvent getLineEvent() {
-        return (LineEvent) super.getSource();
+        return (LineEvent) getSource();
     }
 }

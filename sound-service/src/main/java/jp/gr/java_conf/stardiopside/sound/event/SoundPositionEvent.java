@@ -12,6 +12,6 @@ public class SoundPositionEvent extends ApplicationEvent {
     }
 
     public Duration getPosition() {
-        return (Duration) super.getSource();
+        return (Duration) getSource();
     }
 }
