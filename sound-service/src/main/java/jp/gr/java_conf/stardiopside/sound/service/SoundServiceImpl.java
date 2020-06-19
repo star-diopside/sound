@@ -19,12 +19,6 @@ import javax.sound.sampled.LineUnavailableException;
 import javax.sound.sampled.SourceDataLine;
 import javax.sound.sampled.UnsupportedAudioFileException;
 
-import org.jaudiotagger.audio.AudioFile;
-import org.jaudiotagger.audio.AudioFileIO;
-import org.jaudiotagger.audio.exceptions.CannotReadException;
-import org.jaudiotagger.audio.exceptions.InvalidAudioFrameException;
-import org.jaudiotagger.audio.exceptions.ReadOnlyFileException;
-import org.jaudiotagger.tag.TagException;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.util.Assert;
 
@@ -57,10 +51,8 @@ public class SoundServiceImpl implements SoundService {
 
         try {
             try {
-                AudioFile audioFile = AudioFileIO.read(path.toFile());
-                publisher.publishEvent(new SoundInformationEvent(audioFile));
-            } catch (CannotReadException | IOException | TagException | ReadOnlyFileException
-                    | InvalidAudioFrameException e) {
+                publisher.publishEvent(new SoundInformationEvent(path));
+            } catch (Exception e) {
                 logger.log(Level.WARNING, e.getMessage(), e);
                 publisher.publishEvent(new SoundExceptionEvent(e));
                 return false;

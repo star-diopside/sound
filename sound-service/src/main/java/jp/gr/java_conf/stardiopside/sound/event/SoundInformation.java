@@ -1,10 +1,11 @@
 package jp.gr.java_conf.stardiopside.sound.event;
 
+import java.nio.file.Path;
 import java.time.Duration;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
-import org.jaudiotagger.audio.AudioFile;
+import org.jaudiotagger.audio.AudioFileIO;
 import org.jaudiotagger.audio.AudioHeader;
 import org.jaudiotagger.tag.FieldKey;
 import org.jaudiotagger.tag.Tag;
@@ -14,7 +15,8 @@ public class SoundInformation {
     private final AudioHeader audioHeader;
     private final Tag tag;
 
-    public SoundInformation(AudioFile audioFile) {
+    public SoundInformation(Path path) throws Exception {
+        var audioFile = AudioFileIO.read(path.toFile());
         audioHeader = audioFile.getAudioHeader();
         tag = audioFile.getTag();
     }
