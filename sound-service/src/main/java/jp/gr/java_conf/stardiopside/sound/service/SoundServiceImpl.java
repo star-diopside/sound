@@ -7,7 +7,6 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.time.Duration;
 import java.time.temporal.ChronoUnit;
-import java.util.Optional;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -85,7 +84,7 @@ public class SoundServiceImpl implements SoundService {
     private boolean playInternal(InputStream inputStream) {
         try {
             InputStream is = inputStream.markSupported() ? inputStream : new BufferedInputStream(inputStream);
-            getTitle(is).ifPresent(s -> publisher.publishEvent(new SoundActionEvent("Title: " + s)));
+            getInformation(is);
             playBufferedInputStream(is);
             return true;
         } catch (IOException | UnsupportedAudioFileException | LineUnavailableException e) {
@@ -141,12 +140,13 @@ public class SoundServiceImpl implements SoundService {
         }
     }
 
-    private static Optional<String> getTitle(InputStream inputStream)
+    private static void getInformation(InputStream inputStream)
             throws IOException, UnsupportedAudioFileException {
         Assert.isTrue(inputStream.markSupported(), "inputStream does not support mark.");
-        AudioFileFormat audioFileFormat = AudioSystem.getAudioFileFormat(inputStream);
-        Object title = audioFileFormat.properties().get("title");
-        return title == null ? Optional.empty() : Optional.of(title.toString());
+        if (logger.isLoggable(Level.FINE)) {
+            AudioFileFormat audioFileFormat = AudioSystem.getAudioFileFormat(inputStream);
+            audioFileFormat.properties().forEach((k, v) -> logger.log(Level.FINE, k + " = " + v));
+        }
     }
 
     @Override
