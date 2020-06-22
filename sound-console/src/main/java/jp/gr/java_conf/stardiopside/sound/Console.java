@@ -7,9 +7,12 @@ import java.nio.file.Paths;
 import java.time.Duration;
 import java.time.LocalDateTime;
 import java.util.Arrays;
+import java.util.Formatter;
+import java.util.Optional;
 import java.util.logging.Logger;
 
 import javax.annotation.PreDestroy;
+import javax.sound.sampled.LineEvent.Type;
 
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.boot.SpringApplication;
@@ -21,6 +24,7 @@ import jp.gr.java_conf.stardiopside.sound.event.SoundActionEvent;
 import jp.gr.java_conf.stardiopside.sound.event.SoundExceptionEvent;
 import jp.gr.java_conf.stardiopside.sound.event.SoundInformationEvent;
 import jp.gr.java_conf.stardiopside.sound.event.SoundLineEvent;
+import jp.gr.java_conf.stardiopside.sound.event.SoundPositionEvent;
 import jp.gr.java_conf.stardiopside.sound.service.SoundService;
 
 @SpringBootApplication
@@ -30,6 +34,7 @@ public class Console implements CommandLineRunner {
     private final SoundService service;
     private LocalDateTime start;
     private boolean stopped = false;
+    private Optional<Duration> trackLength = Optional.empty();
 
     public Console(SoundService service) {
         this.service = service;
@@ -73,6 +78,7 @@ public class Console implements CommandLineRunner {
 
     @EventListener
     public void onSoundInformationEvent(SoundInformationEvent event) {
+        trackLength = event.getSoundInformation().getTrackLengthAsDuration();
         var info = event.getSoundInformation().toMap();
         info.keySet().stream()
                 .mapToInt(String::length)
@@ -83,6 +89,9 @@ public class Console implements CommandLineRunner {
 
     @EventListener
     public void onSoundLineEvent(SoundLineEvent event) {
+        if (Type.STOP.equals(event.getLineEvent().getType())) {
+            System.out.print("\r");
+        }
         logger.info(event.getLineEvent().toString());
     }
 
@@ -94,5 +103,20 @@ public class Console implements CommandLineRunner {
     @EventListener
     public void onSoundExceptionEvent(SoundExceptionEvent event) {
         logger.info("Error: thrown " + event.getException().getClass().getName());
+    }
+
+    @EventListener
+    public void onSoundPositionEvent(SoundPositionEvent event) {
+        var position = event.getPosition();
+        if (position == null) {
+            trackLength = Optional.empty();
+        } else {
+            try (var formatter = new Formatter()) {
+                formatter.format("\r---> %02d:%02d", position.toMinutes(), position.toSecondsPart());
+                trackLength.ifPresent(d -> formatter.format(" / %02d:%02d (%3d%%)", d.toMinutes(), d.toSecondsPart(),
+                        (int) (100.0 * position.getSeconds() / d.getSeconds())));
+                System.out.print(formatter.toString());
+            }
+        }
     }
 }
