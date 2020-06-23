@@ -107,10 +107,15 @@ public class Console implements CommandLineRunner {
         if (position == null) {
             trackLength = Optional.empty();
         } else {
+            long len = trackLength.map(Duration::getSeconds).orElse(0L);
+            int percent = (len == 0L ? 0 : (int) (100.0 * position.getSeconds() / len));
+            int progress = Math.round(percent / 10.0F);
+
             try (var formatter = new Formatter()) {
-                formatter.format("---> %02d:%02d", position.toMinutes(), position.toSecondsPart());
-                trackLength.ifPresent(d -> formatter.format(" / %02d:%02d (%3d%%)", d.toMinutes(), d.toSecondsPart(),
-                        (int) (100.0 * position.getSeconds() / d.getSeconds())));
+                formatter.format("[%s%s] %02d:%02d", "=".repeat(progress), "-".repeat(10 - progress),
+                        position.toMinutes(), position.toSecondsPart());
+                trackLength.ifPresent(
+                        d -> formatter.format(" / %02d:%02d (%3d%%)", d.toMinutes(), d.toSecondsPart(), percent));
                 formatter.format("\r");
                 System.out.print(formatter.toString());
             }
