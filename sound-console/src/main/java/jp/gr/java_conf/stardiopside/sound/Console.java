@@ -12,7 +12,6 @@ import java.util.Optional;
 import java.util.logging.Logger;
 
 import javax.annotation.PreDestroy;
-import javax.sound.sampled.LineEvent.Type;
 
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.boot.SpringApplication;
@@ -89,9 +88,6 @@ public class Console implements CommandLineRunner {
 
     @EventListener
     public void onSoundLineEvent(SoundLineEvent event) {
-        if (Type.STOP.equals(event.getLineEvent().getType())) {
-            System.out.print("\r");
-        }
         logger.info(event.getLineEvent().toString());
     }
 
@@ -112,9 +108,10 @@ public class Console implements CommandLineRunner {
             trackLength = Optional.empty();
         } else {
             try (var formatter = new Formatter()) {
-                formatter.format("\r---> %02d:%02d", position.toMinutes(), position.toSecondsPart());
+                formatter.format("---> %02d:%02d", position.toMinutes(), position.toSecondsPart());
                 trackLength.ifPresent(d -> formatter.format(" / %02d:%02d (%3d%%)", d.toMinutes(), d.toSecondsPart(),
                         (int) (100.0 * position.getSeconds() / d.getSeconds())));
+                formatter.format("\r");
                 System.out.print(formatter.toString());
             }
         }
