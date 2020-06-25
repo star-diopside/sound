@@ -4,6 +4,7 @@ import java.nio.file.Path;
 import java.time.Duration;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
+import java.util.Optional;
 
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.ReadOnlyObjectProperty;
@@ -68,9 +69,8 @@ public class SoundData {
         getHistory().add(LocalDateTime.now().format(HISTORY_FORMATTER) + " - " + event);
     }
 
-    public void setPosition(Duration position) {
-        status.set(position == null ? ""
-                : String.format("%02d:%02d:%02d", position.toHours(), position.toMinutesPart(),
-                        position.toSecondsPart()));
+    public void setPosition(Optional<Duration> position) {
+        status.set(position.map(p -> String.format("%02d:%02d:%02d", p.toHours(), p.toMinutesPart(), p.toSecondsPart()))
+                .orElse(""));
     }
 }

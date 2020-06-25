@@ -103,10 +103,7 @@ public class Console implements CommandLineRunner {
 
     @EventListener
     public void onSoundPositionEvent(SoundPositionEvent event) {
-        var position = event.getPosition();
-        if (position == null) {
-            trackLength = Optional.empty();
-        } else {
+        event.getPosition().ifPresentOrElse(position -> {
             long len = trackLength.map(Duration::getSeconds).orElse(0L);
             int percent = (len == 0L ? 0 : (int) (100.0 * position.getSeconds() / len));
             int progress = Math.round(percent / 10.0F);
@@ -119,6 +116,8 @@ public class Console implements CommandLineRunner {
                 formatter.format("\r");
                 System.out.print(formatter.toString());
             }
-        }
+        }, () -> {
+            trackLength = Optional.empty();
+        });
     }
 }
