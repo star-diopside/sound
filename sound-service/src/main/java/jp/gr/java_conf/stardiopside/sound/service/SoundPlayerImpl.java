@@ -5,6 +5,7 @@ import java.io.UncheckedIOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.time.Duration;
+import java.util.Comparator;
 import java.util.Deque;
 import java.util.concurrent.BlockingDeque;
 import java.util.concurrent.ConcurrentLinkedDeque;
@@ -128,7 +129,8 @@ public class SoundPlayerImpl implements SoundPlayer {
 
     @Override
     public void add(Path path) {
-        try (Stream<Path> stream = Files.find(path, Integer.MAX_VALUE, (p, attr) -> attr.isRegularFile()).sorted()) {
+        try (Stream<Path> stream = Files.find(path, Integer.MAX_VALUE, (p, attr) -> attr.isRegularFile())
+                .sorted(Comparator.comparing(Path::getParent).thenComparing(Path::getFileName))) {
             stream.forEach(beforeFiles::addLast);
         } catch (IOException e) {
             publisher.publishEvent(new SoundExceptionEvent(e));

@@ -3,10 +3,12 @@ package jp.gr.java_conf.stardiopside.sound;
 import java.io.IOException;
 import java.io.UncheckedIOException;
 import java.nio.file.Files;
+import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.time.Duration;
 import java.time.LocalDateTime;
 import java.util.Arrays;
+import java.util.Comparator;
 import java.util.Formatter;
 import java.util.Optional;
 import java.util.logging.Logger;
@@ -51,7 +53,8 @@ public class Console implements CommandLineRunner {
         try {
             Arrays.stream(args).map(Paths::get).flatMap(path -> {
                 try {
-                    return Files.find(path, Integer.MAX_VALUE, (p, attr) -> attr.isRegularFile()).sorted();
+                    return Files.find(path, Integer.MAX_VALUE, (p, attr) -> attr.isRegularFile())
+                            .sorted(Comparator.comparing(Path::getParent).thenComparing(Path::getFileName));
                 } catch (IOException e) {
                     throw new UncheckedIOException(e);
                 }
