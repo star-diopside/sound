@@ -44,8 +44,7 @@ public class SoundServiceImpl implements SoundService {
 
     @Override
     public boolean play(Path path) {
-        String name = path.getFileName().toString();
-        publisher.publishEvent(new SoundActionEvent("Begin " + name));
+        publisher.publishEvent(new SoundActionEvent("BEGIN", path));
 
         try {
             publishSoundInformationEvent(path);
@@ -57,7 +56,7 @@ public class SoundServiceImpl implements SoundService {
             publishSoundExceptionEvent(e);
             return false;
         } finally {
-            publisher.publishEvent(new SoundActionEvent("End " + name));
+            publisher.publishEvent(new SoundActionEvent("END", path));
         }
 
         return true;
@@ -66,7 +65,7 @@ public class SoundServiceImpl implements SoundService {
     @Override
     public boolean play(InputStream inputStream, String name) {
         String title = (name == null ? "unnamed" : name);
-        publisher.publishEvent(new SoundActionEvent("Begin " + title));
+        publisher.publishEvent(new SoundActionEvent("BEGIN", title));
 
         try (InputStream is = inputStream.markSupported() ? inputStream : new BufferedInputStream(inputStream)) {
             outputAudioInformation(is);
@@ -77,7 +76,7 @@ public class SoundServiceImpl implements SoundService {
             publishSoundExceptionEvent(e);
             return false;
         } finally {
-            publisher.publishEvent(new SoundActionEvent("End " + title));
+            publisher.publishEvent(new SoundActionEvent("END", title));
         }
 
         return true;
@@ -85,15 +84,14 @@ public class SoundServiceImpl implements SoundService {
 
     private void playAudioInputStream(AudioInputStream inputStream) throws IOException, LineUnavailableException {
         AudioFormat baseFormat = inputStream.getFormat();
-        publisher.publishEvent(new SoundActionEvent("INPUT: " + baseFormat.getClass() + " - " + baseFormat));
+        publisher.publishEvent(new SoundActionEvent("INPUT", baseFormat));
         if (baseFormat.getEncoding().equals(AudioFormat.Encoding.PCM_SIGNED)
                 || baseFormat.getEncoding().equals(AudioFormat.Encoding.PCM_UNSIGNED)) {
             playAudioInputStream(inputStream, baseFormat);
         } else {
             AudioFormat decodedFormat = new AudioFormat(AudioFormat.Encoding.PCM_SIGNED, baseFormat.getSampleRate(), 16,
                     baseFormat.getChannels(), baseFormat.getChannels() * 2, baseFormat.getSampleRate(), false);
-            publisher.publishEvent(
-                    new SoundActionEvent("DECODED: " + decodedFormat.getClass() + " - " + decodedFormat));
+            publisher.publishEvent(new SoundActionEvent("DECODED", decodedFormat));
             try (AudioInputStream decodedInputStream = AudioSystem.getAudioInputStream(decodedFormat, inputStream)) {
                 playAudioInputStream(decodedInputStream, decodedFormat);
             }

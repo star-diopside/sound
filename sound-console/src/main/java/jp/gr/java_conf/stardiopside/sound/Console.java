@@ -93,7 +93,7 @@ public class Console implements CommandLineRunner {
 
     @EventListener
     public void onSoundActionEvent(SoundActionEvent event) {
-        logger.info(event.getAction());
+        logger.info(event.getSoundActionInformation().toString());
     }
 
     @EventListener

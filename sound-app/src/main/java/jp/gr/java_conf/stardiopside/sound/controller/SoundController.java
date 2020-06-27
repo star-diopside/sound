@@ -72,7 +72,7 @@ public class SoundController implements Initializable {
 
     @EventListener
     public void onSoundActionEvent(SoundActionEvent event) {
-        Platform.runLater(() -> model.addHistory(event.getAction()));
+        Platform.runLater(() -> model.addHistory(event.getSoundActionInformation().toString()));
     }
 
     @EventListener
