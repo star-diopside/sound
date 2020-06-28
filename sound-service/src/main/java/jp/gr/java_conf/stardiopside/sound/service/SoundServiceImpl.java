@@ -153,7 +153,7 @@ public class SoundServiceImpl implements SoundService {
     }
 
     private static void outputAudioInformation(AudioFileFormat audioFileFormat) {
-        audioFileFormat.properties().forEach((k, v) -> logger.log(Level.FINE, k + " = " + v));
+        audioFileFormat.properties().forEach((k, v) -> logger.fine(k + " = " + v));
     }
 
     @Override

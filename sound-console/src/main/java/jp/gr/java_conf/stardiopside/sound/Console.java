@@ -4,7 +4,6 @@ import java.io.IOException;
 import java.io.UncheckedIOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.time.Duration;
 import java.time.LocalDateTime;
 import java.util.Arrays;
@@ -18,7 +17,6 @@ import javax.annotation.PreDestroy;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
-import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.context.event.EventListener;
 
 import jp.gr.java_conf.stardiopside.sound.event.SoundActionEvent;
@@ -42,7 +40,7 @@ public class Console implements CommandLineRunner {
     }
 
     public static void main(String[] args) {
-        try (ConfigurableApplicationContext context = SpringApplication.run(Console.class, args)) {
+        try (var context = SpringApplication.run(Console.class, args)) {
         }
     }
 
@@ -51,7 +49,7 @@ public class Console implements CommandLineRunner {
         start = LocalDateTime.now();
 
         try {
-            Arrays.stream(args).map(Paths::get).flatMap(path -> {
+            Arrays.stream(args).map(Path::of).flatMap(path -> {
                 try {
                     return Files.find(path, Integer.MAX_VALUE, (p, attr) -> attr.isRegularFile())
                             .sorted(Comparator.comparing(Path::getParent).thenComparing(Path::getFileName));
