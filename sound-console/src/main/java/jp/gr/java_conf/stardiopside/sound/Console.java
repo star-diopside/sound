@@ -10,6 +10,7 @@ import java.util.Arrays;
 import java.util.Comparator;
 import java.util.Formatter;
 import java.util.Optional;
+import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import javax.annotation.PreDestroy;
@@ -56,7 +57,13 @@ public class Console implements CommandLineRunner {
                 } catch (IOException e) {
                     throw new UncheckedIOException(e);
                 }
-            }).forEach(service::play);
+            }).forEach(path -> {
+                try {
+                    service.play(path);
+                } catch (Exception e) {
+                    logger.log(Level.SEVERE, e.getMessage(), e);
+                }
+            });
         } finally {
             logger.info("Execution Time: " + getExecutionTimeString(start));
             stopped = true;
