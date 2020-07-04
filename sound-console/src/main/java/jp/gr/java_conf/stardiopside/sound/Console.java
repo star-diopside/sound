@@ -1,21 +1,22 @@
 package jp.gr.java_conf.stardiopside.sound;
 
 import java.io.IOException;
-import java.io.UncheckedIOException;
 import java.nio.file.Files;
+import java.nio.file.InvalidPathException;
 import java.nio.file.Path;
 import java.time.Duration;
 import java.time.LocalDateTime;
-import java.util.Arrays;
 import java.util.Comparator;
 import java.util.Formatter;
 import java.util.Optional;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import java.util.stream.Stream;
 
 import javax.annotation.PreDestroy;
 
-import org.springframework.boot.CommandLineRunner;
+import org.springframework.boot.ApplicationArguments;
+import org.springframework.boot.ApplicationRunner;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.context.event.EventListener;
@@ -28,7 +29,7 @@ import jp.gr.java_conf.stardiopside.sound.event.SoundPositionEvent;
 import jp.gr.java_conf.stardiopside.sound.service.SoundService;
 
 @SpringBootApplication
-public class Console implements CommandLineRunner {
+public class Console implements ApplicationRunner {
 
     private static final Logger logger = Logger.getLogger(Console.class.getName());
     private final SoundService service;
@@ -46,16 +47,17 @@ public class Console implements CommandLineRunner {
     }
 
     @Override
-    public void run(String... args) {
+    public void run(ApplicationArguments args) throws Exception {
         start = LocalDateTime.now();
 
         try {
-            Arrays.stream(args).map(Path::of).flatMap(path -> {
+            args.getNonOptionArgs().stream().flatMap(s -> {
                 try {
-                    return Files.find(path, Integer.MAX_VALUE, (p, attr) -> attr.isRegularFile())
+                    return Files.find(Path.of(s), Integer.MAX_VALUE, (p, attr) -> attr.isRegularFile())
                             .sorted(Comparator.comparing(Path::getParent).thenComparing(Path::getFileName));
-                } catch (IOException e) {
-                    throw new UncheckedIOException(e);
+                } catch (InvalidPathException | IOException e) {
+                    logger.log(Level.WARNING, e.getMessage(), e);
+                    return Stream.empty();
                 }
             }).forEach(path -> {
                 try {
