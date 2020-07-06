@@ -85,8 +85,7 @@ public class SoundServiceImpl implements SoundService {
     private void playAudioInputStream(AudioInputStream inputStream) throws IOException, LineUnavailableException {
         AudioFormat baseFormat = inputStream.getFormat();
         publisher.publishEvent(new SoundActionEvent("INPUT", baseFormat));
-        if (baseFormat.getEncoding().equals(AudioFormat.Encoding.PCM_SIGNED)
-                || baseFormat.getEncoding().equals(AudioFormat.Encoding.PCM_UNSIGNED)) {
+        if (isPlayableAudioFormat(baseFormat)) {
             playAudioInputStream(inputStream, baseFormat);
         } else {
             AudioFormat decodedFormat = new AudioFormat(AudioFormat.Encoding.PCM_SIGNED, baseFormat.getSampleRate(), 16,
@@ -120,6 +119,10 @@ public class SoundServiceImpl implements SoundService {
         } finally {
             skipping = false;
         }
+    }
+
+    private static boolean isPlayableAudioFormat(AudioFormat format) {
+        return AudioFormat.Encoding.PCM_SIGNED.equals(format.getEncoding()) && format.getSampleSizeInBits() == 16;
     }
 
     private void publishSoundInformationEvent(Path path) {
