@@ -16,7 +16,7 @@ public class SoundActionEvent extends ApplicationEvent {
         private final String name;
         private final String information;
 
-        public SimpleSoundActionInformation(String name, String information) {
+        SimpleSoundActionInformation(String name, String information) {
             this.name = name;
             this.information = information;
         }
@@ -28,14 +28,14 @@ public class SoundActionEvent extends ApplicationEvent {
     }
 
     private static class SoundFileActionInformation extends SimpleSoundActionInformation {
-        public SoundFileActionInformation(String name, Path path) {
+        SoundFileActionInformation(String name, Path path) {
             super(name, String.format("\"%s\" (Directory: \"%s\")", path.getFileName(),
                     path.toAbsolutePath().normalize().getParent()));
         }
     }
 
     private static class SoundAudioFormatActionInformation extends SimpleSoundActionInformation {
-        public SoundAudioFormatActionInformation(String name, AudioFormat format) {
+        SoundAudioFormatActionInformation(String name, AudioFormat format) {
             super(name, format.getClass() + " - " + format);
         }
     }

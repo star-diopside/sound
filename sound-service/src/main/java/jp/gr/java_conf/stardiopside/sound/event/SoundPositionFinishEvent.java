@@ -1,7 +1,7 @@
 package jp.gr.java_conf.stardiopside.sound.event;
 
 @SuppressWarnings("serial")
-public class SoundPositionFinishEvent extends SoundPositionEvent {
+public final class SoundPositionFinishEvent extends SoundPositionEvent {
 
     public static final SoundPositionFinishEvent INSTANCE = new SoundPositionFinishEvent();
 

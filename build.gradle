@@ -1,6 +1,7 @@
 plugins {
     id "org.springframework.boot" version "2.3.1.RELEASE"
     id "com.google.osdetector" version "1.6.2"
+    id "com.github.spotbugs" version "4.4.4"
 }
 
 subprojects {
@@ -14,6 +15,8 @@ subprojects {
 
     apply plugin: "java-library"
     apply plugin: "io.spring.dependency-management"
+    apply plugin: "checkstyle"
+    apply plugin: "com.github.spotbugs"
 
     repositories {
         jcenter()
@@ -28,6 +31,32 @@ subprojects {
     dependencies {
         compileOnly "org.projectlombok:lombok"
         annotationProcessor "org.projectlombok:lombok"
+    }
+
+    tasks.withType(JavaCompile) {
+        options.encoding = "UTF-8"
+    }
+
+    javadoc {
+        options.charSet = "UTF-8"
+        options.encoding = "UTF-8"
+    }
+
+    checkstyle {
+        toolVersion = "8.34"
+        configFile = file("${rootDir}/config/checkstyle/checkstyle.xml")
+        ignoreFailures = true
+    }
+
+    spotbugs {
+        toolVersion = "4.0.6"
+        ignoreFailures = true
+    }
+
+    spotbugsMain {
+        reports {
+            html.enabled = true
+        }
     }
 }
 
