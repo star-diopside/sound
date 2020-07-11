@@ -1,13 +1,13 @@
 plugins {
-    id "org.springframework.boot" version "2.3.1.RELEASE"
-    id "com.google.osdetector" version "1.6.2"
+    id "org.springframework.boot" version "2.3.1.RELEASE" apply false
+    id "org.openjfx.javafxplugin" version "0.0.9" apply false
     id "com.github.spotbugs" version "4.4.4"
 }
 
 subprojects {
     ext {
         javafxVersion = "14.0.1"
-        controlsfxVersion = "11.0.1"
+        controlsfxVersion = "11.0.2"
         mp3spiVersion = "1.9.5.4"
         jaadVersion = "0.8.5"
         jaudiotaggerVersion = "2.0.3"
@@ -67,33 +67,28 @@ project(":sound-service") {
     }
 }
 
-project(":sound-app") {
-    apply plugin: "org.springframework.boot"
-    apply plugin: "com.google.osdetector"
-
-    ext.platform = osdetector.os == "osx" ? "mac" : osdetector.os == "windows" ? "win" : osdetector.os
-
-    dependencies {
-        implementation project(":sound-service")
-        implementation "org.openjfx:javafx-base:${javafxVersion}:${platform}"
-        implementation "org.openjfx:javafx-graphics:${javafxVersion}:${platform}"
-        implementation "org.openjfx:javafx-controls:${javafxVersion}:${platform}"
-        implementation "org.openjfx:javafx-fxml:${javafxVersion}:${platform}"
-        implementation "org.controlsfx:controlsfx:${controlsfxVersion}"
-        runtimeOnly "com.googlecode.soundlibs:mp3spi:${mp3spiVersion}"
-        runtimeOnly "net.sourceforge.jaadec:jaad:${jaadVersion}"
-    }
-
-    bootJar {
-        classifier = "${platform}"
-    }
-}
-
 project(":sound-console") {
     apply plugin: "org.springframework.boot"
 
     dependencies {
         implementation project(":sound-service")
+        runtimeOnly "com.googlecode.soundlibs:mp3spi:${mp3spiVersion}"
+        runtimeOnly "net.sourceforge.jaadec:jaad:${jaadVersion}"
+    }
+}
+
+project(":sound-app") {
+    apply plugin: "org.springframework.boot"
+    apply plugin: "org.openjfx.javafxplugin"
+
+    javafx {
+        version = javafxVersion
+        modules = [ "javafx.controls", "javafx.fxml" ]
+    }
+
+    dependencies {
+        implementation project(":sound-service")
+        implementation "org.controlsfx:controlsfx:${controlsfxVersion}"
         runtimeOnly "com.googlecode.soundlibs:mp3spi:${mp3spiVersion}"
         runtimeOnly "net.sourceforge.jaadec:jaad:${jaadVersion}"
     }
