@@ -40,7 +40,7 @@ public class App extends Application {
             dialog.show();
         });
 
-        var loader = new FXMLLoader(getClass().getClassLoader().getResource("fxml/main.fxml"), messages);
+        var loader = new FXMLLoader(getClass().getResource("main.fxml"), messages);
         loader.setControllerFactory(applicationContext::getBean);
         primaryStage.setScene(new Scene(loader.load()));
         primaryStage.show();

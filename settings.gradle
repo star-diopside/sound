@@ -2,4 +2,6 @@ rootProject.name = "sound"
 
 include ":sound-service"
 include ":sound-console"
+include ":sound-console-boot"
 include ":sound-app"
+include ":sound-app-boot"

@@ -1,4 +1,8 @@
 module jp.gr.java_conf.stardiopside.sound.app {
+    opens jp.gr.java_conf.stardiopside.sound;
+    opens jp.gr.java_conf.stardiopside.sound.controller;
+    opens config;
+
     requires jp.gr.java_conf.stardiopside.sound.service;
     requires java.logging;
     requires java.annotation;
