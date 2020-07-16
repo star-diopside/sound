@@ -9,4 +9,6 @@ module jp.gr.java_conf.stardiopside.sound.service {
     requires spring.core;
     requires spring.context;
     requires jaudiotagger;
+
+    uses javax.sound.sampled.spi.AudioFileReader;
 }
