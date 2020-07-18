@@ -1,6 +1,7 @@
 package jp.gr.java_conf.stardiopside.sound.service;
 
 import java.io.BufferedInputStream;
+import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.file.Path;
@@ -167,12 +168,18 @@ public class SoundServiceImpl implements SoundService {
     }
 
     private static AudioInputStream getAudioInputStream(Path path) throws UnsupportedAudioFileException {
+        File file = path.toFile();
         for (AudioFileReader reader : ServiceLoader.load(AudioFileReader.class)) {
+            AudioInputStream stream;
             try {
-                return reader.getAudioInputStream(path.toFile());
+                logger.fine("Try AudioFileReader: " + reader.getClass());
+                stream = reader.getAudioInputStream(file);
             } catch (UnsupportedAudioFileException | IOException e) {
-                logger.log(Level.FINE, e.getMessage(), e);
+                logger.log(Level.FINEST, e.getMessage(), e);
+                continue;
             }
+            logger.fine("Using AudioFileReader: " + reader.getClass());
+            return stream;
         }
         throw new UnsupportedAudioFileException("File of unsupported format");
     }
@@ -180,22 +187,33 @@ public class SoundServiceImpl implements SoundService {
     private static AudioInputStream getAudioInputStream(InputStream inputStream) throws UnsupportedAudioFileException {
         Assert.isTrue(inputStream.markSupported(), "inputStream does not support mark.");
         for (AudioFileReader reader : ServiceLoader.load(AudioFileReader.class)) {
+            AudioInputStream stream;
             try {
-                return reader.getAudioInputStream(inputStream);
+                logger.fine("Try AudioFileReader: " + reader.getClass());
+                stream = reader.getAudioInputStream(inputStream);
             } catch (UnsupportedAudioFileException | IOException e) {
-                logger.log(Level.FINE, e.getMessage(), e);
+                logger.log(Level.FINEST, e.getMessage(), e);
+                continue;
             }
+            logger.fine("Using AudioFileReader: " + reader.getClass());
+            return stream;
         }
         throw new UnsupportedAudioFileException("Stream of unsupported format");
     }
 
     private static AudioFileFormat getAudioFileFormat(Path path) throws UnsupportedAudioFileException {
+        File file = path.toFile();
         for (AudioFileReader reader : ServiceLoader.load(AudioFileReader.class)) {
+            AudioFileFormat format;
             try {
-                return reader.getAudioFileFormat(path.toFile());
+                logger.fine("Try AudioFileReader: " + reader.getClass());
+                format = reader.getAudioFileFormat(file);
             } catch (UnsupportedAudioFileException | IOException e) {
-                logger.log(Level.FINE, e.getMessage(), e);
+                logger.log(Level.FINEST, e.getMessage(), e);
+                continue;
             }
+            logger.fine("Using AudioFileReader: " + reader.getClass());
+            return format;
         }
         throw new UnsupportedAudioFileException("File of unsupported format");
     }
@@ -203,11 +221,16 @@ public class SoundServiceImpl implements SoundService {
     private static AudioFileFormat getAudioFileFormat(InputStream inputStream) throws UnsupportedAudioFileException {
         Assert.isTrue(inputStream.markSupported(), "inputStream does not support mark.");
         for (AudioFileReader reader : ServiceLoader.load(AudioFileReader.class)) {
+            AudioFileFormat format;
             try {
-                return reader.getAudioFileFormat(inputStream);
+                logger.fine("Try AudioFileReader: " + reader.getClass());
+                format = reader.getAudioFileFormat(inputStream);
             } catch (UnsupportedAudioFileException | IOException e) {
-                logger.log(Level.FINE, e.getMessage(), e);
+                logger.log(Level.FINEST, e.getMessage(), e);
+                continue;
             }
+            logger.fine("Using AudioFileReader: " + reader.getClass());
+            return format;
         }
         throw new UnsupportedAudioFileException("Stream of unsupported format");
     }

@@ -9,9 +9,9 @@ subprojects {
     ext {
         javafxVersion = "14.0.1"
         controlsfxVersion = "11.0.2"
-        mp3spiVersion = "1.9.5.4"
-        jaadVersion = "0.8.5"
         jaudiotaggerVersion = "2.0.3"
+        jaadVersion = "0.8.5"
+        mp3spiVersion = "1.9.5.4"
     }
 
     apply plugin: "java-library"
@@ -82,8 +82,8 @@ project(":sound-console") {
 
     dependencies {
         implementation project(":sound-service")
-        runtimeOnly "com.googlecode.soundlibs:mp3spi:${mp3spiVersion}"
         runtimeOnly "net.sourceforge.jaadec:jaad:${jaadVersion}"
+        runtimeOnly "com.googlecode.soundlibs:mp3spi:${mp3spiVersion}"
     }
 }
 
@@ -113,8 +113,8 @@ project(":sound-app") {
     dependencies {
         implementation project(":sound-service")
         implementation "org.controlsfx:controlsfx:${controlsfxVersion}"
-        runtimeOnly "com.googlecode.soundlibs:mp3spi:${mp3spiVersion}"
         runtimeOnly "net.sourceforge.jaadec:jaad:${jaadVersion}"
+        runtimeOnly "com.googlecode.soundlibs:mp3spi:${mp3spiVersion}"
     }
 }
 
