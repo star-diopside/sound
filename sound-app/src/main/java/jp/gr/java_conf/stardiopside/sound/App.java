@@ -11,8 +11,10 @@ import org.springframework.context.ConfigurableApplicationContext;
 
 import javafx.application.Application;
 import javafx.fxml.FXMLLoader;
+import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.stage.Stage;
+import jp.gr.java_conf.stardiopside.sound.controller.SoundController;
 
 @SpringBootApplication
 public class App extends Application {
@@ -42,7 +44,10 @@ public class App extends Application {
 
         var loader = new FXMLLoader(getClass().getResource("main.fxml"), messages);
         loader.setControllerFactory(applicationContext::getBean);
-        primaryStage.setScene(new Scene(loader.load()));
+        Parent root = loader.load();
+        SoundController controller = loader.getController();
+        controller.setStage(primaryStage);
+        primaryStage.setScene(new Scene(root));
         primaryStage.show();
     }
 

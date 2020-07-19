@@ -4,6 +4,7 @@ import java.io.File;
 import java.net.URL;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.time.Duration;
 import java.util.ResourceBundle;
 
 import javax.annotation.PreDestroy;
@@ -12,17 +13,22 @@ import org.springframework.context.event.EventListener;
 import org.springframework.stereotype.Controller;
 
 import javafx.application.Platform;
+import javafx.beans.binding.Bindings;
+import javafx.beans.value.ChangeListener;
+import javafx.beans.value.WeakChangeListener;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
 import javafx.scene.control.Label;
 import javafx.scene.control.ListView;
+import javafx.scene.control.ProgressBar;
 import javafx.scene.control.TextField;
 import javafx.stage.DirectoryChooser;
 import javafx.stage.FileChooser;
-import javafx.stage.Window;
+import javafx.stage.Stage;
 import jp.gr.java_conf.stardiopside.sound.event.SoundActionEvent;
 import jp.gr.java_conf.stardiopside.sound.event.SoundExceptionEvent;
+import jp.gr.java_conf.stardiopside.sound.event.SoundInformationEvent;
 import jp.gr.java_conf.stardiopside.sound.event.SoundLineEvent;
 import jp.gr.java_conf.stardiopside.sound.event.SoundPositionEvent;
 import jp.gr.java_conf.stardiopside.sound.model.SoundData;
@@ -35,11 +41,20 @@ public class SoundController implements Initializable {
     private final SoundPlayer player;
     private SoundData model = new SoundData();
 
+    private Stage stage;
+    private ChangeListener<Boolean> showingChangeListener;
+
     @FXML
     private TextField selectedFile;
 
     @FXML
-    private Label status;
+    private Label trackPosition;
+
+    @FXML
+    private Label trackLength;
+
+    @FXML
+    private ProgressBar trackProgress;
 
     @FXML
     private ListView<Path> files;
@@ -51,10 +66,24 @@ public class SoundController implements Initializable {
         this.player = player;
     }
 
+    public void setStage(Stage stage) {
+        this.stage = stage;
+        showingChangeListener = (observable, oldValue, newValue) -> {
+            if (oldValue.booleanValue() && !newValue.booleanValue()) {
+                stop();
+            }
+        };
+        stage.showingProperty().addListener(new WeakChangeListener<>(showingChangeListener));
+    }
+
     @Override
     public void initialize(URL location, ResourceBundle resources) {
         selectedFile.textProperty().bindBidirectional(model.selectedFileProperty(), new PathStringConverter());
-        status.textProperty().bind(model.statusProperty());
+        trackPosition.textProperty().bind(Bindings.createStringBinding(() -> convertToString(model.getTrackPosition()),
+                model.trackPositionProperty()));
+        trackLength.textProperty().bind(Bindings.createStringBinding(() -> convertToString(model.getTrackLength()),
+                model.trackLengthProperty()));
+        trackProgress.progressProperty().bind(model.trackProgressBinding());
         files.itemsProperty().bind(model.filesProperty());
         history.itemsProperty().bind(model.historyProperty());
         player.play();
@@ -63,6 +92,14 @@ public class SoundController implements Initializable {
     @PreDestroy
     public void onDestroy() {
         stop();
+    }
+
+    @EventListener
+    public void onSoundInformationEvent(SoundInformationEvent event) {
+        Platform.runLater(() -> {
+            model.setTrackLength(event.getSoundInformation().getTrackLengthAsDuration().orElse(null));
+            event.getSoundInformation().toMap().forEach((k, v) -> model.addHistory("\t" + k + ": " + v));
+        });
     }
 
     @EventListener
@@ -82,15 +119,16 @@ public class SoundController implements Initializable {
 
     @EventListener
     public void onSoundPositionEvent(SoundPositionEvent event) {
-        Platform.runLater(() -> model.setPosition(event.getPosition()));
+        Platform.runLater(() -> event.getPosition().ifPresentOrElse(
+                model::setTrackPosition,
+                () -> {
+                    model.setTrackPosition(null);
+                    model.setTrackLength(null);
+                }));
     }
 
     public void stop() {
         player.terminate();
-    }
-
-    private Window getWindow() {
-        return selectedFile.getScene().getWindow();
     }
 
     @FXML
@@ -106,7 +144,7 @@ public class SoundController implements Initializable {
             }
         }
 
-        File file = chooser.showDialog(getWindow());
+        File file = chooser.showDialog(stage);
         if (file != null) {
             model.setSelectedFile(file.toPath());
         }
@@ -126,7 +164,7 @@ public class SoundController implements Initializable {
             }
         }
 
-        File file = chooser.showOpenDialog(getWindow());
+        File file = chooser.showOpenDialog(stage);
         if (file != null) {
             model.setSelectedFile(file.toPath());
         }
@@ -163,5 +201,9 @@ public class SoundController implements Initializable {
     private void onClear(ActionEvent event) {
         player.clear();
         model.getFiles().clear();
+    }
+
+    private static String convertToString(Duration d) {
+        return d == null ? "00:00" : String.format("%02d:%02d", d.toMinutes(), d.toSecondsPart());
     }
 }
