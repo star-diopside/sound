@@ -25,14 +25,12 @@ public class SoundData {
     private ReadOnlyObjectWrapper<ObservableList<String>> history = new ReadOnlyObjectWrapper<>(
             FXCollections.observableArrayList());
 
-    private DoubleBinding trackProgress = Bindings.createDoubleBinding(() -> {
-        if (trackPosition.get() == null || trackLength.get() == null) {
-            return 0.0;
-        } else {
-            long length = trackLength.get().getSeconds();
-            return length == 0L ? 0.0 : (double) trackPosition.get().getSeconds() / length;
-        }
-    }, trackPosition, trackLength);
+    private DoubleBinding trackProgress = Bindings.createDoubleBinding(
+            () -> trackPosition.get() == null || trackLength.get() == null || trackLength.get().equals(Duration.ZERO)
+                    ? 0.0
+                    : (trackPosition.get().getSeconds() + trackPosition.get().getNano() * 1.0e-9)
+                            / (trackLength.get().getSeconds() + trackLength.get().getNano() * 1.0e-9),
+            trackPosition, trackLength);
 
     public ObjectProperty<Path> selectedFileProperty() {
         return selectedFile;
