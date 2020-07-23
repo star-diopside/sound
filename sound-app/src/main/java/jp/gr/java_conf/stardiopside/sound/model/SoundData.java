@@ -4,33 +4,61 @@ import java.nio.file.Path;
 import java.time.Duration;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
+import java.util.Optional;
+import java.util.function.Predicate;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import javafx.beans.binding.Bindings;
-import javafx.beans.binding.DoubleBinding;
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.ReadOnlyObjectProperty;
 import javafx.beans.property.ReadOnlyObjectWrapper;
 import javafx.beans.property.SimpleObjectProperty;
+import javafx.beans.value.ObservableDoubleValue;
+import javafx.beans.value.ObservableObjectValue;
+import javafx.beans.value.ObservableStringValue;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
+import jp.gr.java_conf.stardiopside.sound.event.SoundInformation;
 
 public class SoundData {
 
     private static final DateTimeFormatter HISTORY_FORMATTER = DateTimeFormatter.ofPattern("uuuu/MM/dd HH:mm:ss.SSS");
     private ObjectProperty<Path> selectedFile = new SimpleObjectProperty<>();
+    private ObjectProperty<SoundInformation> soundInformation = new SimpleObjectProperty<>();
     private ObjectProperty<Duration> trackPosition = new SimpleObjectProperty<>();
-    private ObjectProperty<Duration> trackLength = new SimpleObjectProperty<>();
     private ReadOnlyObjectWrapper<ObservableList<Path>> files = new ReadOnlyObjectWrapper<>(
             FXCollections.observableArrayList());
     private ReadOnlyObjectWrapper<ObservableList<String>> history = new ReadOnlyObjectWrapper<>(
             FXCollections.observableArrayList());
 
-    private DoubleBinding trackProgress = Bindings.createDoubleBinding(
+    private ObservableStringValue windowTitle = Bindings.createStringBinding(
+            () -> soundInformation.get() == null ? null
+                    : Stream.of(soundInformation.get().getTitle(), soundInformation.get().getAlbum())
+                            .flatMap(Optional::stream)
+                            .filter(Predicate.not(String::isBlank))
+                            .collect(Collectors.joining(" / ")),
+            soundInformation);
+
+    private ObservableObjectValue<Duration> trackLength = Bindings.createObjectBinding(
+            () -> soundInformation.get() == null ? null
+                    : soundInformation.get().getTrackLengthAsDuration().orElse(null),
+            soundInformation);
+
+    private ObservableDoubleValue trackProgress = Bindings.createDoubleBinding(
             () -> trackPosition.get() == null || trackLength.get() == null || trackLength.get().equals(Duration.ZERO)
                     ? 0.0
                     : (trackPosition.get().getSeconds() + trackPosition.get().getNano() * 1.0e-9)
                             / (trackLength.get().getSeconds() + trackLength.get().getNano() * 1.0e-9),
             trackPosition, trackLength);
+
+    public ObservableStringValue windowTitleValue() {
+        return windowTitle;
+    }
+
+    public String getWindowTitle() {
+        return windowTitle.get();
+    }
 
     public ObjectProperty<Path> selectedFileProperty() {
         return selectedFile;
@@ -42,6 +70,18 @@ public class SoundData {
 
     public void setSelectedFile(Path selectedFile) {
         this.selectedFile.set(selectedFile);
+    }
+
+    public ObjectProperty<SoundInformation> soundInformationProperty() {
+        return soundInformation;
+    }
+
+    public SoundInformation getSoundInformation() {
+        return soundInformation.get();
+    }
+
+    public void setSoundInformation(SoundInformation soundInformation) {
+        this.soundInformation.set(soundInformation);
     }
 
     public ObjectProperty<Duration> trackPositionProperty() {
@@ -56,7 +96,7 @@ public class SoundData {
         this.trackPosition.set(trackPosition);
     }
 
-    public ObjectProperty<Duration> trackLengthProperty() {
+    public ObservableObjectValue<Duration> trackLengthValue() {
         return trackLength;
     }
 
@@ -64,11 +104,7 @@ public class SoundData {
         return trackLength.get();
     }
 
-    public void setTrackLength(Duration trackLength) {
-        this.trackLength.set(trackLength);
-    }
-
-    public DoubleBinding trackProgressBinding() {
+    public ObservableDoubleValue trackProgressValue() {
         return trackProgress;
     }
 

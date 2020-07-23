@@ -74,6 +74,7 @@ public class SoundController implements Initializable {
             }
         };
         stage.showingProperty().addListener(new WeakChangeListener<>(showingChangeListener));
+        stage.titleProperty().bind(model.windowTitleValue());
     }
 
     @Override
@@ -82,8 +83,8 @@ public class SoundController implements Initializable {
         trackPosition.textProperty().bind(Bindings.createStringBinding(() -> convertToString(model.getTrackPosition()),
                 model.trackPositionProperty()));
         trackLength.textProperty().bind(Bindings.createStringBinding(() -> convertToString(model.getTrackLength()),
-                model.trackLengthProperty()));
-        trackProgress.progressProperty().bind(model.trackProgressBinding());
+                model.trackLengthValue()));
+        trackProgress.progressProperty().bind(model.trackProgressValue());
         files.itemsProperty().bind(model.filesProperty());
         history.itemsProperty().bind(model.historyProperty());
         player.play();
@@ -97,7 +98,7 @@ public class SoundController implements Initializable {
     @EventListener
     public void onSoundInformationEvent(SoundInformationEvent event) {
         Platform.runLater(() -> {
-            model.setTrackLength(event.getSoundInformation().getTrackLengthAsDuration().orElse(null));
+            model.setSoundInformation(event.getSoundInformation());
             event.getSoundInformation().toMap().forEach((k, v) -> model.addHistory("\t" + k + ": " + v));
         });
     }
@@ -122,8 +123,8 @@ public class SoundController implements Initializable {
         Platform.runLater(() -> event.getPosition().ifPresentOrElse(
                 model::setTrackPosition,
                 () -> {
+                    model.setSoundInformation(null);
                     model.setTrackPosition(null);
-                    model.setTrackLength(null);
                 }));
     }
 
