@@ -12,99 +12,72 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import org.jaudiotagger.audio.AudioFileIO;
-import org.jaudiotagger.audio.AudioHeader;
 import org.jaudiotagger.tag.FieldKey;
-import org.jaudiotagger.tag.Tag;
 
+import lombok.Data;
+
+@Data
 public class SoundInformation {
 
     private static final Logger logger = Logger.getLogger(SoundInformation.class.getName());
-    private final AudioHeader audioHeader;
-    private final Tag tag;
+
+    private final Optional<String> track;
+    private final Optional<String> trackTotal;
+    private final Optional<String> title;
+    private final Optional<String> artist;
+    private final Optional<String> discNo;
+    private final Optional<String> discTotal;
+    private final Optional<String> album;
+    private final Optional<String> albumArtist;
+    private final OptionalInt trackLength;
+    private final Optional<Duration> trackLengthAsDuration;
+    private final Optional<String> format;
+    private final Optional<String> sampleRate;
+    private final Optional<String> bitRate;
+    private final Optional<String> channels;
 
     public SoundInformation(Path path) throws Exception {
         var audioFile = AudioFileIO.read(path.toFile());
-        audioHeader = audioFile.getAudioHeader();
-        tag = audioFile.getTag();
-    }
+        var audioHeader = audioFile.getAudioHeader();
+        var tag = audioFile.getTag();
 
-    public Optional<String> getTrack() {
-        return optional(() -> tag.getFirst(FieldKey.TRACK));
-    }
-
-    public Optional<String> getTrackTotal() {
-        return optional(() -> tag.getFirst(FieldKey.TRACK_TOTAL));
-    }
-
-    public Optional<String> getTitle() {
-        return optional(() -> tag.getFirst(FieldKey.TITLE));
-    }
-
-    public Optional<String> getArtist() {
-        return optional(() -> tag.getFirst(FieldKey.ARTIST));
-    }
-
-    public Optional<String> getDiscNo() {
-        return optional(() -> tag.getFirst(FieldKey.DISC_NO));
-    }
-
-    public Optional<String> getDiscTotal() {
-        return optional(() -> tag.getFirst(FieldKey.DISC_TOTAL));
-    }
-
-    public Optional<String> getAlbum() {
-        return optional(() -> tag.getFirst(FieldKey.ALBUM));
-    }
-
-    public Optional<String> getAlbumArtist() {
-        return optional(() -> tag.getFirst(FieldKey.ALBUM_ARTIST));
-    }
-
-    public OptionalInt getTrackLength() {
-        return optional(audioHeader::getTrackLength);
-    }
-
-    public Optional<Duration> getTrackLengthAsDuration() {
-        return getTrackLength().stream()
+        track = optional(() -> tag.getFirst(FieldKey.TRACK));
+        trackTotal = optional(() -> tag.getFirst(FieldKey.TRACK_TOTAL));
+        title = optional(() -> tag.getFirst(FieldKey.TITLE));
+        artist = optional(() -> tag.getFirst(FieldKey.ARTIST));
+        discNo = optional(() -> tag.getFirst(FieldKey.DISC_NO));
+        discTotal = optional(() -> tag.getFirst(FieldKey.DISC_TOTAL));
+        album = optional(() -> tag.getFirst(FieldKey.ALBUM));
+        albumArtist = optional(() -> tag.getFirst(FieldKey.ALBUM_ARTIST));
+        trackLength = optional(audioHeader::getTrackLength);
+        trackLengthAsDuration = trackLength.stream()
                 .mapToObj(SoundInformation::convertTrackLengthToDuration)
                 .findFirst();
-    }
-
-    public Optional<String> getFormat() {
-        return optional(audioHeader::getFormat);
-    }
-
-    public Optional<String> getSampleRate() {
-        return optional(audioHeader::getSampleRate);
-    }
-
-    public Optional<String> getBitRate() {
-        return optional(audioHeader::getBitRate);
-    }
-
-    public Optional<String> getChannels() {
-        return optional(audioHeader::getChannels);
+        format = optional(audioHeader::getFormat);
+        sampleRate = optional(audioHeader::getSampleRate);
+        bitRate = optional(audioHeader::getBitRate);
+        channels = optional(audioHeader::getChannels);
     }
 
     public Map<String, String> toMap() {
         var info = new LinkedHashMap<String, String>();
 
-        getTrack().ifPresent(s -> info.put("TRACK", s));
-        getTrackTotal().ifPresent(s -> info.put("TRACK_TOTAL", s));
-        getTitle().ifPresent(s -> info.put("TITLE", s));
-        getArtist().ifPresent(s -> info.put("ARTIST", s));
-        getDiscNo().ifPresent(s -> info.put("DISC_NO", s));
-        getDiscTotal().ifPresent(s -> info.put("DISC_TOTAL", s));
-        getAlbum().ifPresent(s -> info.put("ALBUM", s));
-        getAlbumArtist().ifPresent(s -> info.put("ALBUM_ARTIST", s));
-        getTrackLength().stream().mapToObj(i -> {
+        track.ifPresent(s -> info.put("TRACK", s));
+        trackTotal.ifPresent(s -> info.put("TRACK_TOTAL", s));
+        title.ifPresent(s -> info.put("TITLE", s));
+        artist.ifPresent(s -> info.put("ARTIST", s));
+        discNo.ifPresent(s -> info.put("DISC_NO", s));
+        discTotal.ifPresent(s -> info.put("DISC_TOTAL", s));
+        album.ifPresent(s -> info.put("ALBUM", s));
+        albumArtist.ifPresent(s -> info.put("ALBUM_ARTIST", s));
+        trackLength.stream().mapToObj(i -> {
             var d = convertTrackLengthToDuration(i);
             return String.format("%d (%d:%02d)", i, d.toMinutes(), d.toSecondsPart());
         }).findFirst().ifPresent(s -> info.put("TRACK_LENGTH", s));
-        getFormat().ifPresent(s -> info.put("FORMAT", s));
-        getSampleRate().ifPresent(s -> info.put("SAMPLE_RATE", s));
-        getBitRate().ifPresent(s -> info.put("BIT_RATE", s));
-        getChannels().ifPresent(s -> info.put("CHANNELS", s));
+        format.ifPresent(s -> info.put("FORMAT", s));
+        sampleRate.ifPresent(s -> info.put("SAMPLE_RATE", s));
+        bitRate.ifPresent(s -> info.put("BIT_RATE", s));
+        channels.ifPresent(s -> info.put("CHANNELS", s));
 
         return info;
     }
