@@ -6,6 +6,8 @@
 <?import javafx.scene.control.ListView?>
 <?import javafx.scene.control.ProgressBar?>
 <?import javafx.scene.control.SplitPane?>
+<?import javafx.scene.control.TableColumn?>
+<?import javafx.scene.control.TableView?>
 <?import javafx.scene.control.TextField?>
 <?import javafx.scene.layout.ColumnConstraints?>
 <?import javafx.scene.layout.GridPane?>
@@ -69,7 +71,15 @@
                 <SplitPane dividerPositions="0.25" orientation="VERTICAL" prefHeight="400.0" GridPane.columnSpan="2147483647" GridPane.rowIndex="3">
                     <items>
                         <ListView fx:id="files" />
-                        <ListView fx:id="history" />
+                        <TableView fx:id="historyView">
+                            <columns>
+                                <TableColumn fx:id="historyDateTimeColumn" maxWidth="150.0" minWidth="150.0" text="時刻" />
+                                <TableColumn fx:id="historyValueColumn" text="内容" />
+                            </columns>
+                            <columnResizePolicy>
+                                <TableView fx:constant="CONSTRAINED_RESIZE_POLICY" />
+                            </columnResizePolicy>
+                        </TableView>
                     </items>
                 </SplitPane>
             </children>

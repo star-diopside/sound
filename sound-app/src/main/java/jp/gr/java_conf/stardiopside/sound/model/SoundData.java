@@ -3,36 +3,34 @@ package jp.gr.java_conf.stardiopside.sound.model;
 import java.nio.file.Path;
 import java.time.Duration;
 import java.time.LocalDateTime;
-import java.time.format.DateTimeFormatter;
 import java.util.Optional;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import javafx.beans.binding.Bindings;
+import javafx.beans.binding.DoubleBinding;
+import javafx.beans.binding.ObjectBinding;
+import javafx.beans.binding.StringBinding;
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.ReadOnlyObjectProperty;
 import javafx.beans.property.ReadOnlyObjectWrapper;
 import javafx.beans.property.SimpleObjectProperty;
-import javafx.beans.value.ObservableDoubleValue;
-import javafx.beans.value.ObservableObjectValue;
-import javafx.beans.value.ObservableStringValue;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import jp.gr.java_conf.stardiopside.sound.event.SoundInformation;
 
 public class SoundData {
 
-    private static final DateTimeFormatter HISTORY_FORMATTER = DateTimeFormatter.ofPattern("uuuu/MM/dd HH:mm:ss.SSS");
-    private ObjectProperty<Path> selectedFile = new SimpleObjectProperty<>();
-    private ObjectProperty<SoundInformation> soundInformation = new SimpleObjectProperty<>();
-    private ObjectProperty<Duration> trackPosition = new SimpleObjectProperty<>();
-    private ReadOnlyObjectWrapper<ObservableList<Path>> files = new ReadOnlyObjectWrapper<>(
+    private final ObjectProperty<Path> selectedFile = new SimpleObjectProperty<>();
+    private final ObjectProperty<SoundInformation> soundInformation = new SimpleObjectProperty<>();
+    private final ObjectProperty<Duration> trackPosition = new SimpleObjectProperty<>();
+    private final ReadOnlyObjectWrapper<ObservableList<Path>> files = new ReadOnlyObjectWrapper<>(
             FXCollections.observableArrayList());
-    private ReadOnlyObjectWrapper<ObservableList<String>> history = new ReadOnlyObjectWrapper<>(
+    private final ReadOnlyObjectWrapper<ObservableList<History>> history = new ReadOnlyObjectWrapper<>(
             FXCollections.observableArrayList());
 
-    private ObservableStringValue windowTitle = Bindings.createStringBinding(
+    private final StringBinding windowTitle = Bindings.createStringBinding(
             () -> soundInformation.get() == null ? null
                     : Stream.of(soundInformation.get().getTitle(), soundInformation.get().getAlbum())
                             .flatMap(Optional::stream)
@@ -40,19 +38,19 @@ public class SoundData {
                             .collect(Collectors.joining(" / ")),
             soundInformation);
 
-    private ObservableObjectValue<Duration> trackLength = Bindings.createObjectBinding(
+    private final ObjectBinding<Duration> trackLength = Bindings.createObjectBinding(
             () -> soundInformation.get() == null ? null
                     : soundInformation.get().getTrackLengthAsDuration().orElse(null),
             soundInformation);
 
-    private ObservableDoubleValue trackProgress = Bindings.createDoubleBinding(
+    private final DoubleBinding trackProgress = Bindings.createDoubleBinding(
             () -> trackPosition.get() == null || trackLength.get() == null || trackLength.get().equals(Duration.ZERO)
                     ? 0.0
                     : (trackPosition.get().getSeconds() + trackPosition.get().getNano() * 1.0e-9)
                             / (trackLength.get().getSeconds() + trackLength.get().getNano() * 1.0e-9),
             trackPosition, trackLength);
 
-    public ObservableStringValue windowTitleValue() {
+    public StringBinding windowTitleBinding() {
         return windowTitle;
     }
 
@@ -96,7 +94,7 @@ public class SoundData {
         this.trackPosition.set(trackPosition);
     }
 
-    public ObservableObjectValue<Duration> trackLengthValue() {
+    public ObjectBinding<Duration> trackLengthBinding() {
         return trackLength;
     }
 
@@ -104,7 +102,7 @@ public class SoundData {
         return trackLength.get();
     }
 
-    public ObservableDoubleValue trackProgressValue() {
+    public DoubleBinding trackProgressBinding() {
         return trackProgress;
     }
 
@@ -120,15 +118,15 @@ public class SoundData {
         return files.get();
     }
 
-    public ReadOnlyObjectProperty<ObservableList<String>> historyProperty() {
+    public ReadOnlyObjectProperty<ObservableList<History>> historyProperty() {
         return history.getReadOnlyProperty();
     }
 
-    public ObservableList<String> getHistory() {
+    public ObservableList<History> getHistory() {
         return history.get();
     }
 
     public void addHistory(Object event) {
-        getHistory().add(LocalDateTime.now().format(HISTORY_FORMATTER) + " - " + event);
+        getHistory().add(new History(LocalDateTime.now(), String.valueOf(event)));
     }
 }

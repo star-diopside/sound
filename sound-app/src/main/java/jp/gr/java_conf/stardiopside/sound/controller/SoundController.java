@@ -22,7 +22,10 @@ import javafx.fxml.Initializable;
 import javafx.scene.control.Label;
 import javafx.scene.control.ListView;
 import javafx.scene.control.ProgressBar;
+import javafx.scene.control.TableColumn;
+import javafx.scene.control.TableView;
 import javafx.scene.control.TextField;
+import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.stage.DirectoryChooser;
 import javafx.stage.FileChooser;
 import javafx.stage.Stage;
@@ -31,6 +34,7 @@ import jp.gr.java_conf.stardiopside.sound.event.SoundExceptionEvent;
 import jp.gr.java_conf.stardiopside.sound.event.SoundInformationEvent;
 import jp.gr.java_conf.stardiopside.sound.event.SoundLineEvent;
 import jp.gr.java_conf.stardiopside.sound.event.SoundPositionEvent;
+import jp.gr.java_conf.stardiopside.sound.model.History;
 import jp.gr.java_conf.stardiopside.sound.model.SoundData;
 import jp.gr.java_conf.stardiopside.sound.service.SoundPlayer;
 import jp.gr.java_conf.stardiopside.sound.util.PathStringConverter;
@@ -60,7 +64,13 @@ public class SoundController implements Initializable {
     private ListView<Path> files;
 
     @FXML
-    private ListView<String> history;
+    private TableView<History> historyView;
+
+    @FXML
+    private TableColumn<History, String> historyDateTimeColumn;
+
+    @FXML
+    private TableColumn<History, String> historyValueColumn;
 
     public SoundController(SoundPlayer player) {
         this.player = player;
@@ -74,7 +84,7 @@ public class SoundController implements Initializable {
             }
         };
         stage.showingProperty().addListener(new WeakChangeListener<>(showingChangeListener));
-        stage.titleProperty().bind(model.windowTitleValue());
+        stage.titleProperty().bind(model.windowTitleBinding());
     }
 
     @Override
@@ -83,10 +93,12 @@ public class SoundController implements Initializable {
         trackPosition.textProperty().bind(Bindings.createStringBinding(() -> convertToString(model.getTrackPosition()),
                 model.trackPositionProperty()));
         trackLength.textProperty().bind(Bindings.createStringBinding(() -> convertToString(model.getTrackLength()),
-                model.trackLengthValue()));
-        trackProgress.progressProperty().bind(model.trackProgressValue());
+                model.trackLengthBinding()));
+        trackProgress.progressProperty().bind(model.trackProgressBinding());
         files.itemsProperty().bind(model.filesProperty());
-        history.itemsProperty().bind(model.historyProperty());
+        historyView.itemsProperty().bind(model.historyProperty());
+        historyDateTimeColumn.setCellValueFactory(new PropertyValueFactory<>("dateTimeString"));
+        historyValueColumn.setCellValueFactory(new PropertyValueFactory<>("value"));
         player.play();
     }
 
