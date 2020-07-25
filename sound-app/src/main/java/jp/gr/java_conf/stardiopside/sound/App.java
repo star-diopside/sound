@@ -42,7 +42,7 @@ public class App extends Application {
             dialog.show();
         });
 
-        var loader = new FXMLLoader(getClass().getResource("main.fxml"), messages);
+        var loader = new FXMLLoader(getClass().getResource("sound.fxml"), messages);
         loader.setControllerFactory(applicationContext::getBean);
         Parent root = loader.load();
         SoundController controller = loader.getController();

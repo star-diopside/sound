@@ -37,19 +37,16 @@ import jp.gr.java_conf.stardiopside.sound.event.SoundPositionEvent;
 import jp.gr.java_conf.stardiopside.sound.model.History;
 import jp.gr.java_conf.stardiopside.sound.model.SoundData;
 import jp.gr.java_conf.stardiopside.sound.service.SoundPlayer;
-import jp.gr.java_conf.stardiopside.sound.util.PathStringConverter;
 
 @Controller
 public class SoundController implements Initializable {
 
     private final SoundPlayer player;
     private SoundData model = new SoundData();
+    private Path initialDirectory;
 
     private Stage stage;
     private ChangeListener<Boolean> showingChangeListener;
-
-    @FXML
-    private TextField selectedFile;
 
     @FXML
     private Label trackPosition;
@@ -61,7 +58,46 @@ public class SoundController implements Initializable {
     private ProgressBar trackProgress;
 
     @FXML
-    private ListView<Path> files;
+    private TextField track;
+
+    @FXML
+    private TextField trackTotal;
+
+    @FXML
+    private TextField title;
+
+    @FXML
+    private TextField artist;
+
+    @FXML
+    private TextField discNo;
+
+    @FXML
+    private TextField discTotal;
+
+    @FXML
+    private TextField album;
+
+    @FXML
+    private TextField albumArtist;
+
+    @FXML
+    private TextField trackLengthInt;
+
+    @FXML
+    private TextField format;
+
+    @FXML
+    private TextField sampleRate;
+
+    @FXML
+    private TextField bitRate;
+
+    @FXML
+    private TextField channels;
+
+    @FXML
+    private ListView<Path> filesView;
 
     @FXML
     private TableView<History> historyView;
@@ -89,13 +125,27 @@ public class SoundController implements Initializable {
 
     @Override
     public void initialize(URL location, ResourceBundle resources) {
-        selectedFile.textProperty().bindBidirectional(model.selectedFileProperty(), new PathStringConverter());
         trackPosition.textProperty().bind(Bindings.createStringBinding(() -> convertToString(model.getTrackPosition()),
                 model.trackPositionProperty()));
         trackLength.textProperty().bind(Bindings.createStringBinding(() -> convertToString(model.getTrackLength()),
                 model.trackLengthBinding()));
         trackProgress.progressProperty().bind(model.trackProgressBinding());
-        files.itemsProperty().bind(model.filesProperty());
+        track.textProperty().bind(model.trackBinding());
+        trackTotal.textProperty().bind(model.trackTotalBinding());
+        title.textProperty().bind(model.titleBinding());
+        artist.textProperty().bind(model.artistBinding());
+        discNo.textProperty().bind(model.discNoBinding());
+        discTotal.textProperty().bind(model.discTotalBinding());
+        album.textProperty().bind(model.albumBinding());
+        albumArtist.textProperty().bind(model.albumArtistBinding());
+        trackLengthInt.textProperty().bind(Bindings.createStringBinding(
+                () -> model.getTrackLengthInt().stream().mapToObj(String::valueOf).findFirst().orElse(null),
+                model.trackLengthIntBinding()));
+        format.textProperty().bind(model.formatBinding());
+        sampleRate.textProperty().bind(model.sampleRateBinding());
+        bitRate.textProperty().bind(model.bitRateBinding());
+        channels.textProperty().bind(model.channelsBinding());
+        filesView.itemsProperty().bind(model.filesProperty());
         historyView.itemsProperty().bind(model.historyProperty());
         historyDateTimeColumn.setCellValueFactory(new PropertyValueFactory<>("dateTimeString"));
         historyValueColumn.setCellValueFactory(new PropertyValueFactory<>("value"));
@@ -109,10 +159,7 @@ public class SoundController implements Initializable {
 
     @EventListener
     public void onSoundInformationEvent(SoundInformationEvent event) {
-        Platform.runLater(() -> {
-            model.setSoundInformation(event.getSoundInformation());
-            event.getSoundInformation().toMap().forEach((k, v) -> model.addHistory("\t" + k + ": " + v));
-        });
+        Platform.runLater(() -> model.setSoundInformation(event.getSoundInformation()));
     }
 
     @EventListener
@@ -148,8 +195,8 @@ public class SoundController implements Initializable {
     private void onSelectDirectory(ActionEvent event) {
         DirectoryChooser chooser = new DirectoryChooser();
 
-        if (model.getSelectedFile() != null) {
-            Path path = model.getSelectedFile().toAbsolutePath();
+        if (initialDirectory != null) {
+            Path path = initialDirectory.toAbsolutePath();
             if (Files.isDirectory(path)) {
                 chooser.setInitialDirectory(path.toFile());
             } else if (Files.isRegularFile(path)) {
@@ -159,7 +206,10 @@ public class SoundController implements Initializable {
 
         File file = chooser.showDialog(stage);
         if (file != null) {
-            model.setSelectedFile(file.toPath());
+            Path path = file.toPath();
+            player.add(path);
+            model.getFiles().add(path);
+            initialDirectory = path;
         }
     }
 
@@ -167,8 +217,8 @@ public class SoundController implements Initializable {
     private void onSelectFile(ActionEvent event) {
         FileChooser chooser = new FileChooser();
 
-        if (model.getSelectedFile() != null) {
-            Path path = model.getSelectedFile().toAbsolutePath();
+        if (initialDirectory != null) {
+            Path path = initialDirectory.toAbsolutePath();
             if (Files.isDirectory(path)) {
                 chooser.setInitialDirectory(path.toFile());
             } else if (Files.isRegularFile(path)) {
@@ -177,17 +227,16 @@ public class SoundController implements Initializable {
             }
         }
 
-        File file = chooser.showOpenDialog(stage);
-        if (file != null) {
-            model.setSelectedFile(file.toPath());
+        var files = chooser.showOpenMultipleDialog(stage);
+        if (files != null) {
+            files.stream().map(File::toPath).forEach(path -> {
+                player.add(path);
+                model.getFiles().add(path);
+            });
+            files.stream().map(File::toPath).findFirst().ifPresent(path -> {
+                initialDirectory = path.getParent();
+            });
         }
-    }
-
-    @FXML
-    private void onFileAdd(ActionEvent event) {
-        Path path = model.getSelectedFile();
-        player.add(path);
-        model.getFiles().add(path);
     }
 
     @FXML
