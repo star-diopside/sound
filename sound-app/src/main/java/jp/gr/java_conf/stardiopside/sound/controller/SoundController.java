@@ -5,6 +5,7 @@ import java.net.URL;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.time.Duration;
+import java.util.Arrays;
 import java.util.ResourceBundle;
 
 import javax.annotation.PreDestroy;
@@ -169,7 +170,7 @@ public class SoundController implements Initializable {
 
     @EventListener
     public void onSoundActionEvent(SoundActionEvent event) {
-        Platform.runLater(() -> model.addHistory(event.getSoundActionInformation().toString()));
+        Platform.runLater(() -> model.addHistory(event.getSoundActionInformation()));
     }
 
     @EventListener
@@ -229,13 +230,10 @@ public class SoundController implements Initializable {
 
         var files = chooser.showOpenMultipleDialog(stage);
         if (files != null) {
-            files.stream().map(File::toPath).forEach(path -> {
-                player.add(path);
-                model.getFiles().add(path);
-            });
-            files.stream().map(File::toPath).findFirst().ifPresent(path -> {
-                initialDirectory = path.getParent();
-            });
+            var paths = files.stream().map(File::toPath).toArray(Path[]::new);
+            player.addAll(paths);
+            model.getFiles().addAll(paths);
+            initialDirectory = Arrays.stream(paths).findFirst().map(Path::getParent).orElse(null);
         }
     }
 

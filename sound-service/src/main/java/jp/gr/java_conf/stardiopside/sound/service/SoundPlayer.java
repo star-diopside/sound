@@ -1,6 +1,8 @@
 package jp.gr.java_conf.stardiopside.sound.service;
 
 import java.nio.file.Path;
+import java.util.Arrays;
+import java.util.Collection;
 
 public interface SoundPlayer {
 
@@ -18,4 +20,11 @@ public interface SoundPlayer {
 
     void add(Path path);
 
+    default void addAll(Path... paths) {
+        Arrays.stream(paths).forEach(this::add);
+    }
+
+    default void addAll(Collection<Path> paths) {
+        paths.stream().forEach(this::add);
+    }
 }
