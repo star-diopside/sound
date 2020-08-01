@@ -5,6 +5,7 @@ import java.net.URL;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.time.Duration;
+import java.time.format.DateTimeFormatter;
 import java.util.Arrays;
 import java.util.ResourceBundle;
 
@@ -26,7 +27,6 @@ import javafx.scene.control.ProgressBar;
 import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableView;
 import javafx.scene.control.TextField;
-import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.stage.DirectoryChooser;
 import javafx.stage.FileChooser;
 import javafx.stage.Stage;
@@ -42,6 +42,7 @@ import jp.gr.java_conf.stardiopside.sound.service.SoundPlayer;
 @Controller
 public class SoundController implements Initializable {
 
+    private static final DateTimeFormatter HISTORY_FORMATTER = DateTimeFormatter.ofPattern("uuuu/MM/dd HH:mm:ss.SSS");
     private final SoundPlayer player;
     private SoundData model = new SoundData();
     private Path initialDirectory;
@@ -148,8 +149,9 @@ public class SoundController implements Initializable {
         channels.textProperty().bind(model.channelsBinding());
         filesView.itemsProperty().bind(model.filesProperty());
         historyView.itemsProperty().bind(model.historyProperty());
-        historyDateTimeColumn.setCellValueFactory(new PropertyValueFactory<>("dateTimeString"));
-        historyValueColumn.setCellValueFactory(new PropertyValueFactory<>("value"));
+        historyDateTimeColumn.setCellValueFactory(param -> Bindings.createStringBinding(
+                () -> param.getValue().getDateTime().format(HISTORY_FORMATTER), param.getValue().dateTimeProperty()));
+        historyValueColumn.setCellValueFactory(param -> param.getValue().valueProperty());
         player.play();
     }
 
