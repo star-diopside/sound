@@ -113,7 +113,7 @@
                 </SplitPane>
                 <TableView fx:id="historyView">
                     <columns>
-                        <TableColumn fx:id="historyDateTimeColumn" maxWidth="150.0" minWidth="150.0" text="時刻" />
+                        <TableColumn fx:id="historyDateTimeColumn" maxWidth="180.0" minWidth="180.0" text="時刻" />
                         <TableColumn fx:id="historyValueColumn" text="内容" />
                     </columns>
                     <columnResizePolicy>
