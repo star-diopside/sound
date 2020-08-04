@@ -19,6 +19,7 @@ import javafx.beans.property.ReadOnlyObjectWrapper;
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
+import javafx.collections.transformation.SortedList;
 import jp.gr.java_conf.stardiopside.sound.event.SoundInformation;
 
 public class SoundData {
@@ -27,8 +28,9 @@ public class SoundData {
     private final ObjectProperty<Duration> trackPosition = new SimpleObjectProperty<>();
     private final ReadOnlyObjectWrapper<ObservableList<Path>> files = new ReadOnlyObjectWrapper<>(
             FXCollections.observableArrayList());
-    private final ReadOnlyObjectWrapper<ObservableList<History>> history = new ReadOnlyObjectWrapper<>(
-            FXCollections.observableArrayList());
+    private final ObservableList<History> histories = FXCollections.observableArrayList();
+    private final ReadOnlyObjectWrapper<SortedList<History>> sortedHistories = new ReadOnlyObjectWrapper<>(
+            new SortedList<>(histories));
 
     private final StringBinding windowTitle = Bindings.createStringBinding(
             () -> soundInformation.get() == null ? null
@@ -262,15 +264,15 @@ public class SoundData {
         return files.get();
     }
 
-    public ReadOnlyObjectProperty<ObservableList<History>> historyProperty() {
-        return history.getReadOnlyProperty();
+    public ReadOnlyObjectProperty<SortedList<History>> historiesProperty() {
+        return sortedHistories.getReadOnlyProperty();
     }
 
-    public ObservableList<History> getHistory() {
-        return history.get();
+    public SortedList<History> getHistories() {
+        return sortedHistories.get();
     }
 
     public void addHistory(Object event) {
-        getHistory().add(new History(LocalDateTime.now(), String.valueOf(event)));
+        histories.add(new History(LocalDateTime.now(), String.valueOf(event)));
     }
 }

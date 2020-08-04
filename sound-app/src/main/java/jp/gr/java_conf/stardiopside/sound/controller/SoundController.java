@@ -148,7 +148,8 @@ public class SoundController implements Initializable {
         bitRate.textProperty().bind(model.bitRateBinding());
         channels.textProperty().bind(model.channelsBinding());
         filesView.itemsProperty().bind(model.filesProperty());
-        historyView.itemsProperty().bind(model.historyProperty());
+        historyView.itemsProperty().bind(model.historiesProperty());
+        model.getHistories().comparatorProperty().bind(historyView.comparatorProperty());
         historyDateTimeColumn.setCellValueFactory(param -> Bindings.createStringBinding(
                 () -> param.getValue().getDateTime().format(HISTORY_FORMATTER), param.getValue().dateTimeProperty()));
         historyValueColumn.setCellValueFactory(param -> param.getValue().valueProperty());
