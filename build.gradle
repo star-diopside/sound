@@ -71,6 +71,7 @@ subprojects {
 project(":sound-service") {
     dependencies {
         api "org.springframework.boot:spring-boot-starter"
+        implementation project(":sound-util")
         implementation "org:jaudiotagger:${jaudiotaggerVersion}"
     }
 }
@@ -82,6 +83,7 @@ project(":sound-console") {
 
     dependencies {
         implementation project(":sound-service")
+        implementation project(":sound-util")
         runtimeOnly "net.sourceforge.jaadec:jaad:${jaadVersion}"
         runtimeOnly "com.googlecode.soundlibs:mp3spi:${mp3spiVersion}"
     }

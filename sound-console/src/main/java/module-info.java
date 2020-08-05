@@ -3,6 +3,7 @@ module jp.gr.java_conf.stardiopside.sound.console {
     opens config;
 
     requires jp.gr.java_conf.stardiopside.sound.service;
+    requires jp.gr.java_conf.stardiopside.sound.util;
     requires java.logging;
     requires java.annotation;
     requires spring.boot;

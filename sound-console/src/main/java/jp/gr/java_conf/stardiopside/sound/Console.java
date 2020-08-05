@@ -6,7 +6,6 @@ import java.nio.file.InvalidPathException;
 import java.nio.file.Path;
 import java.time.Duration;
 import java.time.LocalDateTime;
-import java.util.Comparator;
 import java.util.Formatter;
 import java.util.Optional;
 import java.util.logging.Level;
@@ -27,6 +26,7 @@ import jp.gr.java_conf.stardiopside.sound.event.SoundInformationEvent;
 import jp.gr.java_conf.stardiopside.sound.event.SoundLineEvent;
 import jp.gr.java_conf.stardiopside.sound.event.SoundPositionEvent;
 import jp.gr.java_conf.stardiopside.sound.service.SoundService;
+import jp.gr.java_conf.stardiopside.sound.util.Comparators;
 
 @SpringBootApplication
 public class Console implements ApplicationRunner {
@@ -54,7 +54,7 @@ public class Console implements ApplicationRunner {
             args.getNonOptionArgs().stream().flatMap(s -> {
                 try {
                     return Files.find(Path.of(s), Integer.MAX_VALUE, (p, attr) -> attr.isRegularFile())
-                            .sorted(Comparator.comparing(Path::getParent).thenComparing(Path::getFileName));
+                            .sorted(Comparators.comparingPath());
                 } catch (InvalidPathException | IOException e) {
                     logger.log(Level.WARNING, e.getMessage(), e);
                     return Stream.empty();
