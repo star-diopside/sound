@@ -21,15 +21,15 @@
     <children>
         <HBox spacing="4.0">
             <children>
-                <Button onAction="#onSelectDirectory" text="ディレクトリ追加" />
-                <Button onAction="#onSelectFile" text="ファイル追加" />
+                <Button onAction="#onSelectDirectory" text="%onSelectDirectory.text" />
+                <Button onAction="#onSelectFile" text="%onSelectFile.text" />
                 <Separator orientation="VERTICAL" />
-                <Button onAction="#onStart" text="開始" />
-                <Button onAction="#onStop" text="終了" />
-                <Button onAction="#onBack" text="前へ" />
-                <Button onAction="#onSkip" text="次へ" />
+                <Button onAction="#onStart" text="%onStart.text" />
+                <Button onAction="#onStop" text="%onStop.text" />
+                <Button onAction="#onBack" text="%onBack.text" />
+                <Button onAction="#onSkip" text="%onSkip.text" />
                 <Separator orientation="VERTICAL" />
-                <Button onAction="#onClear" text="クリア" />
+                <Button onAction="#onClear" text="%onClear.text" />
             </children>
         </HBox>
         <HBox spacing="4.0">
@@ -64,7 +64,7 @@
                                         <RowConstraints />
                                     </rowConstraints>
                                     <children>
-                                        <Label text="トラック" />
+                                        <Label text="%track" />
                                         <HBox alignment="CENTER_LEFT" spacing="4.0" GridPane.columnIndex="1">
                                             <children>
                                                 <TextField fx:id="track" editable="false" prefWidth="40.0" />
@@ -75,11 +75,11 @@
                                                 <Insets />
                                             </GridPane.margin>
                                         </HBox>
-                                        <Label text="タイトル" GridPane.rowIndex="1" />
+                                        <Label text="%title" GridPane.rowIndex="1" />
                                         <TextField fx:id="title" editable="false" GridPane.columnIndex="1" GridPane.rowIndex="1" />
-                                        <Label text="アーティスト" GridPane.rowIndex="2" />
+                                        <Label text="%artist" GridPane.rowIndex="2" />
                                         <TextField fx:id="artist" editable="false" GridPane.columnIndex="1" GridPane.rowIndex="2" />
-                                        <Label text="ディスク" GridPane.rowIndex="3" />
+                                        <Label text="%disc" GridPane.rowIndex="3" />
                                         <HBox alignment="CENTER_LEFT" spacing="4.0" GridPane.columnIndex="1" GridPane.rowIndex="3">
                                             <children>
                                                 <TextField fx:id="discNo" editable="false" prefWidth="40.0" />
@@ -87,19 +87,19 @@
                                                 <TextField fx:id="discTotal" editable="false" prefWidth="40.0" />
                                             </children>
                                         </HBox>
-                                        <Label text="アルバム" GridPane.rowIndex="4" />
+                                        <Label text="%album" GridPane.rowIndex="4" />
                                         <TextField fx:id="album" editable="false" GridPane.columnIndex="1" GridPane.rowIndex="4" />
-                                        <Label text="アルバムアーティスト" GridPane.rowIndex="5" />
+                                        <Label text="%albumArtist" GridPane.rowIndex="5" />
                                         <TextField fx:id="albumArtist" editable="false" GridPane.columnIndex="1" GridPane.rowIndex="5" />
-                                        <Label text="トラック長" GridPane.rowIndex="6" />
+                                        <Label text="%trackLength" GridPane.rowIndex="6" />
                                         <TextField fx:id="trackLengthInt" editable="false" GridPane.columnIndex="1" GridPane.rowIndex="6" />
-                                        <Label text="フォーマット" GridPane.rowIndex="7" />
+                                        <Label text="%format" GridPane.rowIndex="7" />
                                         <TextField fx:id="format" editable="false" GridPane.columnIndex="1" GridPane.rowIndex="7" />
-                                        <Label text="サンプリングレート" GridPane.rowIndex="8" />
+                                        <Label text="%sampleRate" GridPane.rowIndex="8" />
                                         <TextField fx:id="sampleRate" editable="false" GridPane.columnIndex="1" GridPane.rowIndex="8" />
-                                        <Label text="ビットレート" GridPane.rowIndex="9" />
+                                        <Label text="%bitRate" GridPane.rowIndex="9" />
                                         <TextField fx:id="bitRate" editable="false" GridPane.columnIndex="1" GridPane.rowIndex="9" />
-                                        <Label text="チャンネル数" GridPane.rowIndex="10" />
+                                        <Label text="%channels" GridPane.rowIndex="10" />
                                         <TextField fx:id="channels" editable="false" GridPane.columnIndex="1" GridPane.rowIndex="10" />
                                     </children>
                                     <padding>
@@ -113,8 +113,8 @@
                 </SplitPane>
                 <TableView fx:id="historyView">
                     <columns>
-                        <TableColumn fx:id="historyDateTimeColumn" maxWidth="180.0" minWidth="180.0" text="時刻" />
-                        <TableColumn fx:id="historyValueColumn" text="内容" />
+                        <TableColumn fx:id="historyDateTimeColumn" maxWidth="180.0" minWidth="180.0" text="%historyDateTimeColumn.text" />
+                        <TableColumn fx:id="historyValueColumn" text="%historyValueColumn.text" />
                     </columns>
                     <columnResizePolicy>
                         <TableView fx:constant="CONSTRAINED_RESIZE_POLICY" />
