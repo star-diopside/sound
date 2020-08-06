@@ -5,8 +5,8 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import org.controlsfx.dialog.ExceptionDialog;
-import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
+import org.springframework.boot.builder.SpringApplicationBuilder;
 import org.springframework.context.ConfigurableApplicationContext;
 
 import javafx.application.Application;
@@ -28,7 +28,8 @@ public class App extends Application {
 
     @Override
     public void init() throws Exception {
-        applicationContext = SpringApplication.run(getClass(), getParameters().getRaw().toArray(new String[0]));
+        applicationContext = new SpringApplicationBuilder(getClass()).headless(false)
+                .run(getParameters().getRaw().toArray(new String[0]));
     }
 
     @Override
