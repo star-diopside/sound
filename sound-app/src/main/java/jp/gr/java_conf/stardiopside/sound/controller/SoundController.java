@@ -7,12 +7,13 @@ import java.nio.file.Path;
 import java.time.Duration;
 import java.time.format.DateTimeFormatter;
 import java.util.Arrays;
+import java.util.Optional;
 import java.util.ResourceBundle;
 
 import javax.annotation.PreDestroy;
 
 import org.springframework.context.event.EventListener;
-import org.springframework.stereotype.Controller;
+import org.springframework.stereotype.Component;
 
 import javafx.application.Platform;
 import javafx.beans.binding.Bindings;
@@ -39,16 +40,15 @@ import jp.gr.java_conf.stardiopside.sound.model.History;
 import jp.gr.java_conf.stardiopside.sound.model.SoundData;
 import jp.gr.java_conf.stardiopside.sound.service.SoundPlayer;
 
-@Controller
+@Component
 public class SoundController implements Initializable {
 
     private static final DateTimeFormatter HISTORY_FORMATTER = DateTimeFormatter.ofPattern("uuuu/MM/dd HH:mm:ss.SSS");
     private final SoundPlayer player;
-    private SoundData model = new SoundData();
-    private Path initialDirectory;
-
+    private final SoundData model = new SoundData();
     private Stage stage;
     private ChangeListener<Boolean> showingChangeListener;
+    private Path initialDirectory;
 
     @FXML
     private Label trackPosition;
@@ -197,18 +197,11 @@ public class SoundController implements Initializable {
 
     @FXML
     private void onSelectDirectory(ActionEvent event) {
-        DirectoryChooser chooser = new DirectoryChooser();
+        var chooser = new DirectoryChooser();
 
-        if (initialDirectory != null) {
-            Path path = initialDirectory.toAbsolutePath();
-            if (Files.isDirectory(path)) {
-                chooser.setInitialDirectory(path.toFile());
-            } else if (Files.isRegularFile(path)) {
-                chooser.setInitialDirectory(path.getParent().toFile());
-            }
-        }
+        getInitialDirectory().ifPresent(chooser::setInitialDirectory);
+        var file = chooser.showDialog(stage);
 
-        File file = chooser.showDialog(stage);
         if (file != null) {
             Path path = file.toPath();
             player.add(path);
@@ -219,19 +212,11 @@ public class SoundController implements Initializable {
 
     @FXML
     private void onSelectFile(ActionEvent event) {
-        FileChooser chooser = new FileChooser();
+        var chooser = new FileChooser();
 
-        if (initialDirectory != null) {
-            Path path = initialDirectory.toAbsolutePath();
-            if (Files.isDirectory(path)) {
-                chooser.setInitialDirectory(path.toFile());
-            } else if (Files.isRegularFile(path)) {
-                chooser.setInitialDirectory(path.getParent().toFile());
-                chooser.setInitialFileName(path.getFileName().toString());
-            }
-        }
-
+        getInitialDirectory().ifPresent(chooser::setInitialDirectory);
         var files = chooser.showOpenMultipleDialog(stage);
+
         if (files != null) {
             var paths = files.stream().map(File::toPath).toArray(Path[]::new);
             player.addAll(paths);
@@ -268,5 +253,13 @@ public class SoundController implements Initializable {
 
     private static String convertToString(Duration d) {
         return d == null ? "00:00" : String.format("%02d:%02d", d.toMinutes(), d.toSecondsPart());
+    }
+
+    private Optional<File> getInitialDirectory() {
+        if (initialDirectory != null && Files.isDirectory(initialDirectory)) {
+            return Optional.of(initialDirectory.toFile());
+        } else {
+            return Optional.empty();
+        }
     }
 }
