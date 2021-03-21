@@ -53,16 +53,17 @@ public class SoundPlayerImpl implements SoundPlayer {
     private class Task implements Runnable {
         @Override
         public void run() {
+            Path path = null;
             try {
-                Path path = beforeFiles.takeFirst();
+                path = beforeFiles.takeFirst();
                 if (soundService.play(path)) {
                     afterFiles.addLast(path);
                 }
             } catch (InterruptedException e) {
                 logger.log(Level.FINE, e.getMessage(), e);
             } catch (Exception e) {
-                publisher.publishEvent(new SoundExceptionEvent(e));
-                logger.log(Level.WARNING, e.getMessage(), e);
+                publisher.publishEvent(new SoundExceptionEvent(e, path));
+                logger.log(Level.WARNING, "Error occurred in " + path, e);
             } finally {
                 if (!stopping) {
                     taskExecutor.add(this);
@@ -133,7 +134,7 @@ public class SoundPlayerImpl implements SoundPlayer {
                 .sorted(Comparators.comparingPath())) {
             stream.forEach(beforeFiles::addLast);
         } catch (IOException e) {
-            publisher.publishEvent(new SoundExceptionEvent(e));
+            publisher.publishEvent(new SoundExceptionEvent(e, path));
             throw new UncheckedIOException(e);
         }
     }

@@ -78,7 +78,12 @@ class FileSoundSource implements SoundSource {
             publisher.publishEvent(new SoundInformationEvent(path));
         } catch (Exception e) {
             logger.log(Level.WARNING, e.getMessage(), e);
-            publisher.publishEvent(new SoundExceptionEvent(e));
+            publisher.publishEvent(new SoundExceptionEvent(e, path));
         }
+    }
+
+    @Override
+    public String toString() {
+        return "FileSoundSource[path=" + path + "]";
     }
 }

@@ -63,7 +63,7 @@ public class Console implements ApplicationRunner {
                 try {
                     service.play(path);
                 } catch (Exception e) {
-                    logger.log(Level.SEVERE, e.getMessage(), e);
+                    logger.log(Level.SEVERE, "Error occurred in " + path, e);
                 }
             });
         } finally {

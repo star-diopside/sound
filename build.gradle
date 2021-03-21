@@ -79,7 +79,10 @@ project(":sound-service") {
 project(":sound-console") {
     apply plugin: "application"
 
-    mainClassName = "jp.gr.java_conf.stardiopside.sound.Console"
+    application {
+        mainModule = "jp.gr.java_conf.stardiopside.sound.console"
+        mainClass = "jp.gr.java_conf.stardiopside.sound.Console"
+    }
 
     dependencies {
         implementation project(":sound-service")
@@ -105,7 +108,10 @@ project(":sound-app") {
     apply plugin: "org.openjfx.javafxplugin"
     apply plugin: "application"
 
-    mainClassName = "jp.gr.java_conf.stardiopside.sound.App"
+    application {
+        mainModule = "jp.gr.java_conf.stardiopside.sound.app"
+        mainClass = "jp.gr.java_conf.stardiopside.sound.App"
+    }
 
     javafx {
         version = javafxVersion

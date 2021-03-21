@@ -70,4 +70,9 @@ class InputStreamSoundSource implements SoundSource {
     public void publishPlayEndEvent(ApplicationEventPublisher publisher) {
         publisher.publishEvent(new SoundActionEvent("END", name));
     }
+
+    @Override
+    public String toString() {
+        return "InputStreamSoundSource[inputStream=" + inputStream + ", name=" + name + "]";
+    }
 }

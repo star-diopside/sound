@@ -63,7 +63,7 @@ public class SoundServiceImpl implements SoundService {
                 playAudioInputStream(audioInputStream);
             }
         } catch (IOException | UnsupportedAudioFileException | LineUnavailableException e) {
-            publishSoundExceptionEvent(e);
+            publishSoundExceptionEvent(e, soundSource);
             return false;
         } finally {
             soundSource.publishPlayEndEvent(publisher);
@@ -115,16 +115,16 @@ public class SoundServiceImpl implements SoundService {
         return AudioFormat.Encoding.PCM_SIGNED.equals(format.getEncoding()) && format.getSampleSizeInBits() == 16;
     }
 
-    private void publishSoundExceptionEvent(Exception e) {
-        logger.log(Level.WARNING, e.getMessage(), e);
-        publisher.publishEvent(new SoundExceptionEvent(e));
+    private void publishSoundExceptionEvent(Exception e, SoundSource soundSource) {
+        logger.log(Level.WARNING, "Error occurred in " + soundSource, e);
+        publisher.publishEvent(new SoundExceptionEvent(e, soundSource));
     }
 
     private void outputAudioInformation(SoundSource soundSource) {
         try {
             soundSource.getAudioFileFormat().properties().forEach((k, v) -> logger.fine(k + " = " + v));
         } catch (UnsupportedAudioFileException | IOException e) {
-            publishSoundExceptionEvent(e);
+            publishSoundExceptionEvent(e, soundSource);
         }
     }
 }
