@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.control.Menu?>
+<?import javafx.scene.control.MenuBar?>
+<?import javafx.scene.control.MenuItem?>
+<?import javafx.scene.control.TableColumn?>
+<?import javafx.scene.control.TableView?>
+<?import javafx.scene.layout.BorderPane?>
+
+<BorderPane xmlns="http://javafx.com/javafx/11" xmlns:fx="http://javafx.com/fxml/1" fx:controller="jp.gr.java_conf.stardiopside.sound.controller.SoundCheckerController">
+    <top>
+        <MenuBar BorderPane.alignment="CENTER">
+            <menus>
+                <Menu mnemonicParsing="false" text="%file.text">
+                    <items>
+                        <MenuItem onAction="#onSelectDirectory" text="%onSelectDirectory.text" />
+                        <MenuItem onAction="#onSelectFile" text="%onSelectFile.text" />
+                        <MenuItem onAction="#onClear" text="%onClear.text" />
+                    </items>
+                </Menu>
+            </menus>
+        </MenuBar>
+    </top>
+    <center>
+        <TableView fx:id="soundFiles" BorderPane.alignment="CENTER">
+            <columns>
+                <TableColumn fx:id="soundFileName" text="%soundFileName.text" />
+                <TableColumn fx:id="soundFileExtension" text="%soundFileExtension.text" />
+                <TableColumn fx:id="soundFileDirectory" text="%soundFileDirectory.text" />
+                <TableColumn fx:id="soundFileAudioInput" text="%soundFileAudioInput.text" />
+                <TableColumn fx:id="soundFileAudioFormat" text="%soundFileAudioFormat.text" />
+            </columns>
+        </TableView>
+    </center>
+</BorderPane>

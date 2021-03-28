@@ -137,3 +137,38 @@ project(":sound-app-boot") {
         runtimeOnly project(":sound-app")
     }
 }
+
+project(":sound-checker") {
+    apply plugin: "org.openjfx.javafxplugin"
+    apply plugin: "application"
+
+    application {
+        mainModule = "jp.gr.java_conf.stardiopside.sound.checker"
+        mainClass = "jp.gr.java_conf.stardiopside.sound.SoundChecker"
+    }
+
+    javafx {
+        version = javafxVersion
+        modules = [ "javafx.controls", "javafx.fxml" ]
+    }
+
+    dependencies {
+        implementation project(":sound-service")
+        implementation project(":sound-util")
+        implementation "org.controlsfx:controlsfx:${controlsfxVersion}"
+        runtimeOnly "net.sourceforge.jaadec:jaad:${jaadVersion}"
+        runtimeOnly "com.googlecode.soundlibs:mp3spi:${mp3spiVersion}"
+    }
+}
+
+project(":sound-checker-boot") {
+    apply plugin: "org.springframework.boot"
+
+    bootJar {
+        mainClassName = "jp.gr.java_conf.stardiopside.sound.SoundChecker"
+    }
+
+    dependencies {
+        runtimeOnly project(":sound-checker")
+    }
+}

@@ -40,12 +40,12 @@ public class SoundServiceImpl implements SoundService {
 
     @Override
     public boolean play(Path path) {
-        return play(new FileSoundSource(path));
+        return play(SoundSource.of(path));
     }
 
     @Override
     public boolean play(InputStream inputStream, String name) {
-        return play(new InputStreamSoundSource(inputStream, name));
+        return play(SoundSource.of(inputStream, name));
     }
 
     @Override
