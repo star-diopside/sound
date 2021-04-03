@@ -8,9 +8,15 @@ public interface SoundService {
 
     Duration getPosition();
 
-    boolean play(Path path);
+    boolean play(SoundSource soundSource);
 
-    boolean play(InputStream inputStream, String name);
+    default boolean play(Path path) {
+        return play(SoundSource.of(path));
+    }
+
+    default boolean play(InputStream inputStream, String name) {
+        return play(SoundSource.of(inputStream, name));
+    }
 
     void skip();
 

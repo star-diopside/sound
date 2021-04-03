@@ -1,8 +1,6 @@
 package jp.gr.java_conf.stardiopside.sound.service;
 
 import java.io.IOException;
-import java.io.InputStream;
-import java.nio.file.Path;
 import java.time.Duration;
 import java.time.temporal.ChronoUnit;
 import java.util.logging.Level;
@@ -39,21 +37,12 @@ public class SoundServiceImpl implements SoundService {
     }
 
     @Override
-    public boolean play(Path path) {
-        return play(SoundSource.of(path));
-    }
-
-    @Override
-    public boolean play(InputStream inputStream, String name) {
-        return play(SoundSource.of(inputStream, name));
-    }
-
-    @Override
     public void skip() {
         skipping = true;
     }
 
-    private boolean play(SoundSource soundSource) {
+    @Override
+    public boolean play(SoundSource soundSource) {
         soundSource.publishPlayBeginEvent(publisher);
 
         try {
