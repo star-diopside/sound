@@ -1,6 +1,5 @@
 plugins {
     id "org.springframework.boot" version "2.4.4" apply false
-    id "org.javamodularity.moduleplugin" version "1.7.0" apply false
     id "org.openjfx.javafxplugin" version "0.0.9" apply false
     id "com.github.spotbugs" version "4.7.0"
 }
@@ -16,7 +15,6 @@ subprojects {
     }
 
     apply plugin: "java-library"
-    apply plugin: "org.javamodularity.moduleplugin"
     apply plugin: "io.spring.dependency-management"
     apply plugin: "checkstyle"
     apply plugin: "com.github.spotbugs"
@@ -73,7 +71,7 @@ project(":sound-service") {
     dependencies {
         api "org.springframework.boot:spring-boot-starter"
         implementation project(":sound-util")
-        implementation "org:jaudiotagger:${jaudiotaggerVersion}"
+        implementation project(":sound-compatibility")
     }
 }
 
@@ -171,5 +169,17 @@ project(":sound-checker-boot") {
 
     dependencies {
         runtimeOnly project(":sound-checker")
+    }
+}
+
+project(":sound-compatibility") {
+    jar {
+        manifest {
+            attributes("Automatic-Module-Name": "jp.gr.java_conf.stardiopside.sound.compatibility")
+        }
+    }
+
+    dependencies {
+        implementation "org:jaudiotagger:${jaudiotaggerVersion}"
     }
 }

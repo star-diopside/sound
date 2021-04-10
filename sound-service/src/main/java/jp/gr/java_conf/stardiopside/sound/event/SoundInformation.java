@@ -11,9 +11,7 @@ import java.util.function.Supplier;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-import org.jaudiotagger.audio.AudioFileIO;
-import org.jaudiotagger.tag.FieldKey;
-
+import jp.gr.java_conf.stardiopside.sound.compatibility.AudioFile;
 import lombok.Data;
 
 @Data
@@ -37,26 +35,24 @@ public class SoundInformation {
     private final Optional<String> channels;
 
     public SoundInformation(Path path) throws Exception {
-        var audioFile = AudioFileIO.read(path.toFile());
-        var audioHeader = audioFile.getAudioHeader();
-        var tag = audioFile.getTag();
+        var audioFile = new AudioFile(path);
 
-        track = optional(() -> tag.getFirst(FieldKey.TRACK));
-        trackTotal = optional(() -> tag.getFirst(FieldKey.TRACK_TOTAL));
-        title = optional(() -> tag.getFirst(FieldKey.TITLE));
-        artist = optional(() -> tag.getFirst(FieldKey.ARTIST));
-        discNo = optional(() -> tag.getFirst(FieldKey.DISC_NO));
-        discTotal = optional(() -> tag.getFirst(FieldKey.DISC_TOTAL));
-        album = optional(() -> tag.getFirst(FieldKey.ALBUM));
-        albumArtist = optional(() -> tag.getFirst(FieldKey.ALBUM_ARTIST));
-        trackLength = optional(audioHeader::getTrackLength);
+        track = optional(audioFile::getTrack);
+        trackTotal = optional(audioFile::getTrackTotal);
+        title = optional(audioFile::getTitle);
+        artist = optional(audioFile::getArtist);
+        discNo = optional(audioFile::getDiscNo);
+        discTotal = optional(audioFile::getDiscTotal);
+        album = optional(audioFile::getAlbum);
+        albumArtist = optional(audioFile::getAlbumArtist);
+        trackLength = optional(audioFile::getTrackLength);
         trackLengthAsDuration = trackLength.stream()
                 .mapToObj(SoundInformation::convertTrackLengthToDuration)
                 .findFirst();
-        format = optional(audioHeader::getFormat);
-        sampleRate = optional(audioHeader::getSampleRate);
-        bitRate = optional(audioHeader::getBitRate);
-        channels = optional(audioHeader::getChannels);
+        format = optional(audioFile::getFormat);
+        sampleRate = optional(audioFile::getSampleRate);
+        bitRate = optional(audioFile::getBitRate);
+        channels = optional(audioFile::getChannels);
     }
 
     public Map<String, String> toMap() {
