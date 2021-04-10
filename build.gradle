@@ -1,14 +1,15 @@
 plugins {
-    id "org.springframework.boot" version "2.3.1.RELEASE" apply false
+    id "org.springframework.boot" version "2.4.4" apply false
     id "org.javamodularity.moduleplugin" version "1.7.0" apply false
     id "org.openjfx.javafxplugin" version "0.0.9" apply false
-    id "com.github.spotbugs" version "4.4.4"
+    id "com.github.spotbugs" version "4.7.0"
 }
 
 subprojects {
+    ext["lombok.version"] = "1.18.20"
     ext {
-        javafxVersion = "14.0.1"
-        controlsfxVersion = "11.0.2"
+        javafxVersion = "16"
+        controlsfxVersion = "11.1.0"
         jaudiotaggerVersion = "2.0.3"
         jaadVersion = "0.8.5"
         mp3spiVersion = "1.9.5.4"
@@ -47,7 +48,7 @@ subprojects {
     }
 
     checkstyle {
-        toolVersion = "8.34"
+        toolVersion = "8.41.1"
         configFile = file("${rootDir}/config/checkstyle/checkstyle.xml")
         ignoreFailures = true
     }
@@ -57,7 +58,7 @@ subprojects {
     }
 
     spotbugs {
-        toolVersion = "4.0.6"
+        toolVersion = "4.2.2"
         ignoreFailures = true
     }
 
