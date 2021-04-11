@@ -3,8 +3,6 @@ package jp.gr.java_conf.stardiopside.sound.service;
 import java.io.IOException;
 import java.time.Duration;
 import java.time.temporal.ChronoUnit;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 
 import javax.sound.sampled.AudioFormat;
 import javax.sound.sampled.AudioInputStream;
@@ -13,6 +11,8 @@ import javax.sound.sampled.LineUnavailableException;
 import javax.sound.sampled.SourceDataLine;
 import javax.sound.sampled.UnsupportedAudioFileException;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.context.ApplicationEventPublisher;
 
 import jp.gr.java_conf.stardiopside.sound.event.SoundActionEvent;
@@ -24,7 +24,7 @@ import lombok.Getter;
 
 public class SoundServiceImpl implements SoundService {
 
-    private static final Logger logger = Logger.getLogger(SoundServiceImpl.class.getName());
+    private static final Logger LOGGER = LoggerFactory.getLogger(SoundServiceImpl.class);
     private volatile boolean skipping;
 
     @Getter
@@ -105,13 +105,13 @@ public class SoundServiceImpl implements SoundService {
     }
 
     private void publishSoundExceptionEvent(Exception e, SoundSource soundSource) {
-        logger.log(Level.WARNING, "Error occurred in " + soundSource, e);
+        LOGGER.warn("Error occurred in " + soundSource, e);
         publisher.publishEvent(new SoundExceptionEvent(e, soundSource));
     }
 
     private void outputAudioInformation(SoundSource soundSource) {
         try {
-            soundSource.getAudioFileFormat().properties().forEach((k, v) -> logger.fine(k + " = " + v));
+            soundSource.getAudioFileFormat().properties().forEach((k, v) -> LOGGER.debug(k + " = " + v));
         } catch (UnsupportedAudioFileException | IOException e) {
             publishSoundExceptionEvent(e, soundSource);
         }

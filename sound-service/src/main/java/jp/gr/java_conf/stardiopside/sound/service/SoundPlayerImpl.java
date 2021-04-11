@@ -9,13 +9,13 @@ import java.util.Deque;
 import java.util.concurrent.BlockingDeque;
 import java.util.concurrent.ConcurrentLinkedDeque;
 import java.util.concurrent.LinkedBlockingDeque;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 import java.util.stream.Stream;
 
 import javax.annotation.PostConstruct;
 import javax.annotation.PreDestroy;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.context.ApplicationEventPublisher;
 
 import jp.gr.java_conf.stardiopside.sound.event.SoundExceptionEvent;
@@ -23,7 +23,7 @@ import jp.gr.java_conf.stardiopside.sound.util.Comparators;
 
 public class SoundPlayerImpl implements SoundPlayer {
 
-    private static final Logger logger = Logger.getLogger(SoundPlayerImpl.class.getName());
+    private static final Logger LOGGER = LoggerFactory.getLogger(SoundPlayerImpl.class);
     private static final Duration BACK_THRESHOLD = Duration.ofSeconds(2);
     private BlockingDeque<Path> beforeFiles = new LinkedBlockingDeque<>();
     private Deque<Path> afterFiles = new ConcurrentLinkedDeque<>();
@@ -60,10 +60,10 @@ public class SoundPlayerImpl implements SoundPlayer {
                     afterFiles.addLast(path);
                 }
             } catch (InterruptedException e) {
-                logger.log(Level.FINE, e.getMessage(), e);
+                LOGGER.debug(e.getMessage(), e);
             } catch (Exception e) {
                 publisher.publishEvent(new SoundExceptionEvent(e, path));
-                logger.log(Level.WARNING, "Error occurred in " + path, e);
+                LOGGER.warn("Error occurred in " + path, e);
             } finally {
                 if (!stopping) {
                     taskExecutor.add(this);

@@ -8,8 +8,9 @@ import java.util.Optional;
 import java.util.OptionalInt;
 import java.util.function.IntSupplier;
 import java.util.function.Supplier;
-import java.util.logging.Level;
-import java.util.logging.Logger;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import jp.gr.java_conf.stardiopside.sound.compatibility.AudioFile;
 import lombok.Data;
@@ -17,7 +18,7 @@ import lombok.Data;
 @Data
 public class SoundInformation {
 
-    private static final Logger logger = Logger.getLogger(SoundInformation.class.getName());
+    private static final Logger LOGGER = LoggerFactory.getLogger(SoundInformation.class);
 
     private final Optional<String> track;
     private final Optional<String> trackTotal;
@@ -82,7 +83,7 @@ public class SoundInformation {
         try {
             return Optional.ofNullable(s.get());
         } catch (Exception e) {
-            logger.log(Level.FINE, e.getMessage(), e);
+            LOGGER.debug(e.getMessage(), e);
             return Optional.empty();
         }
     }
@@ -91,7 +92,7 @@ public class SoundInformation {
         try {
             return OptionalInt.of(s.getAsInt());
         } catch (Exception e) {
-            logger.log(Level.FINE, e.getMessage(), e);
+            LOGGER.debug(e.getMessage(), e);
             return OptionalInt.empty();
         }
     }

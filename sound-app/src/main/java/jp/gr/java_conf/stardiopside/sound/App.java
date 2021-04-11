@@ -1,10 +1,10 @@
 package jp.gr.java_conf.stardiopside.sound;
 
 import java.util.ResourceBundle;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 
 import org.controlsfx.dialog.ExceptionDialog;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.builder.SpringApplicationBuilder;
 import org.springframework.context.ConfigurableApplicationContext;
@@ -19,7 +19,7 @@ import jp.gr.java_conf.stardiopside.sound.controller.SoundController;
 @SpringBootApplication
 public class App extends Application {
 
-    private static final Logger logger = Logger.getLogger(App.class.getName());
+    private static final Logger LOGGER = LoggerFactory.getLogger(App.class);
     private ConfigurableApplicationContext applicationContext;
 
     public static void main(String[] args) {
@@ -37,7 +37,7 @@ public class App extends Application {
         var messages = ResourceBundle.getBundle("messages");
 
         Thread.currentThread().setUncaughtExceptionHandler((t, e) -> {
-            logger.log(Level.SEVERE, e.getMessage(), e);
+            LOGGER.error(e.getMessage(), e);
             var dialog = new ExceptionDialog(e);
             dialog.setHeaderText(messages.getString("message.uncaughtException"));
             dialog.show();

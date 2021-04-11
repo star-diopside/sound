@@ -4,13 +4,13 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.nio.file.Path;
 import java.util.Optional;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 
 import javax.sound.sampled.AudioFileFormat;
 import javax.sound.sampled.AudioInputStream;
 import javax.sound.sampled.UnsupportedAudioFileException;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.context.ApplicationEventPublisher;
 
 import jp.gr.java_conf.stardiopside.sound.event.SoundExceptionEvent;
@@ -37,7 +37,7 @@ public interface SoundSource {
         try {
             getSoundInformation().map(SoundInformationEvent::new).ifPresent(publisher::publishEvent);
         } catch (Exception e) {
-            SoundSourceLogger.logger.log(Level.WARNING, e.getMessage(), e);
+            SoundSourceLogger.LOGGER.warn(e.getMessage(), e);
             publisher.publishEvent(new SoundExceptionEvent(e, this));
         }
     }
@@ -52,5 +52,5 @@ public interface SoundSource {
 }
 
 final class SoundSourceLogger {
-    static final Logger logger = Logger.getLogger(SoundSource.class.getName());
+    static final Logger LOGGER = LoggerFactory.getLogger(SoundSource.class);
 }

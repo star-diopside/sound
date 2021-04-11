@@ -5,15 +5,16 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 import java.util.concurrent.LinkedBlockingQueue;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 
 import javax.annotation.PostConstruct;
 import javax.annotation.PreDestroy;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 public class TaskExecutorImpl implements TaskExecutor {
 
-    private static final Logger logger = Logger.getLogger(TaskExecutorImpl.class.getName());
+    private static final Logger LOGGER = LoggerFactory.getLogger(TaskExecutorImpl.class);
     private BlockingQueue<Runnable> taskQueue = new LinkedBlockingQueue<>();
     private volatile boolean running;
     private ExecutorService executorService;
@@ -67,9 +68,9 @@ public class TaskExecutorImpl implements TaskExecutor {
             try {
                 taskQueue.take().run();
             } catch (InterruptedException e) {
-                logger.log(Level.FINE, e.getMessage(), e);
+                LOGGER.debug(e.getMessage(), e);
             } catch (Exception e) {
-                logger.log(Level.WARNING, e.getMessage(), e);
+                LOGGER.warn(e.getMessage(), e);
             } finally {
                 if (running) {
                     future = executorService.submit(this);

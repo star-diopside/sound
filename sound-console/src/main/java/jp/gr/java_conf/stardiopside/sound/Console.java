@@ -8,12 +8,12 @@ import java.time.Duration;
 import java.time.LocalDateTime;
 import java.util.Formatter;
 import java.util.Optional;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 import java.util.stream.Stream;
 
 import javax.annotation.PreDestroy;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.boot.ApplicationArguments;
 import org.springframework.boot.ApplicationRunner;
 import org.springframework.boot.SpringApplication;
@@ -31,7 +31,7 @@ import jp.gr.java_conf.stardiopside.sound.util.Comparators;
 @SpringBootApplication
 public class Console implements ApplicationRunner {
 
-    private static final Logger logger = Logger.getLogger(Console.class.getName());
+    private static final Logger LOGGER = LoggerFactory.getLogger(Console.class);
     private final SoundService service;
     private LocalDateTime start;
     private boolean stopped = false;
@@ -56,18 +56,18 @@ public class Console implements ApplicationRunner {
                     return Files.find(Path.of(s), Integer.MAX_VALUE, (p, attr) -> attr.isRegularFile())
                             .sorted(Comparators.comparingPath());
                 } catch (InvalidPathException | IOException e) {
-                    logger.log(Level.WARNING, e.getMessage(), e);
+                    LOGGER.warn(e.getMessage(), e);
                     return Stream.empty();
                 }
             }).forEach(path -> {
                 try {
                     service.play(path);
                 } catch (Exception e) {
-                    logger.log(Level.SEVERE, "Error occurred in " + path, e);
+                    LOGGER.error("Error occurred in " + path, e);
                 }
             });
         } finally {
-            logger.info("Execution Time: " + getExecutionTimeString(start));
+            LOGGER.info("Execution Time: " + getExecutionTimeString(start));
             stopped = true;
         }
     }
@@ -93,22 +93,22 @@ public class Console implements ApplicationRunner {
                 .mapToInt(String::length)
                 .max()
                 .ifPresent(i -> info.forEach(
-                        (k, v) -> logger.info(String.format("%" + i + "s: %s", k, v))));
+                        (k, v) -> LOGGER.info(String.format("%" + i + "s: %s", k, v))));
     }
 
     @EventListener
     public void onSoundLineEvent(SoundLineEvent event) {
-        logger.info(event.getLineEvent().toString());
+        LOGGER.info(event.getLineEvent().toString());
     }
 
     @EventListener
     public void onSoundActionEvent(SoundActionEvent event) {
-        logger.info(event.getSoundActionInformation().toString());
+        LOGGER.info(event.getSoundActionInformation().toString());
     }
 
     @EventListener
     public void onSoundExceptionEvent(SoundExceptionEvent event) {
-        logger.info("Error: thrown " + event.getException().getClass().getName());
+        LOGGER.info("Error: thrown " + event.getException().getClass().getName());
     }
 
     @EventListener

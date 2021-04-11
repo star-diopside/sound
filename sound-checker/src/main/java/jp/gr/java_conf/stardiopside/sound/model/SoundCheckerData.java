@@ -5,9 +5,10 @@ import java.nio.file.Files;
 import java.nio.file.InvalidPathException;
 import java.nio.file.Path;
 import java.util.Arrays;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 import java.util.stream.Stream;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import javafx.beans.property.ReadOnlyObjectProperty;
 import javafx.beans.property.ReadOnlyObjectWrapper;
@@ -19,7 +20,7 @@ import jp.gr.java_conf.stardiopside.sound.util.Comparators;
 
 public class SoundCheckerData {
 
-    private static final Logger logger = Logger.getLogger(SoundCheckerData.class.getName());
+    private static final Logger LOGGER = LoggerFactory.getLogger(SoundCheckerData.class);
     private final StringProperty windowTitle = new SimpleStringProperty();
     private final ReadOnlyObjectWrapper<ObservableList<SoundFile>> soundFiles = new ReadOnlyObjectWrapper<>(
             FXCollections.observableArrayList());
@@ -54,7 +55,7 @@ public class SoundCheckerData {
                 return Files.find(path, Integer.MAX_VALUE, (p, attr) -> attr.isRegularFile())
                         .sorted(Comparators.comparingPath());
             } catch (InvalidPathException | IOException e) {
-                logger.log(Level.WARNING, e.getMessage(), e);
+                LOGGER.warn(e.getMessage(), e);
                 return Stream.empty();
             }
         }).map(SoundFile::new).toArray(SoundFile[]::new));

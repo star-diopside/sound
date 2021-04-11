@@ -4,8 +4,8 @@ module jp.gr.java_conf.stardiopside.sound.console {
 
     requires jp.gr.java_conf.stardiopside.sound.service;
     requires jp.gr.java_conf.stardiopside.sound.util;
-    requires java.logging;
     requires java.annotation;
+    requires org.slf4j;
     requires spring.boot;
     requires spring.boot.autoconfigure;
     requires spring.context;
