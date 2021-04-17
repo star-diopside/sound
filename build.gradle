@@ -1,17 +1,12 @@
 plugins {
-    id "org.springframework.boot" version "2.4.4" apply false
+    id "org.springframework.boot" version "2.4.5" apply false
     id "org.openjfx.javafxplugin" version "0.0.9" apply false
     id "com.github.spotbugs" version "4.7.0"
 }
 
 subprojects {
-    ext["lombok.version"] = "1.18.20"
     ext {
         javafxVersion = "16"
-        controlsfxVersion = "11.1.0"
-        jaudiotaggerVersion = "2.0.3"
-        jaadVersion = "0.8.5"
-        mp3spiVersion = "1.9.5.4"
     }
 
     apply plugin: "java-library"
@@ -26,6 +21,12 @@ subprojects {
     dependencyManagement {
         imports {
             mavenBom org.springframework.boot.gradle.plugin.SpringBootPlugin.BOM_COORDINATES
+        }
+        dependencies {
+            dependency "org.controlsfx:controlsfx:11.1.0"
+            dependency "org:jaudiotagger:2.0.3"
+            dependency "net.sourceforge.jaadec:jaad:0.8.5"
+            dependency "com.googlecode.soundlibs:mp3spi:1.9.5.4"
         }
     }
 
@@ -86,8 +87,8 @@ project(":sound-console") {
     dependencies {
         implementation project(":sound-service")
         implementation project(":sound-util")
-        runtimeOnly "net.sourceforge.jaadec:jaad:${jaadVersion}"
-        runtimeOnly "com.googlecode.soundlibs:mp3spi:${mp3spiVersion}"
+        runtimeOnly "net.sourceforge.jaadec:jaad"
+        runtimeOnly "com.googlecode.soundlibs:mp3spi"
     }
 }
 
@@ -95,7 +96,7 @@ project(":sound-console-boot") {
     apply plugin: "org.springframework.boot"
 
     bootJar {
-        mainClassName = "jp.gr.java_conf.stardiopside.sound.Console"
+        mainClass = "jp.gr.java_conf.stardiopside.sound.Console"
     }
 
     dependencies {
@@ -114,14 +115,14 @@ project(":sound-app") {
 
     javafx {
         version = javafxVersion
-        modules = [ "javafx.controls", "javafx.fxml" ]
+        modules = ["javafx.controls", "javafx.fxml"]
     }
 
     dependencies {
         implementation project(":sound-service")
-        implementation "org.controlsfx:controlsfx:${controlsfxVersion}"
-        runtimeOnly "net.sourceforge.jaadec:jaad:${jaadVersion}"
-        runtimeOnly "com.googlecode.soundlibs:mp3spi:${mp3spiVersion}"
+        implementation "org.controlsfx:controlsfx"
+        runtimeOnly "net.sourceforge.jaadec:jaad"
+        runtimeOnly "com.googlecode.soundlibs:mp3spi"
     }
 }
 
@@ -129,7 +130,7 @@ project(":sound-app-boot") {
     apply plugin: "org.springframework.boot"
 
     bootJar {
-        mainClassName = "jp.gr.java_conf.stardiopside.sound.App"
+        mainClass = "jp.gr.java_conf.stardiopside.sound.App"
     }
 
     dependencies {
@@ -148,15 +149,15 @@ project(":sound-checker") {
 
     javafx {
         version = javafxVersion
-        modules = [ "javafx.controls", "javafx.fxml" ]
+        modules = ["javafx.controls", "javafx.fxml"]
     }
 
     dependencies {
         implementation project(":sound-service")
         implementation project(":sound-util")
-        implementation "org.controlsfx:controlsfx:${controlsfxVersion}"
-        runtimeOnly "net.sourceforge.jaadec:jaad:${jaadVersion}"
-        runtimeOnly "com.googlecode.soundlibs:mp3spi:${mp3spiVersion}"
+        implementation "org.controlsfx:controlsfx"
+        runtimeOnly "net.sourceforge.jaadec:jaad"
+        runtimeOnly "com.googlecode.soundlibs:mp3spi"
     }
 }
 
@@ -164,7 +165,7 @@ project(":sound-checker-boot") {
     apply plugin: "org.springframework.boot"
 
     bootJar {
-        mainClassName = "jp.gr.java_conf.stardiopside.sound.SoundChecker"
+        mainClass = "jp.gr.java_conf.stardiopside.sound.SoundChecker"
     }
 
     dependencies {
@@ -180,6 +181,6 @@ project(":sound-compatibility") {
     }
 
     dependencies {
-        implementation "org:jaudiotagger:${jaudiotaggerVersion}"
+        implementation "org:jaudiotagger"
     }
 }
