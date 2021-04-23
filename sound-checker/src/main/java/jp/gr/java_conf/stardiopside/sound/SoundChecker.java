@@ -2,6 +2,7 @@ package jp.gr.java_conf.stardiopside.sound;
 
 import java.util.ResourceBundle;
 
+import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.builder.SpringApplicationBuilder;
 import org.springframework.context.ConfigurableApplicationContext;
@@ -42,6 +43,6 @@ public class SoundChecker extends Application {
 
     @Override
     public void stop() throws Exception {
-        applicationContext.close();
+        SpringApplication.exit(applicationContext);
     }
 }

@@ -42,8 +42,7 @@ public class Console implements ApplicationRunner {
     }
 
     public static void main(String[] args) {
-        try (var context = SpringApplication.run(Console.class, args)) {
-        }
+        SpringApplication.exit(SpringApplication.run(Console.class, args));
     }
 
     @Override
