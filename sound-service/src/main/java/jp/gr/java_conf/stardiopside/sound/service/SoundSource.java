@@ -42,15 +42,19 @@ public interface SoundSource {
         }
     }
 
-    public static SoundSource of(Path path) {
+    static SoundSource of(Path path) {
         return new FileSoundSource(path);
     }
 
-    public static SoundSource of(InputStream inputStream, String name) {
+    static SoundSource of(InputStream inputStream, String name) {
         return new InputStreamSoundSource(inputStream, name);
     }
 }
 
 final class SoundSourceLogger {
+
     static final Logger LOGGER = LoggerFactory.getLogger(SoundSource.class);
+
+    private SoundSourceLogger() {
+    }
 }
