@@ -3,6 +3,7 @@ package jp.gr.java_conf.stardiopside.sound.service;
 import java.io.BufferedInputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.ArrayList;
 import java.util.ServiceLoader;
 
 import javax.sound.sampled.AudioFileFormat;
@@ -29,36 +30,48 @@ class InputStreamSoundSource implements SoundSource {
 
     @Override
     public AudioInputStream getAudioInputStream() throws UnsupportedAudioFileException, IOException {
+        var exceptions = new ArrayList<Exception>();
+
         for (var reader : ServiceLoader.load(AudioFileReader.class)) {
             AudioInputStream stream;
             try {
                 LOGGER.debug("Try AudioFileReader: " + reader.getClass());
                 stream = reader.getAudioInputStream(inputStream);
-            } catch (UnsupportedAudioFileException e) {
+            } catch (UnsupportedAudioFileException | IOException e) {
                 LOGGER.trace(e.getMessage(), e);
+                exceptions.add(e);
                 continue;
             }
             LOGGER.debug("Using AudioFileReader: " + reader.getClass());
             return stream;
         }
-        throw new UnsupportedAudioFileException("Stream of unsupported format");
+
+        var exc = new UnsupportedAudioFileException("Stream of unsupported format");
+        exceptions.forEach(exc::addSuppressed);
+        throw exc;
     }
 
     @Override
     public AudioFileFormat getAudioFileFormat() throws UnsupportedAudioFileException, IOException {
+        var exceptions = new ArrayList<Exception>();
+
         for (var reader : ServiceLoader.load(AudioFileReader.class)) {
             AudioFileFormat format;
             try {
                 LOGGER.debug("Try AudioFileReader: " + reader.getClass());
                 format = reader.getAudioFileFormat(inputStream);
-            } catch (UnsupportedAudioFileException e) {
+            } catch (UnsupportedAudioFileException | IOException e) {
                 LOGGER.trace(e.getMessage(), e);
+                exceptions.add(e);
                 continue;
             }
             LOGGER.debug("Using AudioFileReader: " + reader.getClass());
             return format;
         }
-        throw new UnsupportedAudioFileException("Stream of unsupported format");
+
+        var exc = new UnsupportedAudioFileException("Stream of unsupported format");
+        exceptions.forEach(exc::addSuppressed);
+        throw exc;
     }
 
     @Override
