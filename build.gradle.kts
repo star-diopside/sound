@@ -5,10 +5,10 @@ plugins {
     `java-library`
     application
     checkstyle
-    id("com.github.spotbugs") version "4.7.0"
-    id("org.springframework.boot") version "2.4.5" apply false
+    id("com.github.spotbugs") version "4.7.1"
+    id("org.springframework.boot") version "2.5.0" apply false
     id("io.spring.dependency-management") version "1.0.11.RELEASE"
-    id("org.openjfx.javafxplugin") version "0.0.9"
+    id("org.openjfx.javafxplugin") version "0.0.10"
 }
 
 subprojects {
@@ -42,13 +42,11 @@ subprojects {
     }
 
     checkstyle {
-        toolVersion = "8.41.1"
         configFile = file("${rootDir}/config/checkstyle/checkstyle.xml")
         isIgnoreFailures = true
     }
 
     spotbugs {
-        toolVersion.set("4.2.2")
         ignoreFailures.set(true)
     }
 
@@ -70,9 +68,7 @@ subprojects {
 
     tasks.spotbugsMain {
         reports {
-            create("html") {
-                enabled = true
-            }
+            create("html")
         }
     }
 }
