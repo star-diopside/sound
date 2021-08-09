@@ -1,14 +1,10 @@
-import org.springframework.boot.gradle.plugin.SpringBootPlugin
-import org.springframework.boot.gradle.tasks.bundling.BootJar
-
 plugins {
     `java-library`
-    application
     checkstyle
-    id("com.github.spotbugs") version "4.7.1"
-    id("org.springframework.boot") version "2.5.0" apply false
+    id("com.github.spotbugs") version "4.7.2"
+    id("org.springframework.boot") version "2.5.3" apply false
     id("io.spring.dependency-management") version "1.0.11.RELEASE"
-    id("org.openjfx.javafxplugin") version "0.0.10"
+    id("org.openjfx.javafxplugin") version "0.0.10" apply false
 }
 
 subprojects {
@@ -25,7 +21,7 @@ subprojects {
 
     dependencyManagement {
         imports {
-            mavenBom(SpringBootPlugin.BOM_COORDINATES)
+            mavenBom(org.springframework.boot.gradle.plugin.SpringBootPlugin.BOM_COORDINATES)
         }
         dependencies {
             dependency("org.controlsfx:controlsfx:11.1.0")
@@ -70,126 +66,5 @@ subprojects {
         reports {
             create("html")
         }
-    }
-}
-
-project(":sound-service") {
-    dependencies {
-        api("org.springframework.boot:spring-boot-starter")
-        implementation(project(":sound-util"))
-        implementation(project(":sound-compatibility"))
-    }
-}
-
-project(":sound-compatibility") {
-    tasks.jar {
-        manifest {
-            attributes("Automatic-Module-Name" to "jp.gr.java_conf.stardiopside.sound.compatibility")
-        }
-    }
-
-    dependencies {
-        implementation("org:jaudiotagger")
-    }
-}
-
-project(":sound-console") {
-    apply(plugin = "application")
-
-    application {
-        mainModule.set("jp.gr.java_conf.stardiopside.sound.console")
-        mainClass.set("jp.gr.java_conf.stardiopside.sound.Console")
-    }
-
-    dependencies {
-        implementation(project(":sound-service"))
-        implementation(project(":sound-util"))
-        runtimeOnly(files("${rootDir}/libs/jaad-0.8.4.jar"))
-        runtimeOnly("com.googlecode.soundlibs:mp3spi")
-    }
-}
-
-project(":sound-console-boot") {
-    apply(plugin = "org.springframework.boot")
-
-    tasks.getByName<BootJar>("bootJar") {
-        mainClass.set("jp.gr.java_conf.stardiopside.sound.Console")
-    }
-
-    dependencies {
-        runtimeOnly(project(":sound-console"))
-    }
-}
-
-project(":sound-app") {
-    apply(plugin = "application")
-    apply(plugin = "org.openjfx.javafxplugin")
-
-    application {
-        mainModule.set("jp.gr.java_conf.stardiopside.sound.app")
-        mainClass.set("jp.gr.java_conf.stardiopside.sound.App")
-    }
-
-    val javafxVersion: String by extra
-
-    javafx {
-        version = javafxVersion
-        modules("javafx.controls", "javafx.fxml")
-    }
-
-    dependencies {
-        implementation(project(":sound-service"))
-        implementation("org.controlsfx:controlsfx")
-        runtimeOnly(files("${rootDir}/libs/jaad-0.8.4.jar"))
-        runtimeOnly("com.googlecode.soundlibs:mp3spi")
-    }
-}
-
-project(":sound-app-boot") {
-    apply(plugin = "org.springframework.boot")
-
-    tasks.getByName<BootJar>("bootJar") {
-        mainClass.set("jp.gr.java_conf.stardiopside.sound.App")
-    }
-
-    dependencies {
-        runtimeOnly(project(":sound-app"))
-    }
-}
-
-project(":sound-checker") {
-    apply(plugin = "application")
-    apply(plugin = "org.openjfx.javafxplugin")
-
-    application {
-        mainModule.set("jp.gr.java_conf.stardiopside.sound.checker")
-        mainClass.set("jp.gr.java_conf.stardiopside.sound.SoundChecker")
-    }
-
-    val javafxVersion: String by extra
-
-    javafx {
-        version = javafxVersion
-        modules("javafx.controls", "javafx.fxml")
-    }
-
-    dependencies {
-        implementation(project(":sound-service"))
-        implementation(project(":sound-util"))
-        implementation("org.controlsfx:controlsfx")
-        runtimeOnly(files("${rootDir}/libs/jaad-0.8.4.jar"))
-        runtimeOnly("com.googlecode.soundlibs:mp3spi")
-    }
-}
-
-project(":sound-checker-boot") {
-    apply(plugin = "org.springframework.boot")
-
-    tasks.getByName<BootJar>("bootJar") {
-        mainClass.set("jp.gr.java_conf.stardiopside.sound.SoundChecker")
-    }
-
-    dependencies {
-        runtimeOnly(project(":sound-checker"))
     }
 }
