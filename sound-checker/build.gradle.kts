@@ -17,7 +17,6 @@ javafx {
 
 dependencies {
     implementation(project(":sound-service"))
-    implementation(project(":sound-util"))
     implementation("org.controlsfx:controlsfx")
     runtimeOnly(files("${rootDir}/libs/jaad-0.8.4.jar"))
     runtimeOnly("com.googlecode.soundlibs:mp3spi")

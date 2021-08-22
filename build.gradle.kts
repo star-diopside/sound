@@ -27,6 +27,7 @@ subprojects {
             dependency("org.controlsfx:controlsfx:11.1.0")
             dependency("org:jaudiotagger:2.0.3")
             dependency("com.googlecode.soundlibs:mp3spi:1.9.5.4")
+            dependency("com.google.guava:guava:30.1.1-jre")
         }
     }
 

@@ -1,17 +1,8 @@
 package jp.gr.java_conf.stardiopside.sound;
 
-import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.InvalidPathException;
-import java.nio.file.Path;
-import java.time.Duration;
-import java.time.LocalDateTime;
-import java.util.Formatter;
-import java.util.Optional;
-import java.util.stream.Stream;
-
-import javax.annotation.PreDestroy;
-
+import jp.gr.java_conf.stardiopside.sound.event.*;
+import jp.gr.java_conf.stardiopside.sound.service.SoundService;
+import jp.gr.java_conf.stardiopside.sound.util.PathComparators;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.boot.ApplicationArguments;
@@ -20,13 +11,17 @@ import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.context.event.EventListener;
 
-import jp.gr.java_conf.stardiopside.sound.event.SoundActionEvent;
-import jp.gr.java_conf.stardiopside.sound.event.SoundExceptionEvent;
-import jp.gr.java_conf.stardiopside.sound.event.SoundInformationEvent;
-import jp.gr.java_conf.stardiopside.sound.event.SoundLineEvent;
-import jp.gr.java_conf.stardiopside.sound.event.SoundPositionEvent;
-import jp.gr.java_conf.stardiopside.sound.service.SoundService;
-import jp.gr.java_conf.stardiopside.sound.util.Comparators;
+import javax.annotation.PreDestroy;
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.InvalidPathException;
+import java.nio.file.Path;
+import java.time.Duration;
+import java.time.LocalDateTime;
+import java.util.Comparator;
+import java.util.Formatter;
+import java.util.Optional;
+import java.util.stream.Stream;
 
 @SpringBootApplication
 public class Console implements ApplicationRunner {
@@ -53,7 +48,8 @@ public class Console implements ApplicationRunner {
             args.getNonOptionArgs().stream().flatMap(s -> {
                 try {
                     return Files.find(Path.of(s), Integer.MAX_VALUE, (p, attr) -> attr.isRegularFile())
-                            .sorted(Comparators.comparingPath());
+                            .sorted(Comparator.comparing(Path::getParent, PathComparators.comparing())
+                                    .thenComparing(PathComparators.comparingBySoundInformation()));
                 } catch (InvalidPathException | IOException e) {
                     LOGGER.warn(e.getMessage(), e);
                     return Stream.empty();
