@@ -1,5 +1,10 @@
 package jp.gr.java_conf.stardiopside.sound.event;
 
+import jp.gr.java_conf.stardiopside.sound.compatibility.AudioFile;
+import lombok.Value;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import java.nio.file.Path;
 import java.time.Duration;
 import java.util.LinkedHashMap;
@@ -9,13 +14,7 @@ import java.util.OptionalInt;
 import java.util.function.IntSupplier;
 import java.util.function.Supplier;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
-import jp.gr.java_conf.stardiopside.sound.compatibility.AudioFile;
-import lombok.Data;
-
-@Data
+@Value
 public class SoundInformation {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(SoundInformation.class);
@@ -35,7 +34,7 @@ public class SoundInformation {
     private final Optional<String> bitRate;
     private final Optional<String> channels;
 
-    public SoundInformation(Path path) throws Exception {
+    private SoundInformation(Path path) throws Exception {
         var audioFile = new AudioFile(path);
 
         track = optional(audioFile::getTrack);
@@ -54,6 +53,10 @@ public class SoundInformation {
         sampleRate = optional(audioFile::getSampleRate);
         bitRate = optional(audioFile::getBitRate);
         channels = optional(audioFile::getChannels);
+    }
+
+    public static SoundInformation read(Path path) throws Exception {
+        return new SoundInformation(path);
     }
 
     public Map<String, String> toMap() {

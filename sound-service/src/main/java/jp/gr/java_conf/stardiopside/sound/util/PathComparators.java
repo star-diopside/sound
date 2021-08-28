@@ -9,12 +9,13 @@ import org.slf4j.LoggerFactory;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.Comparator;
+import java.util.Optional;
 import java.util.WeakHashMap;
 
 public final class PathComparators {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(PathComparators.class);
-    private static final WeakHashMap<Path, SoundInformation> SOUND_INFORMATION_MAP = new WeakHashMap<>();
+    private static final WeakHashMap<Path, Optional<SoundInformation>> SOUND_INFORMATION_MAP = new WeakHashMap<>();
 
     private PathComparators() {
     }
@@ -72,12 +73,12 @@ public final class PathComparators {
     public static Comparator<Path> comparingBySoundInformation() {
         return Comparator.comparing(path -> SOUND_INFORMATION_MAP.computeIfAbsent(path, p -> {
             try {
-                return new SoundInformation(p);
+                return Optional.of(SoundInformation.read(p));
             } catch (Exception e) {
-                LOGGER.warn(e.getMessage(), e);
-                return null;
+                LOGGER.warn("Cannot read sound information: " + p, e);
+                return Optional.empty();
             }
-        }), Comparator.nullsLast(comparingSoundInformation()));
+        }), Comparators.emptiesLast(comparingSoundInformation()));
     }
 
     private static Comparator<SoundInformation> comparingSoundInformation() {

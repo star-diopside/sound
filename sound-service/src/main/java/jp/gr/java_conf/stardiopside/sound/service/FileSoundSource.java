@@ -1,22 +1,20 @@
 package jp.gr.java_conf.stardiopside.sound.service;
 
-import java.io.IOException;
-import java.nio.file.Path;
-import java.util.ArrayList;
-import java.util.Optional;
-import java.util.ServiceLoader;
+import jp.gr.java_conf.stardiopside.sound.event.SoundActionEvent;
+import jp.gr.java_conf.stardiopside.sound.event.SoundInformation;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.context.ApplicationEventPublisher;
 
 import javax.sound.sampled.AudioFileFormat;
 import javax.sound.sampled.AudioInputStream;
 import javax.sound.sampled.UnsupportedAudioFileException;
 import javax.sound.sampled.spi.AudioFileReader;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.context.ApplicationEventPublisher;
-
-import jp.gr.java_conf.stardiopside.sound.event.SoundActionEvent;
-import jp.gr.java_conf.stardiopside.sound.event.SoundInformation;
+import java.io.IOException;
+import java.nio.file.Path;
+import java.util.Optional;
+import java.util.ServiceLoader;
+import java.util.stream.Stream;
 
 class FileSoundSource implements SoundSource {
 
@@ -30,7 +28,7 @@ class FileSoundSource implements SoundSource {
     @Override
     public AudioInputStream getAudioInputStream() throws UnsupportedAudioFileException, IOException {
         var file = path.toFile();
-        var exceptions = new ArrayList<Exception>();
+        Stream.Builder<Exception> exceptions = Stream.builder();
 
         for (var reader : ServiceLoader.load(AudioFileReader.class)) {
             AudioInputStream stream;
@@ -47,14 +45,14 @@ class FileSoundSource implements SoundSource {
         }
 
         var exc = new UnsupportedAudioFileException("File of unsupported format");
-        exceptions.forEach(exc::addSuppressed);
+        exceptions.build().forEach(exc::addSuppressed);
         throw exc;
     }
 
     @Override
     public AudioFileFormat getAudioFileFormat() throws UnsupportedAudioFileException, IOException {
         var file = path.toFile();
-        var exceptions = new ArrayList<Exception>();
+        Stream.Builder<Exception> exceptions = Stream.builder();
 
         for (var reader : ServiceLoader.load(AudioFileReader.class)) {
             AudioFileFormat format;
@@ -71,13 +69,13 @@ class FileSoundSource implements SoundSource {
         }
 
         var exc = new UnsupportedAudioFileException("File of unsupported format");
-        exceptions.forEach(exc::addSuppressed);
+        exceptions.build().forEach(exc::addSuppressed);
         throw exc;
     }
 
     @Override
     public Optional<SoundInformation> getSoundInformation() throws Exception {
-        return Optional.of(new SoundInformation(path));
+        return Optional.of(SoundInformation.read(path));
     }
 
     @Override
