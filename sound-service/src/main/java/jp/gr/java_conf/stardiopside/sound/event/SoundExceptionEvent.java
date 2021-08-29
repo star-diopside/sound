@@ -1,21 +1,20 @@
 package jp.gr.java_conf.stardiopside.sound.event;
 
-import org.springframework.context.ApplicationEvent;
-
 import lombok.Getter;
+import org.springframework.context.ApplicationEvent;
 
 @SuppressWarnings("serial")
 public class SoundExceptionEvent extends ApplicationEvent {
 
     @Getter
-    private final Object source;
+    private final Object causeSource;
 
-    public SoundExceptionEvent(Exception exception, Object source) {
+    public SoundExceptionEvent(Exception exception, Object causeSource) {
         super(exception);
-        this.source = source;
+        this.causeSource = causeSource;
     }
 
     public Exception getException() {
-        return (Exception) super.getSource();
+        return (Exception) getSource();
     }
 }

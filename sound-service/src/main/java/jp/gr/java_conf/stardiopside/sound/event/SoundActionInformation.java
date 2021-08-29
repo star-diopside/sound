@@ -1,9 +1,9 @@
 package jp.gr.java_conf.stardiopside.sound.event;
 
-public interface SoundActionInformation {
+public interface SoundActionInformation<T> {
 
     String getName();
 
-    String getInformation();
+    T getInformation();
 
 }
