@@ -1,5 +1,6 @@
 dependencies {
     api("org.springframework.boot:spring-boot-starter")
-    implementation(project(":sound-util"))
     implementation(project(":sound-compatibility"))
+    implementation("org.apache.commons:commons-lang3")
+    implementation("com.google.guava:guava")
 }

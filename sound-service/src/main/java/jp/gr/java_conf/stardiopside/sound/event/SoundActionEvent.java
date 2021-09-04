@@ -1,42 +1,65 @@
 package jp.gr.java_conf.stardiopside.sound.event;
 
-import java.nio.file.Path;
-
-import javax.sound.sampled.AudioFormat;
-
+import lombok.Data;
 import org.springframework.context.ApplicationEvent;
 
-import lombok.Data;
+import javax.sound.sampled.AudioFormat;
+import java.nio.file.Path;
 
 @SuppressWarnings("serial")
 public class SoundActionEvent extends ApplicationEvent {
 
     @Data
-    private static class SimpleSoundActionInformation implements SoundActionInformation {
+    private abstract static class AbstractSoundActionInformation<T> implements SoundActionInformation<T> {
         private final String name;
-        private final String information;
+        private final T information;
 
-        SimpleSoundActionInformation(String name, String information) {
+        AbstractSoundActionInformation(String name, T information) {
             this.name = name;
             this.information = information;
         }
 
         @Override
         public String toString() {
-            return name + ": " + information;
+            return name + ": " + toInformationString();
+        }
+
+        protected abstract String toInformationString();
+    }
+
+    private static class SimpleSoundActionInformation extends AbstractSoundActionInformation<String> {
+        SimpleSoundActionInformation(String name, String information) {
+            super(name, information);
+        }
+
+        @Override
+        protected String toInformationString() {
+            return getInformation();
         }
     }
 
-    private static class SoundFileActionInformation extends SimpleSoundActionInformation {
+    private static class SoundFileActionInformation extends AbstractSoundActionInformation<Path> {
         SoundFileActionInformation(String name, Path path) {
-            super(name, String.format("\"%s\" (Directory: \"%s\")", path.getFileName(),
-                    path.toAbsolutePath().normalize().getParent()));
+            super(name, path);
+        }
+
+        @Override
+        protected String toInformationString() {
+            var path = getInformation();
+            return String.format("\"%s\" (Directory: \"%s\")", path.getFileName(),
+                    path.toAbsolutePath().normalize().getParent());
         }
     }
 
-    private static class SoundAudioFormatActionInformation extends SimpleSoundActionInformation {
+    private static class SoundAudioFormatActionInformation extends AbstractSoundActionInformation<AudioFormat> {
         SoundAudioFormatActionInformation(String name, AudioFormat format) {
-            super(name, format.getClass() + " - " + format);
+            super(name, format);
+        }
+
+        @Override
+        protected String toInformationString() {
+            var format = getInformation();
+            return format.getClass() + " - " + format;
         }
     }
 
@@ -52,7 +75,7 @@ public class SoundActionEvent extends ApplicationEvent {
         super(new SoundAudioFormatActionInformation(name, format));
     }
 
-    public SoundActionInformation getSoundActionInformation() {
-        return (SoundActionInformation) getSource();
+    public SoundActionInformation<?> getSoundActionInformation() {
+        return (SoundActionInformation<?>) getSource();
     }
 }

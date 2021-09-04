@@ -1,22 +1,21 @@
 package jp.gr.java_conf.stardiopside.sound.model;
 
-import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.InvalidPathException;
-import java.nio.file.Path;
-import java.util.Arrays;
-import java.util.stream.Stream;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import javafx.beans.property.ReadOnlyObjectProperty;
 import javafx.beans.property.ReadOnlyObjectWrapper;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.beans.property.StringProperty;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
-import jp.gr.java_conf.stardiopside.sound.util.Comparators;
+import jp.gr.java_conf.stardiopside.sound.util.PathComparators;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.InvalidPathException;
+import java.nio.file.Path;
+import java.util.Arrays;
+import java.util.stream.Stream;
 
 public class SoundCheckerData {
 
@@ -53,7 +52,7 @@ public class SoundCheckerData {
         getSoundFiles().addAll(paths.flatMap(path -> {
             try {
                 return Files.find(path, Integer.MAX_VALUE, (p, attr) -> attr.isRegularFile())
-                        .sorted(Comparators.comparingPath());
+                        .sorted(PathComparators.comparing());
             } catch (InvalidPathException | IOException e) {
                 LOGGER.warn(e.getMessage(), e);
                 return Stream.empty();

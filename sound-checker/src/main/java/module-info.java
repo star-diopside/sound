@@ -4,7 +4,6 @@ module jp.gr.java_conf.stardiopside.sound.checker {
     opens config;
 
     requires jp.gr.java_conf.stardiopside.sound.service;
-    requires jp.gr.java_conf.stardiopside.sound.util;
     requires java.annotation;
     requires javafx.base;
     requires javafx.controls;
