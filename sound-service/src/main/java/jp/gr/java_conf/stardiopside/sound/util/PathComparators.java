@@ -89,6 +89,6 @@ public final class PathComparators {
     }
 
     private static int compareInt(String s1, String s2) {
-        return Integer.compare(NumberUtils.toInt(s1), NumberUtils.toInt(s2));
+        return Integer.compare(NumberUtils.toInt(s1, Integer.MAX_VALUE), NumberUtils.toInt(s2, Integer.MAX_VALUE));
     }
 }
