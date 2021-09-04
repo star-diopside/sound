@@ -10,7 +10,7 @@ import java.nio.file.Path;
 public class SoundActionEvent extends ApplicationEvent {
 
     @Data
-    private static abstract class AbstractSoundActionInformation<T> implements SoundActionInformation<T> {
+    private abstract static class AbstractSoundActionInformation<T> implements SoundActionInformation<T> {
         private final String name;
         private final T information;
 

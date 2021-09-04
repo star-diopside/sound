@@ -15,7 +15,7 @@ import java.util.function.IntSupplier;
 import java.util.function.Supplier;
 
 @Value
-public class SoundInformation {
+public final class SoundInformation {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(SoundInformation.class);
 
