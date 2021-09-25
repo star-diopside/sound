@@ -1,10 +1,15 @@
 plugins {
     application
+    id("org.springframework.boot")
     id("org.openjfx.javafxplugin")
 }
 
 application {
     mainModule.set("jp.gr.java_conf.stardiopside.sound.checker")
+    mainClass.set("jp.gr.java_conf.stardiopside.sound.SoundChecker")
+}
+
+springBoot {
     mainClass.set("jp.gr.java_conf.stardiopside.sound.SoundChecker")
 }
 

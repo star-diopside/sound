@@ -1,9 +1,14 @@
 plugins {
     application
+    id("org.springframework.boot")
 }
 
 application {
     mainModule.set("jp.gr.java_conf.stardiopside.sound.console")
+    mainClass.set("jp.gr.java_conf.stardiopside.sound.Console")
+}
+
+springBoot {
     mainClass.set("jp.gr.java_conf.stardiopside.sound.Console")
 }
 
