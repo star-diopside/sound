@@ -1,11 +1,11 @@
 plugins {
     `java-library`
     checkstyle
-    id("com.github.spotbugs") version "4.7.9"
-    id("org.springframework.boot") version "2.5.6" apply false
+    id("com.github.spotbugs") version "5.0.9"
+    id("org.springframework.boot") version "2.7.1" apply false
     id("io.spring.dependency-management") version "1.0.11.RELEASE"
-    id("org.openjfx.javafxplugin") version "0.0.10" apply false
-    id("org.javamodularity.moduleplugin") version "1.8.10" apply false
+    id("org.openjfx.javafxplugin") version "0.0.13" apply false
+    id("org.javamodularity.moduleplugin") version "1.8.11" apply false
 }
 
 subprojects {
@@ -18,17 +18,17 @@ subprojects {
         mavenCentral()
     }
 
-    val javafxVersion by extra { "17.0.1" }
+    val javafxVersion by extra { "18.0.1" }
 
     dependencyManagement {
         imports {
             mavenBom(org.springframework.boot.gradle.plugin.SpringBootPlugin.BOM_COORDINATES)
         }
         dependencies {
-            dependency("org.controlsfx:controlsfx:11.1.0")
+            dependency("org.controlsfx:controlsfx:11.1.1")
             dependency("org:jaudiotagger:2.0.3")
             dependency("com.googlecode.soundlibs:mp3spi:1.9.5.4")
-            dependency("com.google.guava:guava:31.0.1-jre")
+            dependency("com.google.guava:guava:31.1-jre")
         }
     }
 
