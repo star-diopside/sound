@@ -3,15 +3,15 @@ package jp.gr.java_conf.stardiopside.sound.internal;
 import jp.gr.java_conf.stardiopside.sound.event.SoundInformation;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.util.ConcurrentReferenceHashMap;
 
 import java.nio.file.Path;
 import java.util.Optional;
-import java.util.WeakHashMap;
 
 public final class SoundInformations {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(SoundInformations.class);
-    private static final ThreadLocal<WeakHashMap<Path, Optional<SoundInformation>>> CACHE = ThreadLocal.withInitial(WeakHashMap::new);
+    private static final ConcurrentReferenceHashMap<Path, Optional<SoundInformation>> CACHE = new ConcurrentReferenceHashMap<>();
 
     private SoundInformations() {
     }
@@ -26,6 +26,6 @@ public final class SoundInformations {
     }
 
     public static Optional<SoundInformation> getFromCache(Path path) {
-        return CACHE.get().computeIfAbsent(path, SoundInformations::get);
+        return CACHE.computeIfAbsent(path, SoundInformations::get);
     }
 }
