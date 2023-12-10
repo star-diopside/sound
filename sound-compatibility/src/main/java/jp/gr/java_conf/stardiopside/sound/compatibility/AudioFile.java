@@ -1,13 +1,13 @@
 package jp.gr.java_conf.stardiopside.sound.compatibility;
 
-import java.nio.file.Path;
-
 import org.jaudiotagger.audio.AudioFileIO;
 import org.jaudiotagger.audio.AudioHeader;
 import org.jaudiotagger.tag.FieldKey;
 import org.jaudiotagger.tag.Tag;
 
-public class AudioFile {
+import java.nio.file.Path;
+
+public final class AudioFile {
 
     private final AudioHeader audioHeader;
     private final Tag tag;

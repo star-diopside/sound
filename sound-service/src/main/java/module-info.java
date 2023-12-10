@@ -6,7 +6,7 @@ module jp.gr.java_conf.stardiopside.sound.service {
     requires static lombok;
     requires jp.gr.java_conf.stardiopside.sound.compatibility;
     requires transitive java.desktop;
-    requires java.annotation;
+    requires jakarta.annotation;
     requires com.google.common;
     requires org.apache.commons.lang3;
     requires org.slf4j;

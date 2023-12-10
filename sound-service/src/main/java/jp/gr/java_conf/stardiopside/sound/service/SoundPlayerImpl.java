@@ -1,18 +1,19 @@
 package jp.gr.java_conf.stardiopside.sound.service;
 
+import jakarta.annotation.PostConstruct;
+import jakarta.annotation.PreDestroy;
 import jp.gr.java_conf.stardiopside.sound.event.SoundExceptionEvent;
 import jp.gr.java_conf.stardiopside.sound.util.PathComparators;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.context.ApplicationEventPublisher;
 
-import javax.annotation.PostConstruct;
-import javax.annotation.PreDestroy;
 import java.io.IOException;
 import java.io.UncheckedIOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.time.Duration;
+import java.util.Comparator;
 import java.util.Deque;
 import java.util.concurrent.BlockingDeque;
 import java.util.concurrent.ConcurrentLinkedDeque;
@@ -129,7 +130,8 @@ public class SoundPlayerImpl implements SoundPlayer {
     @Override
     public void add(Path path) {
         try (Stream<Path> stream = Files.find(path, Integer.MAX_VALUE, (p, attr) -> attr.isRegularFile())
-                .sorted(PathComparators.comparing())) {
+                .sorted(Comparator.comparing(Path::getParent, PathComparators.comparing())
+                        .thenComparing(PathComparators.comparingBySoundInformation()))) {
             stream.forEach(beforeFiles::addLast);
         } catch (IOException e) {
             publisher.publishEvent(new SoundExceptionEvent(e, path));

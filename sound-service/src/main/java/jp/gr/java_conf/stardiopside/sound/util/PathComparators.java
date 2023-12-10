@@ -2,6 +2,7 @@ package jp.gr.java_conf.stardiopside.sound.util;
 
 import com.google.common.collect.Comparators;
 import jp.gr.java_conf.stardiopside.sound.event.SoundInformation;
+import jp.gr.java_conf.stardiopside.sound.internal.SoundInformations;
 import org.apache.commons.lang3.math.NumberUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -9,13 +10,10 @@ import org.slf4j.LoggerFactory;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.Comparator;
-import java.util.Optional;
-import java.util.WeakHashMap;
 
 public final class PathComparators {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(PathComparators.class);
-    private static final WeakHashMap<Path, Optional<SoundInformation>> SOUND_INFORMATION_MAP = new WeakHashMap<>();
 
     private PathComparators() {
     }
@@ -71,14 +69,8 @@ public final class PathComparators {
     }
 
     public static Comparator<Path> comparingBySoundInformation() {
-        return Comparator.comparing(path -> SOUND_INFORMATION_MAP.computeIfAbsent(path, p -> {
-            try {
-                return Optional.of(SoundInformation.read(p));
-            } catch (Exception e) {
-                LOGGER.warn("Cannot read sound information: " + p, e);
-                return Optional.empty();
-            }
-        }), Comparators.emptiesLast(comparingSoundInformation()));
+        return Comparator.comparing(SoundInformations::getFromCache,
+                Comparators.emptiesLast(comparingSoundInformation()));
     }
 
     private static Comparator<SoundInformation> comparingSoundInformation() {

@@ -2,6 +2,7 @@ package jp.gr.java_conf.stardiopside.sound.service;
 
 import jp.gr.java_conf.stardiopside.sound.event.SoundActionEvent;
 import jp.gr.java_conf.stardiopside.sound.event.SoundInformation;
+import jp.gr.java_conf.stardiopside.sound.internal.SoundInformations;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.context.ApplicationEventPublisher;
@@ -75,7 +76,7 @@ class FileSoundSource implements SoundSource {
 
     @Override
     public Optional<SoundInformation> getSoundInformation() throws Exception {
-        return Optional.of(SoundInformation.read(path));
+        return SoundInformations.getFromCache(path);
     }
 
     @Override

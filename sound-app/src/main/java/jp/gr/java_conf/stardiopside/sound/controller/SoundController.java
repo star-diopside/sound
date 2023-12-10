@@ -1,20 +1,6 @@
 package jp.gr.java_conf.stardiopside.sound.controller;
 
-import java.io.File;
-import java.net.URL;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.time.Duration;
-import java.time.format.DateTimeFormatter;
-import java.util.Arrays;
-import java.util.Optional;
-import java.util.ResourceBundle;
-
-import javax.annotation.PreDestroy;
-
-import org.springframework.context.event.EventListener;
-import org.springframework.stereotype.Component;
-
+import jakarta.annotation.PreDestroy;
 import javafx.application.Platform;
 import javafx.beans.binding.Bindings;
 import javafx.beans.value.ChangeListener;
@@ -39,6 +25,18 @@ import jp.gr.java_conf.stardiopside.sound.event.SoundPositionEvent;
 import jp.gr.java_conf.stardiopside.sound.model.History;
 import jp.gr.java_conf.stardiopside.sound.model.SoundData;
 import jp.gr.java_conf.stardiopside.sound.service.SoundPlayer;
+import org.springframework.context.event.EventListener;
+import org.springframework.stereotype.Component;
+
+import java.io.File;
+import java.net.URL;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.time.Duration;
+import java.time.format.DateTimeFormatter;
+import java.util.Arrays;
+import java.util.Optional;
+import java.util.ResourceBundle;
 
 @Component
 public class SoundController implements Initializable {
