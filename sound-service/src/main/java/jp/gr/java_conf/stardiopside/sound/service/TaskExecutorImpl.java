@@ -14,7 +14,7 @@ import java.util.concurrent.LinkedBlockingQueue;
 public class TaskExecutorImpl implements TaskExecutor {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(TaskExecutorImpl.class);
-    private BlockingQueue<Runnable> taskQueue = new LinkedBlockingQueue<>();
+    private final BlockingQueue<Runnable> taskQueue = new LinkedBlockingQueue<>();
     private volatile boolean running;
     private ExecutorService executorService;
     private Future<?> future;

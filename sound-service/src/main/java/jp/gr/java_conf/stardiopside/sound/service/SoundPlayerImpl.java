@@ -18,14 +18,16 @@ import java.util.Deque;
 import java.util.concurrent.BlockingDeque;
 import java.util.concurrent.ConcurrentLinkedDeque;
 import java.util.concurrent.LinkedBlockingDeque;
+import java.util.concurrent.locks.ReentrantLock;
 import java.util.stream.Stream;
 
 public class SoundPlayerImpl implements SoundPlayer {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(SoundPlayerImpl.class);
     private static final Duration BACK_THRESHOLD = Duration.ofSeconds(2);
-    private BlockingDeque<Path> beforeFiles = new LinkedBlockingDeque<>();
-    private Deque<Path> afterFiles = new ConcurrentLinkedDeque<>();
+    private final BlockingDeque<Path> beforeFiles = new LinkedBlockingDeque<>();
+    private final Deque<Path> afterFiles = new ConcurrentLinkedDeque<>();
+    private final ReentrantLock lock = new ReentrantLock();
     private volatile boolean operationWaiting;
     private volatile boolean stopping;
 
@@ -97,10 +99,16 @@ public class SoundPlayerImpl implements SoundPlayer {
 
     @Override
     public void back() {
-        if (operationWaiting) {
-            return;
+        lock.lock();
+        try {
+            if (operationWaiting) {
+                return;
+            }
+            operationWaiting = true;
+        } finally {
+            lock.unlock();
         }
-        operationWaiting = true;
+
         Duration nowPosition = soundService.getPosition();
         taskExecutor.add(() -> {
             Path path = afterFiles.pollLast();
