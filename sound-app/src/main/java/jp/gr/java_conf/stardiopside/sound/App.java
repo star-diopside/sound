@@ -1,7 +1,11 @@
 package jp.gr.java_conf.stardiopside.sound;
 
-import java.util.ResourceBundle;
-
+import javafx.application.Application;
+import javafx.fxml.FXMLLoader;
+import javafx.scene.Parent;
+import javafx.scene.Scene;
+import javafx.stage.Stage;
+import jp.gr.java_conf.stardiopside.sound.controller.SoundController;
 import org.controlsfx.dialog.ExceptionDialog;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -10,12 +14,7 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.builder.SpringApplicationBuilder;
 import org.springframework.context.ConfigurableApplicationContext;
 
-import javafx.application.Application;
-import javafx.fxml.FXMLLoader;
-import javafx.scene.Parent;
-import javafx.scene.Scene;
-import javafx.stage.Stage;
-import jp.gr.java_conf.stardiopside.sound.controller.SoundController;
+import java.util.ResourceBundle;
 
 @SpringBootApplication
 public class App extends Application {
@@ -30,7 +29,7 @@ public class App extends Application {
     @Override
     public void init() throws Exception {
         applicationContext = new SpringApplicationBuilder(getClass()).headless(false)
-                .run(getParameters().getRaw().toArray(new String[0]));
+                .run(getParameters().getRaw().toArray(String[]::new));
     }
 
     @Override
