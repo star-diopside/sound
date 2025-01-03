@@ -10,6 +10,7 @@ module jp.gr.java_conf.stardiopside.sound.checker {
     requires javafx.fxml;
     requires org.controlsfx.controls;
     requires org.slf4j;
+    requires jul.to.slf4j;
     requires org.yaml.snakeyaml;
     requires spring.boot;
     requires spring.boot.autoconfigure;
