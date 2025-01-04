@@ -4,16 +4,12 @@ import com.google.common.collect.Comparators;
 import jp.gr.java_conf.stardiopside.sound.event.SoundInformation;
 import jp.gr.java_conf.stardiopside.sound.internal.SoundInformations;
 import org.apache.commons.lang3.math.NumberUtils;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.Comparator;
 
 public final class PathComparators {
-
-    private static final Logger LOGGER = LoggerFactory.getLogger(PathComparators.class);
 
     private PathComparators() {
     }

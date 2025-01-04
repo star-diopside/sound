@@ -1,15 +1,14 @@
 package jp.gr.java_conf.stardiopside.sound.model;
 
-import java.nio.file.Path;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import javafx.beans.property.ReadOnlyObjectProperty;
 import javafx.beans.property.ReadOnlyObjectWrapper;
 import javafx.beans.property.ReadOnlyStringProperty;
 import javafx.beans.property.ReadOnlyStringWrapper;
 import jp.gr.java_conf.stardiopside.sound.service.SoundSource;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import java.nio.file.Path;
 
 public class SoundFile {
 
@@ -33,14 +32,14 @@ public class SoundFile {
         try (var ais = soundSource.getAudioInputStream()) {
             audioInput.set(ais.toString());
         } catch (Exception e) {
-            LOGGER.warn("Error occurred in " + soundSource, e);
+            LOGGER.atWarn().setCause(e).log("Error occurred in {}", soundSource);
             audioInput.set("Error");
         }
 
         try {
             audioFileFormat.set(soundSource.getAudioFileFormat().toString());
         } catch (Exception e) {
-            LOGGER.warn("Error occurred in " + soundSource, e);
+            LOGGER.atWarn().setCause(e).log("Error occurred in {}", soundSource);
             audioFileFormat.set("Error");
         }
     }

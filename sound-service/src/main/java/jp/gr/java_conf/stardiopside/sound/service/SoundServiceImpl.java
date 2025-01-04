@@ -1,9 +1,14 @@
 package jp.gr.java_conf.stardiopside.sound.service;
 
-import java.io.IOException;
-import java.time.Duration;
-import java.time.temporal.ChronoUnit;
-import java.util.Arrays;
+import jp.gr.java_conf.stardiopside.sound.event.SoundActionEvent;
+import jp.gr.java_conf.stardiopside.sound.event.SoundExceptionEvent;
+import jp.gr.java_conf.stardiopside.sound.event.SoundLineEvent;
+import jp.gr.java_conf.stardiopside.sound.event.SoundPositionEvent;
+import jp.gr.java_conf.stardiopside.sound.event.SoundPositionFinishEvent;
+import lombok.Getter;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.context.ApplicationEventPublisher;
 
 import javax.sound.sampled.AudioFormat;
 import javax.sound.sampled.AudioInputStream;
@@ -13,17 +18,10 @@ import javax.sound.sampled.LineUnavailableException;
 import javax.sound.sampled.Mixer;
 import javax.sound.sampled.SourceDataLine;
 import javax.sound.sampled.UnsupportedAudioFileException;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.context.ApplicationEventPublisher;
-
-import jp.gr.java_conf.stardiopside.sound.event.SoundActionEvent;
-import jp.gr.java_conf.stardiopside.sound.event.SoundExceptionEvent;
-import jp.gr.java_conf.stardiopside.sound.event.SoundLineEvent;
-import jp.gr.java_conf.stardiopside.sound.event.SoundPositionEvent;
-import jp.gr.java_conf.stardiopside.sound.event.SoundPositionFinishEvent;
-import lombok.Getter;
+import java.io.IOException;
+import java.time.Duration;
+import java.time.temporal.ChronoUnit;
+import java.util.Arrays;
 
 public class SoundServiceImpl implements SoundService {
 
@@ -103,13 +101,13 @@ public class SoundServiceImpl implements SoundService {
     }
 
     private void publishSoundExceptionEvent(Exception e, SoundSource soundSource) {
-        LOGGER.warn("Error occurred in " + soundSource, e);
+        LOGGER.atWarn().setCause(e).log("Error occurred in {}", soundSource);
         publisher.publishEvent(new SoundExceptionEvent(e, soundSource));
     }
 
     private void outputAudioInformation(SoundSource soundSource) {
         try {
-            soundSource.getAudioFileFormat().properties().forEach((k, v) -> LOGGER.debug(k + " = " + v));
+            soundSource.getAudioFileFormat().properties().forEach((k, v) -> LOGGER.atDebug().log("{} = {}", k, v));
         } catch (UnsupportedAudioFileException | IOException e) {
             publishSoundExceptionEvent(e, soundSource);
         }

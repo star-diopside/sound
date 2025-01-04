@@ -61,10 +61,10 @@ public class SoundPlayerImpl implements SoundPlayer {
                     afterFiles.addLast(path);
                 }
             } catch (InterruptedException e) {
-                LOGGER.debug(e.getMessage(), e);
+                LOGGER.atDebug().setCause(e).log(e.getMessage());
             } catch (Exception e) {
                 publisher.publishEvent(new SoundExceptionEvent(e, path));
-                LOGGER.warn("Error occurred in " + path, e);
+                LOGGER.atWarn().setCause(e).log("Error occurred in {}", path);
             } finally {
                 if (!stopping) {
                     taskExecutor.add(this);

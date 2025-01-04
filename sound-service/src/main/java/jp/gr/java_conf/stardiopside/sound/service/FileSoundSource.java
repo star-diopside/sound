@@ -34,14 +34,14 @@ class FileSoundSource implements SoundSource {
         for (var reader : ServiceLoader.load(AudioFileReader.class)) {
             AudioInputStream stream;
             try {
-                LOGGER.debug("Try AudioFileReader: " + reader.getClass());
+                LOGGER.atDebug().log("Try AudioFileReader: {}", reader.getClass());
                 stream = reader.getAudioInputStream(file);
             } catch (UnsupportedAudioFileException | IOException e) {
-                LOGGER.trace(e.getMessage(), e);
+                LOGGER.atTrace().setCause(e).log(e.getMessage());
                 exceptions.add(e);
                 continue;
             }
-            LOGGER.debug("Using AudioFileReader: " + reader.getClass());
+            LOGGER.atDebug().log("Using AudioFileReader: {}", reader.getClass());
             return stream;
         }
 
@@ -58,14 +58,14 @@ class FileSoundSource implements SoundSource {
         for (var reader : ServiceLoader.load(AudioFileReader.class)) {
             AudioFileFormat format;
             try {
-                LOGGER.debug("Try AudioFileReader: " + reader.getClass());
+                LOGGER.atDebug().log("Try AudioFileReader: {}", reader.getClass());
                 format = reader.getAudioFileFormat(file);
             } catch (UnsupportedAudioFileException | IOException e) {
-                LOGGER.trace(e.getMessage(), e);
+                LOGGER.atTrace().setCause(e).log(e.getMessage());
                 exceptions.add(e);
                 continue;
             }
-            LOGGER.debug("Using AudioFileReader: " + reader.getClass());
+            LOGGER.atDebug().log("Using AudioFileReader: {}", reader.getClass());
             return format;
         }
 

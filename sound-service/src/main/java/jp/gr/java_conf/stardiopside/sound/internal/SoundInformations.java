@@ -20,7 +20,7 @@ public final class SoundInformations {
         try {
             return Optional.of(SoundInformation.read(path));
         } catch (Exception e) {
-            LOGGER.warn("Cannot read sound information: " + path, e);
+            LOGGER.atWarn().setCause(e).log("Cannot read sound information: {}", path);
             return Optional.empty();
         }
     }

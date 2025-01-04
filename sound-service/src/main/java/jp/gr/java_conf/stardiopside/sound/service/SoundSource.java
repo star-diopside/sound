@@ -1,21 +1,19 @@
 package jp.gr.java_conf.stardiopside.sound.service;
 
-import java.io.IOException;
-import java.io.InputStream;
-import java.nio.file.Path;
-import java.util.Optional;
-
-import javax.sound.sampled.AudioFileFormat;
-import javax.sound.sampled.AudioInputStream;
-import javax.sound.sampled.UnsupportedAudioFileException;
-
+import jp.gr.java_conf.stardiopside.sound.event.SoundExceptionEvent;
+import jp.gr.java_conf.stardiopside.sound.event.SoundInformation;
+import jp.gr.java_conf.stardiopside.sound.event.SoundInformationEvent;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.context.ApplicationEventPublisher;
 
-import jp.gr.java_conf.stardiopside.sound.event.SoundExceptionEvent;
-import jp.gr.java_conf.stardiopside.sound.event.SoundInformation;
-import jp.gr.java_conf.stardiopside.sound.event.SoundInformationEvent;
+import javax.sound.sampled.AudioFileFormat;
+import javax.sound.sampled.AudioInputStream;
+import javax.sound.sampled.UnsupportedAudioFileException;
+import java.io.IOException;
+import java.io.InputStream;
+import java.nio.file.Path;
+import java.util.Optional;
 
 public interface SoundSource {
 
@@ -37,7 +35,7 @@ public interface SoundSource {
         try {
             getSoundInformation().map(SoundInformationEvent::new).ifPresent(publisher::publishEvent);
         } catch (Exception e) {
-            SoundSourceLogger.LOGGER.warn(e.getMessage(), e);
+            SoundSourceLogger.LOGGER.atWarn().setCause(e).log(e.getMessage());
             publisher.publishEvent(new SoundExceptionEvent(e, this));
         }
     }

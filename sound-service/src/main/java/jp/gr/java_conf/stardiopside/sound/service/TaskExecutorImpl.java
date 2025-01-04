@@ -67,9 +67,9 @@ public class TaskExecutorImpl implements TaskExecutor {
             try {
                 taskQueue.take().run();
             } catch (InterruptedException e) {
-                LOGGER.debug(e.getMessage(), e);
+                LOGGER.atDebug().setCause(e).log(e.getMessage());
             } catch (Exception e) {
-                LOGGER.warn(e.getMessage(), e);
+                LOGGER.atWarn().setCause(e).log(e.getMessage());
             } finally {
                 if (running) {
                     future = executorService.submit(this);

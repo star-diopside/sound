@@ -55,18 +55,18 @@ public class Console implements ApplicationRunner {
                             .sorted(Comparator.comparing(Path::getParent, PathComparators.comparing())
                                     .thenComparing(PathComparators.comparingBySoundInformation()));
                 } catch (InvalidPathException | IOException e) {
-                    LOGGER.warn(e.getMessage(), e);
+                    LOGGER.atWarn().setCause(e).log(e.getMessage());
                     return Stream.empty();
                 }
             }).forEach(path -> {
                 try {
                     service.play(path);
                 } catch (Exception e) {
-                    LOGGER.error("Error occurred in " + path, e);
+                    LOGGER.atError().setCause(e).log("Error occurred in {}", path);
                 }
             });
         } finally {
-            LOGGER.info("Execution Time: " + getExecutionTimeString(start));
+            LOGGER.atInfo().log("Execution Time: {}", getExecutionTimeString(start));
             stopped = true;
         }
     }
@@ -92,22 +92,22 @@ public class Console implements ApplicationRunner {
                 .mapToInt(String::length)
                 .max()
                 .ifPresent(i -> info.forEach(
-                        (k, v) -> LOGGER.info(String.format("%" + i + "s: %s", k, v))));
+                        (k, v) -> LOGGER.atInfo().log(String.format("%" + i + "s: %s", k, v))));
     }
 
     @EventListener
     public void onSoundLineEvent(SoundLineEvent event) {
-        LOGGER.info(event.getLineEvent().toString());
+        LOGGER.atInfo().log(event.getLineEvent().toString());
     }
 
     @EventListener
     public void onSoundActionEvent(SoundActionEvent event) {
-        LOGGER.info(event.getSoundActionInformation().toString());
+        LOGGER.atInfo().log(event.getSoundActionInformation().toString());
     }
 
     @EventListener
     public void onSoundExceptionEvent(SoundExceptionEvent event) {
-        LOGGER.info("Error: thrown " + event.getException().getClass().getName());
+        LOGGER.atInfo().log("Error: thrown {}", event.getException().getClass().getName());
     }
 
     @EventListener
