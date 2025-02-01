@@ -61,7 +61,7 @@ public class SoundPlayerImpl implements SoundPlayer {
                     afterFiles.addLast(path);
                 }
             } catch (InterruptedException e) {
-                LOGGER.atDebug().setCause(e).log(e.getMessage());
+                LOGGER.atDebug().setCause(e).log(e::getMessage);
             } catch (Exception e) {
                 publisher.publishEvent(new SoundExceptionEvent(e, path));
                 LOGGER.atWarn().setCause(e).log("Error occurred in {}", path);

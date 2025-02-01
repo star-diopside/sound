@@ -55,7 +55,7 @@ public class Console implements ApplicationRunner {
                             .sorted(Comparator.comparing(Path::getParent, PathComparators.comparing())
                                     .thenComparing(PathComparators.comparingBySoundInformation()));
                 } catch (InvalidPathException | IOException e) {
-                    LOGGER.atWarn().setCause(e).log(e.getMessage());
+                    LOGGER.atWarn().setCause(e).log(e::getMessage);
                     return Stream.empty();
                 }
             }).forEach(path -> {
@@ -66,7 +66,9 @@ public class Console implements ApplicationRunner {
                 }
             });
         } finally {
-            LOGGER.atInfo().log("Execution Time: {}", getExecutionTimeString(start));
+            LOGGER.atInfo().setMessage("Execution Time: {}")
+                    .addArgument(() -> getExecutionTimeString(start))
+                    .log();
             stopped = true;
         }
     }
@@ -91,23 +93,30 @@ public class Console implements ApplicationRunner {
         info.keySet().stream()
                 .mapToInt(String::length)
                 .max()
-                .ifPresent(i -> info.forEach(
-                        (k, v) -> LOGGER.atInfo().log(String.format("%" + i + "s: %s", k, v))));
+                .ifPresent(i -> {
+                    var keyFormat = "%" + i + "s";
+                    info.forEach((k, v) -> LOGGER.atInfo().setMessage("{}: {}")
+                            .addArgument(() -> String.format(keyFormat, k))
+                            .addArgument(v)
+                            .log());
+                });
     }
 
     @EventListener
     public void onSoundLineEvent(SoundLineEvent event) {
-        LOGGER.atInfo().log(event.getLineEvent().toString());
+        LOGGER.atInfo().log(() -> event.getLineEvent().toString());
     }
 
     @EventListener
     public void onSoundActionEvent(SoundActionEvent event) {
-        LOGGER.atInfo().log(event.getSoundActionInformation().toString());
+        LOGGER.atInfo().log(() -> event.getSoundActionInformation().toString());
     }
 
     @EventListener
     public void onSoundExceptionEvent(SoundExceptionEvent event) {
-        LOGGER.atInfo().log("Error: thrown {}", event.getException().getClass().getName());
+        LOGGER.atInfo().setMessage("Error: thrown {}")
+                .addArgument(() -> event.getException().getClass().getName())
+                .log();
     }
 
     @EventListener

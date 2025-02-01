@@ -37,7 +37,7 @@ public class App extends Application {
         var messages = ResourceBundle.getBundle("messages");
 
         Thread.currentThread().setUncaughtExceptionHandler((t, e) -> {
-            LOGGER.atError().setCause(e).log(e.getMessage());
+            LOGGER.atError().setCause(e).log(e::getMessage);
             var dialog = new ExceptionDialog(e);
             dialog.setHeaderText(messages.getString("message.uncaughtException"));
             dialog.show();

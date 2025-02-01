@@ -86,7 +86,7 @@ public final class SoundInformation {
         try {
             return Optional.ofNullable(s.get());
         } catch (Exception e) {
-            LOGGER.atDebug().setCause(e).log(e.getMessage());
+            LOGGER.atDebug().setCause(e).log(e::getMessage);
             return Optional.empty();
         }
     }
@@ -95,7 +95,7 @@ public final class SoundInformation {
         try {
             return OptionalInt.of(s.getAsInt());
         } catch (Exception e) {
-            LOGGER.atDebug().setCause(e).log(e.getMessage());
+            LOGGER.atDebug().setCause(e).log(e::getMessage);
             return OptionalInt.empty();
         }
     }

@@ -35,7 +35,7 @@ public interface SoundSource {
         try {
             getSoundInformation().map(SoundInformationEvent::new).ifPresent(publisher::publishEvent);
         } catch (Exception e) {
-            SoundSourceLogger.LOGGER.atWarn().setCause(e).log(e.getMessage());
+            SoundSourceLogger.LOGGER.atWarn().setCause(e).log(e::getMessage);
             publisher.publishEvent(new SoundExceptionEvent(e, this));
         }
     }

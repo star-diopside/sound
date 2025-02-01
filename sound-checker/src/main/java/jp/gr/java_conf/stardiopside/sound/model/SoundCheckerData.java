@@ -54,7 +54,7 @@ public class SoundCheckerData {
                 return Files.find(path, Integer.MAX_VALUE, (p, attr) -> attr.isRegularFile())
                         .sorted(PathComparators.comparing());
             } catch (InvalidPathException | IOException e) {
-                LOGGER.atWarn().setCause(e).log(e.getMessage());
+                LOGGER.atWarn().setCause(e).log(e::getMessage);
                 return Stream.empty();
             }
         }).map(SoundFile::new).toArray(SoundFile[]::new));

@@ -33,14 +33,14 @@ class InputStreamSoundSource implements SoundSource {
         for (var reader : ServiceLoader.load(AudioFileReader.class)) {
             AudioInputStream stream;
             try {
-                LOGGER.atDebug().log("Try AudioFileReader: {}", reader.getClass());
+                LOGGER.atDebug().setMessage("Try AudioFileReader: {}").addArgument(reader::getClass).log();
                 stream = reader.getAudioInputStream(inputStream);
             } catch (UnsupportedAudioFileException | IOException e) {
-                LOGGER.atTrace().setCause(e).log(e.getMessage());
+                LOGGER.atTrace().setCause(e).log(e::getMessage);
                 exceptions.add(e);
                 continue;
             }
-            LOGGER.atDebug().log("Using AudioFileReader: {}", reader.getClass());
+            LOGGER.atDebug().setMessage("Using AudioFileReader: {}").addArgument(reader::getClass).log();
             return stream;
         }
 
@@ -56,14 +56,14 @@ class InputStreamSoundSource implements SoundSource {
         for (var reader : ServiceLoader.load(AudioFileReader.class)) {
             AudioFileFormat format;
             try {
-                LOGGER.atDebug().log("Try AudioFileReader: {}", reader.getClass());
+                LOGGER.atDebug().setMessage("Try AudioFileReader: {}").addArgument(reader::getClass).log();
                 format = reader.getAudioFileFormat(inputStream);
             } catch (UnsupportedAudioFileException | IOException e) {
-                LOGGER.atTrace().setCause(e).log(e.getMessage());
+                LOGGER.atTrace().setCause(e).log(e::getMessage);
                 exceptions.add(e);
                 continue;
             }
-            LOGGER.atDebug().log("Using AudioFileReader: {}", reader.getClass());
+            LOGGER.atDebug().setMessage("Using AudioFileReader: {}").addArgument(reader::getClass).log();
             return format;
         }
 
