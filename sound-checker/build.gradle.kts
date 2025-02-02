@@ -23,6 +23,10 @@ javafx {
 dependencies {
     implementation(project(":sound-service"))
     implementation("org.controlsfx:controlsfx")
-    runtimeOnly(files("${rootDir}/libs/jaad-0.8.4.jar"))
-    runtimeOnly("com.googlecode.soundlibs:mp3spi")
+    runtimeOnly("io.github.jseproject:jse-spi-flac")
+    runtimeOnly("io.github.jseproject:jse-spi-opus")
+    runtimeOnly("io.github.jseproject:jse-spi-vorbis")
+    runtimeOnly("io.github.jseproject:jse-spi-speex")
+    runtimeOnly("io.github.jseproject:jse-spi-mp3")
+    runtimeOnly("io.github.jseproject:jse-spi-aac")
 }
