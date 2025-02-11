@@ -8,6 +8,7 @@ import jp.gr.java_conf.stardiopside.sound.service.SoundSource;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.io.IOException;
 import java.nio.file.Path;
 
 public class SoundFile {
@@ -27,20 +28,22 @@ public class SoundFile {
         directoryName = new ReadOnlyObjectWrapper<>(dir);
         extension = new ReadOnlyStringWrapper(ext);
 
-        var soundSource = SoundSource.of(path);
+        try (var soundSource = SoundSource.of(path)) {
+            try (var ais = soundSource.getAudioInputStream()) {
+                audioInput.set(ais.toString());
+            } catch (Exception e) {
+                LOGGER.atWarn().setCause(e).log("Error occurred in {}", soundSource);
+                audioInput.set("Error");
+            }
 
-        try (var ais = soundSource.getAudioInputStream()) {
-            audioInput.set(ais.toString());
-        } catch (Exception e) {
-            LOGGER.atWarn().setCause(e).log("Error occurred in {}", soundSource);
-            audioInput.set("Error");
-        }
-
-        try {
-            audioFileFormat.set(soundSource.getAudioFileFormat().toString());
-        } catch (Exception e) {
-            LOGGER.atWarn().setCause(e).log("Error occurred in {}", soundSource);
-            audioFileFormat.set("Error");
+            try {
+                audioFileFormat.set(soundSource.getAudioFileFormat().toString());
+            } catch (Exception e) {
+                LOGGER.atWarn().setCause(e).log("Error occurred in {}", soundSource);
+                audioFileFormat.set("Error");
+            }
+        } catch (IOException e) {
+            LOGGER.atWarn().setCause(e).log(e::getMessage);
         }
     }
 

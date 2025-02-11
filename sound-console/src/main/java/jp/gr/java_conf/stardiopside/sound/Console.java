@@ -7,6 +7,7 @@ import jp.gr.java_conf.stardiopside.sound.event.SoundInformationEvent;
 import jp.gr.java_conf.stardiopside.sound.event.SoundLineEvent;
 import jp.gr.java_conf.stardiopside.sound.event.SoundPositionEvent;
 import jp.gr.java_conf.stardiopside.sound.service.SoundService;
+import jp.gr.java_conf.stardiopside.sound.service.SoundSource;
 import jp.gr.java_conf.stardiopside.sound.util.PathComparators;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -17,6 +18,11 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.context.event.EventListener;
 
 import java.io.IOException;
+import java.io.UncheckedIOException;
+import java.net.MalformedURLException;
+import java.net.URI;
+import java.net.URISyntaxException;
+import java.net.URL;
 import java.nio.file.Files;
 import java.nio.file.InvalidPathException;
 import java.nio.file.Path;
@@ -25,6 +31,7 @@ import java.time.LocalDateTime;
 import java.util.Comparator;
 import java.util.Formatter;
 import java.util.Optional;
+import java.util.function.Supplier;
 import java.util.stream.Stream;
 
 @SpringBootApplication
@@ -49,20 +56,15 @@ public class Console implements ApplicationRunner {
         start = LocalDateTime.now();
 
         try {
-            args.getNonOptionArgs().stream().flatMap(s -> {
-                try {
-                    return Files.find(Path.of(s), Integer.MAX_VALUE, (p, attr) -> attr.isRegularFile())
-                            .sorted(Comparator.comparing(Path::getParent, PathComparators.comparing())
-                                    .thenComparing(PathComparators.comparingBySoundInformation()));
-                } catch (InvalidPathException | IOException e) {
-                    LOGGER.atWarn().setCause(e).log(e::getMessage);
-                    return Stream.empty();
-                }
-            }).forEach(path -> {
-                try {
-                    service.play(path);
+            args.getNonOptionArgs().stream().flatMap(Console::getSoundSource).forEach(s -> {
+                try (var soundSource = s.get()) {
+                    try {
+                        service.play(soundSource);
+                    } catch (Exception e) {
+                        LOGGER.atError().setCause(e).log("Error occurred in {}", soundSource);
+                    }
                 } catch (Exception e) {
-                    LOGGER.atError().setCause(e).log("Error occurred in {}", path);
+                    LOGGER.atError().setCause(e).log(e::getMessage);
                 }
             });
         } finally {
@@ -78,6 +80,50 @@ public class Console implements ApplicationRunner {
         if (start != null && !stopped) {
             System.err.println("Execution Time: " + getExecutionTimeString(start));
         }
+    }
+
+    private static Stream<Supplier<SoundSource>> getSoundSource(String arg) {
+        if (arg.startsWith("http://") || arg.startsWith("https://")) {
+            return getSoundSourceFromHttpScheme(arg);
+        } else {
+            return getSoundSourceFromPath(arg);
+        }
+    }
+
+    private static Stream<Supplier<SoundSource>> getSoundSourceFromHttpScheme(String arg) {
+        try {
+            var url = new URI(arg).toURL();
+            return Stream.of(supplySoundSource(url));
+        } catch (URISyntaxException | MalformedURLException e) {
+            LOGGER.atWarn().setCause(e).log(e::getMessage);
+            return Stream.empty();
+        }
+    }
+
+    private static Stream<Supplier<SoundSource>> getSoundSourceFromPath(String arg) {
+        try {
+            return Files.find(Path.of(arg), Integer.MAX_VALUE, (p, attr) -> attr.isRegularFile())
+                    .sorted(Comparator.comparing(Path::getParent, PathComparators.comparing())
+                            .thenComparing(PathComparators.comparingBySoundInformation()))
+                    .map(Console::supplySoundSource);
+        } catch (InvalidPathException | IOException e) {
+            LOGGER.atWarn().setCause(e).log(e::getMessage);
+            return Stream.empty();
+        }
+    }
+
+    private static Supplier<SoundSource> supplySoundSource(URL url) {
+        return () -> {
+            try {
+                return SoundSource.of(url.openStream(), url.getFile());
+            } catch (IOException e) {
+                throw new UncheckedIOException(e);
+            }
+        };
+    }
+
+    private static Supplier<SoundSource> supplySoundSource(Path path) {
+        return () -> SoundSource.of(path);
     }
 
     private static String getExecutionTimeString(LocalDateTime start) {

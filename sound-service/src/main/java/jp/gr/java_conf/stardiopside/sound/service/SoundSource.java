@@ -15,7 +15,7 @@ import java.io.InputStream;
 import java.nio.file.Path;
 import java.util.Optional;
 
-public interface SoundSource {
+public interface SoundSource extends AutoCloseable {
 
     AudioInputStream getAudioInputStream() throws UnsupportedAudioFileException, IOException;
 
@@ -40,8 +40,16 @@ public interface SoundSource {
         }
     }
 
+    @Override
+    default void close() throws IOException {
+    }
+
     static SoundSource of(Path path) {
         return new FileSoundSource(path);
+    }
+
+    static SoundSource of(InputStream inputStream) {
+        return new InputStreamSoundSource(inputStream);
     }
 
     static SoundSource of(InputStream inputStream, String name) {

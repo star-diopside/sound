@@ -21,9 +21,18 @@ class InputStreamSoundSource implements SoundSource {
     private final InputStream inputStream;
     private final String name;
 
+    InputStreamSoundSource(InputStream inputStream) {
+        this(inputStream, null);
+    }
+
     InputStreamSoundSource(InputStream inputStream, String name) {
         this.inputStream = inputStream.markSupported() ? inputStream : new BufferedInputStream(inputStream);
         this.name = (name == null ? "unnamed" : name);
+    }
+
+    @Override
+    public void close() throws IOException {
+        inputStream.close();
     }
 
     @Override
