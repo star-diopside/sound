@@ -56,17 +56,9 @@ public class Console implements ApplicationRunner {
         start = LocalDateTime.now();
 
         try {
-            args.getNonOptionArgs().stream().flatMap(Console::getSoundSource).forEach(s -> {
-                try (var soundSource = s.get()) {
-                    try {
-                        service.play(soundSource);
-                    } catch (Exception e) {
-                        LOGGER.atError().setCause(e).log("Error occurred in {}", soundSource);
-                    }
-                } catch (Exception e) {
-                    LOGGER.atError().setCause(e).log(e::getMessage);
-                }
-            });
+            args.getNonOptionArgs().stream()
+                    .flatMap(this::streamSoundSource)
+                    .forEach(this::playSound);
         } finally {
             LOGGER.atInfo().setMessage("Execution Time: {}")
                     .addArgument(() -> getExecutionTimeString(start))
@@ -82,15 +74,27 @@ public class Console implements ApplicationRunner {
         }
     }
 
-    private static Stream<Supplier<SoundSource>> getSoundSource(String arg) {
-        if (arg.startsWith("http://") || arg.startsWith("https://")) {
-            return getSoundSourceFromHttpScheme(arg);
-        } else {
-            return getSoundSourceFromPath(arg);
+    private void playSound(Supplier<SoundSource> s) {
+        try (var soundSource = s.get()) {
+            try {
+                service.play(soundSource);
+            } catch (Exception e) {
+                LOGGER.atError().setCause(e).log("Error occurred in {}", soundSource);
+            }
+        } catch (Exception e) {
+            LOGGER.atError().setCause(e).log(e::getMessage);
         }
     }
 
-    private static Stream<Supplier<SoundSource>> getSoundSourceFromHttpScheme(String arg) {
+    private Stream<Supplier<SoundSource>> streamSoundSource(String arg) {
+        if (arg.startsWith("http://") || arg.startsWith("https://")) {
+            return streamSoundSourceFromHttpScheme(arg);
+        } else {
+            return streamSoundSourceFromPath(arg);
+        }
+    }
+
+    private Stream<Supplier<SoundSource>> streamSoundSourceFromHttpScheme(String arg) {
         try {
             var url = new URI(arg).toURL();
             return Stream.of(supplySoundSource(url));
@@ -100,19 +104,19 @@ public class Console implements ApplicationRunner {
         }
     }
 
-    private static Stream<Supplier<SoundSource>> getSoundSourceFromPath(String arg) {
+    private Stream<Supplier<SoundSource>> streamSoundSourceFromPath(String arg) {
         try {
-            return Files.find(Path.of(arg), Integer.MAX_VALUE, (p, attr) -> attr.isRegularFile())
+            return Files.find(Path.of(arg), Integer.MAX_VALUE, (_, attr) -> attr.isRegularFile())
                     .sorted(Comparator.comparing(Path::getParent, PathComparators.comparing())
                             .thenComparing(PathComparators.comparingBySoundInformation()))
-                    .map(Console::supplySoundSource);
+                    .map(this::supplySoundSource);
         } catch (InvalidPathException | IOException e) {
             LOGGER.atWarn().setCause(e).log(e::getMessage);
             return Stream.empty();
         }
     }
 
-    private static Supplier<SoundSource> supplySoundSource(URL url) {
+    private Supplier<SoundSource> supplySoundSource(URL url) {
         return () -> {
             try {
                 return SoundSource.of(url.openStream(), url.getFile());
@@ -122,11 +126,11 @@ public class Console implements ApplicationRunner {
         };
     }
 
-    private static Supplier<SoundSource> supplySoundSource(Path path) {
+    private Supplier<SoundSource> supplySoundSource(Path path) {
         return () -> SoundSource.of(path);
     }
 
-    private static String getExecutionTimeString(LocalDateTime start) {
+    private String getExecutionTimeString(LocalDateTime start) {
         var end = LocalDateTime.now();
         var d = Duration.between(start, end);
         return String.format("%02d:%02d:%02d", d.toHours(), d.toMinutesPart(), d.toSecondsPart());
