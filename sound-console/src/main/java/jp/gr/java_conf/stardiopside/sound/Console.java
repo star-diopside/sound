@@ -61,7 +61,7 @@ public class Console implements ApplicationRunner {
                     .forEach(this::playSound);
         } finally {
             LOGGER.atInfo().setMessage("Execution Time: {}")
-                    .addArgument(() -> getExecutionTimeString(start))
+                    .addArgument(this::getExecutionTimeString)
                     .log();
             stopped = true;
         }
@@ -70,7 +70,7 @@ public class Console implements ApplicationRunner {
     @PreDestroy
     public void onDestroy() {
         if (start != null && !stopped) {
-            System.err.println("Execution Time: " + getExecutionTimeString(start));
+            System.err.println("Execution Time: " + getExecutionTimeString());
         }
     }
 
@@ -130,7 +130,7 @@ public class Console implements ApplicationRunner {
         return () -> SoundSource.of(path);
     }
 
-    private String getExecutionTimeString(LocalDateTime start) {
+    private String getExecutionTimeString() {
         var end = LocalDateTime.now();
         var d = Duration.between(start, end);
         return String.format("%02d:%02d:%02d", d.toHours(), d.toMinutesPart(), d.toSecondsPart());
