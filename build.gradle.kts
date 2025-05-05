@@ -49,18 +49,6 @@ subprojects {
         ignoreFailures = true
     }
 
-    tasks.compileJava {
-        options.encoding = "UTF-8"
-    }
-
-    tasks.compileTestJava {
-        options.encoding = "UTF-8"
-    }
-
-    tasks.javadoc {
-        options.encoding = "UTF-8"
-    }
-
     tasks.checkstyleMain {
         exclude("**/module-info.java")
     }

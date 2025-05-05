@@ -5,12 +5,23 @@ plugins {
 }
 
 application {
-    mainModule.set("jp.gr.java_conf.stardiopside.sound.checker")
-    mainClass.set("jp.gr.java_conf.stardiopside.sound.SoundChecker")
+    mainModule = "jp.gr.java_conf.stardiopside.sound.checker"
+    mainClass = "jp.gr.java_conf.stardiopside.sound.SoundChecker"
+    applicationDefaultJvmArgs = listOf("--enable-native-access=javafx.graphics")
 }
 
 springBoot {
-    mainClass.set("jp.gr.java_conf.stardiopside.sound.SoundChecker")
+    mainClass = "jp.gr.java_conf.stardiopside.sound.SoundChecker"
+}
+
+tasks.bootStartScripts {
+    defaultJvmOpts = listOf()
+}
+
+tasks.bootJar {
+    manifest {
+        attributes("Enable-Native-Access" to "ALL-UNNAMED")
+    }
 }
 
 val javafxVersion: String by extra

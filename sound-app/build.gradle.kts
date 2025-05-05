@@ -5,12 +5,23 @@ plugins {
 }
 
 application {
-    mainModule.set("jp.gr.java_conf.stardiopside.sound.app")
-    mainClass.set("jp.gr.java_conf.stardiopside.sound.App")
+    mainModule = "jp.gr.java_conf.stardiopside.sound.app"
+    mainClass = "jp.gr.java_conf.stardiopside.sound.App"
+    applicationDefaultJvmArgs = listOf("--enable-native-access=javafx.graphics")
 }
 
 springBoot {
-    mainClass.set("jp.gr.java_conf.stardiopside.sound.App")
+    mainClass = "jp.gr.java_conf.stardiopside.sound.App"
+}
+
+tasks.bootStartScripts {
+    defaultJvmOpts = listOf()
+}
+
+tasks.bootJar {
+    manifest {
+        attributes("Enable-Native-Access" to "ALL-UNNAMED")
+    }
 }
 
 val javafxVersion: String by extra

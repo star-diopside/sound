@@ -4,12 +4,12 @@ plugins {
 }
 
 application {
-    mainModule.set("jp.gr.java_conf.stardiopside.sound.console")
-    mainClass.set("jp.gr.java_conf.stardiopside.sound.Console")
+    mainModule = "jp.gr.java_conf.stardiopside.sound.console"
+    mainClass = "jp.gr.java_conf.stardiopside.sound.Console"
 }
 
 springBoot {
-    mainClass.set("jp.gr.java_conf.stardiopside.sound.Console")
+    mainClass = "jp.gr.java_conf.stardiopside.sound.Console"
 }
 
 dependencies {
