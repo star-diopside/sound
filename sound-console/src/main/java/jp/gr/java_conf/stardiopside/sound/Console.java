@@ -172,8 +172,8 @@ public class Console implements ApplicationRunner {
     @EventListener
     public void onSoundPositionEvent(SoundPositionEvent event) {
         event.getPosition().ifPresentOrElse(position -> {
-            long len = trackLength.map(Duration::getSeconds).orElse(0L);
-            int percent = (len == 0L ? 0 : (int) (100.0 * position.getSeconds() / len));
+            double len = trackLength.map(this::toDoubleValue).orElse(0.0);
+            int percent = (len == 0.0 ? 0 : (int) Math.round(100.0 * toDoubleValue(position) / len));
             int progress = Math.round(percent / 10.0F);
 
             try (var formatter = new Formatter()) {
@@ -187,5 +187,9 @@ public class Console implements ApplicationRunner {
         }, () -> {
             trackLength = Optional.empty();
         });
+    }
+
+    private double toDoubleValue(Duration d) {
+        return d.getSeconds() + d.getNano() * 1.0e-9;
     }
 }
