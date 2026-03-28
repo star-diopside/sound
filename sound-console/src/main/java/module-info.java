@@ -4,6 +4,7 @@ module jp.gr.java_conf.stardiopside.sound.console {
 
     requires jp.gr.java_conf.stardiopside.sound.service;
     requires jakarta.annotation;
+    requires org.apache.commons.logging;
     requires org.slf4j;
     requires jul.to.slf4j;
     requires org.yaml.snakeyaml;
