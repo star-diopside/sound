@@ -11,6 +11,6 @@ logging:
     name: ${user.home}/logs/sound-app/error.log
   level:
     root: WARN
-    jp.gr.java_conf.stardiopside.sound: INFO
+    "[jp.gr.java_conf.stardiopside.sound]": INFO
   threshold:
     file: ERROR
