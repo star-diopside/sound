@@ -1,3 +1,7 @@
+plugins {
+    id("java-common-conventions")
+}
+
 dependencies {
     api("org.springframework.boot:spring-boot-starter")
     implementation(project(":sound-compatibility"))

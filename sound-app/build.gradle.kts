@@ -1,5 +1,6 @@
 plugins {
     application
+    id("java-common-conventions")
     id("org.springframework.boot")
     id("org.openjfx.javafxplugin")
 }
@@ -24,7 +25,7 @@ tasks.bootJar {
     }
 }
 
-val javafxVersion: String by extra
+val javafxVersion = extra["javafxVersion"] as String
 
 javafx {
     version = javafxVersion
