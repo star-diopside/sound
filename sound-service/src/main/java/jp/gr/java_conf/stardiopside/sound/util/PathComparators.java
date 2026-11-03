@@ -4,6 +4,7 @@ import com.google.common.collect.Comparators;
 import jp.gr.java_conf.stardiopside.sound.event.SoundInformation;
 import jp.gr.java_conf.stardiopside.sound.internal.SoundInformations;
 import org.apache.commons.lang3.math.NumberUtils;
+import org.jspecify.annotations.Nullable;
 
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -18,7 +19,7 @@ public final class PathComparators {
         return Comparator.comparing(PathParts::of, Comparator.naturalOrder());
     }
 
-    private static record PathParts(Path parent, Path fileName) implements Comparable<PathParts> {
+    private static record PathParts(@Nullable Path parent, @Nullable Path fileName) implements Comparable<PathParts> {
 
         private static PathParts of(Path path) {
             if (Files.isDirectory(path)) {

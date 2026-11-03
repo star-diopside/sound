@@ -1,14 +1,5 @@
 package jp.gr.java_conf.stardiopside.sound.model;
 
-import java.nio.file.Path;
-import java.time.Duration;
-import java.time.LocalDateTime;
-import java.util.Optional;
-import java.util.OptionalInt;
-import java.util.function.Predicate;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
-
 import javafx.beans.binding.Bindings;
 import javafx.beans.binding.DoubleBinding;
 import javafx.beans.binding.ObjectBinding;
@@ -21,6 +12,17 @@ import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.collections.transformation.SortedList;
 import jp.gr.java_conf.stardiopside.sound.event.SoundInformation;
+import org.jspecify.annotations.Nullable;
+
+import java.nio.file.Path;
+import java.time.Duration;
+import java.time.LocalDateTime;
+import java.time.ZoneId;
+import java.util.Optional;
+import java.util.OptionalInt;
+import java.util.function.Predicate;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 public class SoundData {
 
@@ -100,8 +102,7 @@ public class SoundData {
     private final DoubleBinding trackProgress = Bindings.createDoubleBinding(
             () -> trackPosition.get() == null || trackLength.get() == null || trackLength.get().equals(Duration.ZERO)
                     ? 0.0
-                    : (trackPosition.get().getSeconds() + trackPosition.get().getNano() * 1.0e-9)
-                            / (trackLength.get().getSeconds() + trackLength.get().getNano() * 1.0e-9),
+                    : divide(trackPosition.get(), trackLength.get()),
             trackPosition, trackLength);
 
     public StringBinding windowTitleBinding() {
@@ -116,11 +117,11 @@ public class SoundData {
         return soundInformation;
     }
 
-    public SoundInformation getSoundInformation() {
+    public @Nullable SoundInformation getSoundInformation() {
         return soundInformation.get();
     }
 
-    public void setSoundInformation(SoundInformation soundInformation) {
+    public void setSoundInformation(@Nullable SoundInformation soundInformation) {
         this.soundInformation.set(soundInformation);
     }
 
@@ -128,11 +129,11 @@ public class SoundData {
         return trackPosition;
     }
 
-    public Duration getTrackPosition() {
+    public @Nullable Duration getTrackPosition() {
         return trackPosition.get();
     }
 
-    public void setTrackPosition(Duration trackPosition) {
+    public void setTrackPosition(@Nullable Duration trackPosition) {
         this.trackPosition.set(trackPosition);
     }
 
@@ -273,6 +274,10 @@ public class SoundData {
     }
 
     public void addHistory(Object event) {
-        histories.add(new History(LocalDateTime.now(), String.valueOf(event)));
+        histories.add(new History(LocalDateTime.now(ZoneId.systemDefault()), String.valueOf(event)));
+    }
+
+    private static double divide(Duration x, Duration y) {
+        return (x.getSeconds() + x.getNano() * 1.0e-9) / (y.getSeconds() + y.getNano() * 1.0e-9);
     }
 }

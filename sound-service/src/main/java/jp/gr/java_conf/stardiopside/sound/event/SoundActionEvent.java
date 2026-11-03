@@ -24,6 +24,7 @@ public class SoundActionEvent extends ApplicationEvent {
             return name + ": " + toInformationString();
         }
 
+        @SuppressWarnings("EffectivelyPrivate")
         protected abstract String toInformationString();
     }
 

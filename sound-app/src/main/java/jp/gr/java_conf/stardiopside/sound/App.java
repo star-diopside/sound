@@ -7,6 +7,7 @@ import javafx.scene.Scene;
 import javafx.stage.Stage;
 import jp.gr.java_conf.stardiopside.sound.controller.SoundController;
 import org.controlsfx.dialog.ExceptionDialog;
+import org.jspecify.annotations.Nullable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.boot.SpringApplication;
@@ -14,13 +15,14 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.builder.SpringApplicationBuilder;
 import org.springframework.context.ConfigurableApplicationContext;
 
+import java.util.Objects;
 import java.util.ResourceBundle;
 
 @SpringBootApplication
 public class App extends Application {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(App.class);
-    private ConfigurableApplicationContext applicationContext;
+    private @Nullable ConfigurableApplicationContext applicationContext;
 
     public static void main(String[] args) {
         launch(args);
@@ -34,6 +36,8 @@ public class App extends Application {
 
     @Override
     public void start(Stage primaryStage) throws Exception {
+        Objects.requireNonNull(applicationContext);
+
         var messages = ResourceBundle.getBundle("messages");
 
         Thread.currentThread().setUncaughtExceptionHandler((t, e) -> {
@@ -54,6 +58,6 @@ public class App extends Application {
 
     @Override
     public void stop() throws Exception {
-        SpringApplication.exit(applicationContext);
+        SpringApplication.exit(Objects.requireNonNull(applicationContext));
     }
 }

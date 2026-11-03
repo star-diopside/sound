@@ -1,8 +1,12 @@
+import net.ltgt.gradle.errorprone.CheckSeverity
+import net.ltgt.gradle.errorprone.errorprone
+
 plugins {
     `java-library`
     checkstyle
     id("com.github.spotbugs")
     id("io.spring.dependency-management")
+    id("net.ltgt.errorprone")
 }
 
 repositories {
@@ -24,6 +28,8 @@ dependencyManagement {
 }
 
 dependencies {
+    errorprone("com.google.errorprone:error_prone_core:2.52.0")
+    errorprone("com.uber.nullaway:nullaway:0.14.3")
     compileOnly("org.projectlombok:lombok")
     annotationProcessor("org.projectlombok:lombok")
     testCompileOnly("org.projectlombok:lombok")
@@ -38,6 +44,16 @@ checkstyle {
 spotbugs {
     toolVersion = "4.10.5"
     ignoreFailures = true
+}
+
+tasks.withType<JavaCompile>().configureEach {
+    options.errorprone {
+        check("NullAway", CheckSeverity.ERROR)
+        option("NullAway:CustomContractAnnotations", "org.springframework.lang.Contract")
+        option("NullAway:ExcludedFieldAnnotations", "javafx.fxml.FXML")
+        option("NullAway:JSpecifyMode", "true")
+        option("NullAway:OnlyNullMarked", "true")
+    }
 }
 
 tasks.spotbugsMain {

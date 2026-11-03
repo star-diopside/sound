@@ -2,6 +2,7 @@ package jp.gr.java_conf.stardiopside.sound.service;
 
 import jakarta.annotation.PostConstruct;
 import jakarta.annotation.PreDestroy;
+import org.jspecify.annotations.Nullable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -17,7 +18,7 @@ public class TaskExecutorImpl implements TaskExecutor {
     private final BlockingQueue<Runnable> taskQueue = new LinkedBlockingQueue<>();
     private volatile boolean running;
     private ExecutorService executorService;
-    private Future<?> future;
+    private @Nullable Future<?> future;
 
     @PostConstruct
     public void onConstruct() {

@@ -1,15 +1,6 @@
 package jp.gr.java_conf.stardiopside.sound.controller;
 
-import java.io.File;
-import java.net.URL;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.util.Arrays;
-import java.util.Optional;
-import java.util.ResourceBundle;
-
-import org.springframework.stereotype.Component;
-
+import com.google.errorprone.annotations.Keep;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
@@ -20,13 +11,23 @@ import javafx.stage.FileChooser;
 import javafx.stage.Stage;
 import jp.gr.java_conf.stardiopside.sound.model.SoundCheckerData;
 import jp.gr.java_conf.stardiopside.sound.model.SoundFile;
+import org.jspecify.annotations.Nullable;
+import org.springframework.stereotype.Component;
+
+import java.io.File;
+import java.net.URL;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.util.Arrays;
+import java.util.Optional;
+import java.util.ResourceBundle;
 
 @Component
 public class SoundCheckerController implements Initializable {
 
     private final SoundCheckerData model = new SoundCheckerData();
-    private Path initialDirectory;
-    private Stage stage;
+    private @Nullable Path initialDirectory;
+    private @Nullable Stage stage;
 
     @FXML
     private TableView<SoundFile> soundFiles;
@@ -63,7 +64,8 @@ public class SoundCheckerController implements Initializable {
     }
 
     @FXML
-    private void onSelectDirectory(ActionEvent event) {
+    @Keep
+    private void onSelectDirectory(ActionEvent unusedEvent) {
         var chooser = new DirectoryChooser();
 
         getInitialDirectory().ifPresent(chooser::setInitialDirectory);
@@ -77,7 +79,8 @@ public class SoundCheckerController implements Initializable {
     }
 
     @FXML
-    private void onSelectFile(ActionEvent event) {
+    @Keep
+    private void onSelectFile(ActionEvent unusedEvent) {
         var chooser = new FileChooser();
 
         getInitialDirectory().ifPresent(chooser::setInitialDirectory);
@@ -91,7 +94,8 @@ public class SoundCheckerController implements Initializable {
     }
 
     @FXML
-    private void onClear(ActionEvent event) {
+    @Keep
+    private void onClear(ActionEvent unusedEvent) {
         model.clearSoundFiles();
     }
 

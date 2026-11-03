@@ -1,15 +1,14 @@
 package jp.gr.java_conf.stardiopside.sound;
 
-import org.springframework.context.ApplicationEventPublisher;
-import org.springframework.context.annotation.Bean;
-import org.springframework.context.annotation.Configuration;
-
 import jp.gr.java_conf.stardiopside.sound.service.SoundPlayer;
 import jp.gr.java_conf.stardiopside.sound.service.SoundPlayerImpl;
 import jp.gr.java_conf.stardiopside.sound.service.SoundService;
 import jp.gr.java_conf.stardiopside.sound.service.SoundServiceImpl;
 import jp.gr.java_conf.stardiopside.sound.service.TaskExecutor;
 import jp.gr.java_conf.stardiopside.sound.service.TaskExecutorImpl;
+import org.springframework.context.ApplicationEventPublisher;
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Configuration;
 
 @Configuration
 public class AppConfig {

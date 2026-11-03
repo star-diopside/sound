@@ -1,6 +1,7 @@
 package jp.gr.java_conf.stardiopside.sound.service;
 
 import jp.gr.java_conf.stardiopside.sound.event.SoundActionEvent;
+import org.jspecify.annotations.Nullable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.context.ApplicationEventPublisher;
@@ -25,7 +26,7 @@ class InputStreamSoundSource implements SoundSource {
         this(inputStream, null);
     }
 
-    InputStreamSoundSource(InputStream inputStream, String name) {
+    InputStreamSoundSource(InputStream inputStream, @Nullable String name) {
         this.inputStream = inputStream.markSupported() ? inputStream : new BufferedInputStream(inputStream);
         this.name = (name == null ? "unnamed" : name);
     }

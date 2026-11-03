@@ -9,5 +9,6 @@ tasks.jar {
 }
 
 dependencies {
+    implementation("org.jspecify:jspecify")
     implementation("org:jaudiotagger")
 }

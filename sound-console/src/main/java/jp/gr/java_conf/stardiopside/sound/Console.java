@@ -1,5 +1,6 @@
 package jp.gr.java_conf.stardiopside.sound;
 
+import com.google.errorprone.annotations.MustBeClosed;
 import jakarta.annotation.PreDestroy;
 import jp.gr.java_conf.stardiopside.sound.event.SoundActionEvent;
 import jp.gr.java_conf.stardiopside.sound.event.SoundExceptionEvent;
@@ -9,6 +10,7 @@ import jp.gr.java_conf.stardiopside.sound.event.SoundPositionEvent;
 import jp.gr.java_conf.stardiopside.sound.service.SoundService;
 import jp.gr.java_conf.stardiopside.sound.service.SoundSource;
 import jp.gr.java_conf.stardiopside.sound.util.PathComparators;
+import org.jspecify.annotations.Nullable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.boot.ApplicationArguments;
@@ -28,6 +30,7 @@ import java.nio.file.InvalidPathException;
 import java.nio.file.Path;
 import java.time.Duration;
 import java.time.LocalDateTime;
+import java.time.ZoneId;
 import java.util.Comparator;
 import java.util.Formatter;
 import java.util.Optional;
@@ -39,7 +42,7 @@ public class Console implements ApplicationRunner {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(Console.class);
     private final SoundService service;
-    private LocalDateTime start;
+    private @Nullable LocalDateTime start;
     private boolean stopped = false;
     private Optional<Duration> trackLength = Optional.empty();
 
@@ -53,7 +56,7 @@ public class Console implements ApplicationRunner {
 
     @Override
     public void run(ApplicationArguments args) throws Exception {
-        start = LocalDateTime.now();
+        start = LocalDateTime.now(ZoneId.systemDefault());
 
         try {
             args.getNonOptionArgs().stream()
@@ -86,6 +89,7 @@ public class Console implements ApplicationRunner {
         }
     }
 
+    @MustBeClosed
     private Stream<Supplier<SoundSource>> streamSoundSource(String arg) {
         if (arg.startsWith("http://") || arg.startsWith("https://")) {
             return streamSoundSourceFromHttpScheme(arg);
@@ -104,6 +108,7 @@ public class Console implements ApplicationRunner {
         }
     }
 
+    @MustBeClosed
     private Stream<Supplier<SoundSource>> streamSoundSourceFromPath(String arg) {
         try {
             return Files.find(Path.of(arg), Integer.MAX_VALUE, (_, attr) -> attr.isRegularFile())
@@ -131,7 +136,7 @@ public class Console implements ApplicationRunner {
     }
 
     private String getExecutionTimeString() {
-        var end = LocalDateTime.now();
+        var end = LocalDateTime.now(ZoneId.systemDefault());
         var d = Duration.between(start, end);
         return String.format("%02d:%02d:%02d", d.toHours(), d.toMinutesPart(), d.toSecondsPart());
     }

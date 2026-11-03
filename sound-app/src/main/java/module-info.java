@@ -4,14 +4,16 @@ module jp.gr.java_conf.stardiopside.sound.app {
     opens config;
 
     requires jp.gr.java_conf.stardiopside.sound.service;
+    requires com.google.errorprone.annotations;
     requires jakarta.annotation;
     requires javafx.base;
     requires javafx.controls;
     requires javafx.fxml;
-    requires org.controlsfx.controls;
-    requires org.apache.commons.logging;
-    requires org.slf4j;
     requires jul.to.slf4j;
+    requires org.apache.commons.logging;
+    requires org.controlsfx.controls;
+    requires org.jspecify;
+    requires org.slf4j;
     requires org.yaml.snakeyaml;
     requires spring.boot;
     requires spring.boot.autoconfigure;

@@ -1,5 +1,6 @@
 package jp.gr.java_conf.stardiopside.sound.model;
 
+import com.google.errorprone.annotations.MustBeClosed;
 import javafx.beans.property.ReadOnlyObjectProperty;
 import javafx.beans.property.ReadOnlyObjectWrapper;
 import javafx.beans.property.SimpleStringProperty;
@@ -49,15 +50,19 @@ public class SoundCheckerData {
     }
 
     public void addFiles(Stream<Path> paths) {
-        getSoundFiles().addAll(paths.flatMap(path -> {
-            try {
-                return Files.find(path, Integer.MAX_VALUE, (p, attr) -> attr.isRegularFile())
-                        .sorted(PathComparators.comparing());
-            } catch (InvalidPathException | IOException e) {
-                LOGGER.atWarn().setCause(e).log(e::getMessage);
-                return Stream.empty();
-            }
-        }).map(SoundFile::new).toArray(SoundFile[]::new));
+        getSoundFiles().addAll(paths.flatMap(SoundCheckerData::findFiles)
+                .map(SoundFile::new).toArray(SoundFile[]::new));
+    }
+
+    @MustBeClosed
+    private static Stream<Path> findFiles(Path path) {
+        try {
+            return Files.find(path, Integer.MAX_VALUE, (p, attr) -> attr.isRegularFile())
+                    .sorted(PathComparators.comparing());
+        } catch (InvalidPathException | IOException e) {
+            LOGGER.atWarn().setCause(e).log(e::getMessage);
+            return Stream.empty();
+        }
     }
 
     public void clearSoundFiles() {

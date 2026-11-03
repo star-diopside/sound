@@ -1,5 +1,6 @@
 package jp.gr.java_conf.stardiopside.sound.controller;
 
+import com.google.errorprone.annotations.Keep;
 import jakarta.annotation.PreDestroy;
 import javafx.application.Platform;
 import javafx.beans.binding.Bindings;
@@ -25,6 +26,7 @@ import jp.gr.java_conf.stardiopside.sound.event.SoundPositionEvent;
 import jp.gr.java_conf.stardiopside.sound.model.History;
 import jp.gr.java_conf.stardiopside.sound.model.SoundData;
 import jp.gr.java_conf.stardiopside.sound.service.SoundPlayer;
+import org.jspecify.annotations.Nullable;
 import org.springframework.context.event.EventListener;
 import org.springframework.stereotype.Component;
 
@@ -44,9 +46,9 @@ public class SoundController implements Initializable {
     private static final DateTimeFormatter HISTORY_FORMATTER = DateTimeFormatter.ofPattern("uuuu/MM/dd HH:mm:ss.SSS");
     private final SoundPlayer player;
     private final SoundData model = new SoundData();
-    private Stage stage;
-    private ChangeListener<Boolean> showingChangeListener;
-    private Path initialDirectory;
+    private @Nullable Stage stage;
+    private @Nullable ChangeListener<Boolean> showingChangeListener;
+    private @Nullable Path initialDirectory;
 
     @FXML
     private Label trackPosition;
@@ -194,7 +196,8 @@ public class SoundController implements Initializable {
     }
 
     @FXML
-    private void onSelectDirectory(ActionEvent event) {
+    @Keep
+    private void onSelectDirectory(ActionEvent unusedEvent) {
         var chooser = new DirectoryChooser();
 
         getInitialDirectory().ifPresent(chooser::setInitialDirectory);
@@ -209,7 +212,8 @@ public class SoundController implements Initializable {
     }
 
     @FXML
-    private void onSelectFile(ActionEvent event) {
+    @Keep
+    private void onSelectFile(ActionEvent unusedEvent) {
         var chooser = new FileChooser();
 
         getInitialDirectory().ifPresent(chooser::setInitialDirectory);
@@ -224,32 +228,37 @@ public class SoundController implements Initializable {
     }
 
     @FXML
-    private void onStart(ActionEvent event) {
+    @Keep
+    private void onStart(ActionEvent unusedEvent) {
         player.play();
     }
 
     @FXML
-    private void onStop(ActionEvent event) {
+    @Keep
+    private void onStop(ActionEvent unusedEvent) {
         player.stop();
     }
 
     @FXML
-    private void onBack(ActionEvent event) {
+    @Keep
+    private void onBack(ActionEvent unusedEvent) {
         player.back();
     }
 
     @FXML
-    private void onSkip(ActionEvent event) {
+    @Keep
+    private void onSkip(ActionEvent unusedEvent) {
         player.skip();
     }
 
     @FXML
-    private void onClear(ActionEvent event) {
+    @Keep
+    private void onClear(ActionEvent unusedEvent) {
         player.clear();
         model.getFiles().clear();
     }
 
-    private static String convertToString(Duration d) {
+    private static String convertToString(@Nullable Duration d) {
         return d == null ? "00:00" : String.format("%02d:%02d", d.toMinutes(), d.toSecondsPart());
     }
 

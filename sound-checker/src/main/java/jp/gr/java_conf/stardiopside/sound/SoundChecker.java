@@ -6,17 +6,19 @@ import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.stage.Stage;
 import jp.gr.java_conf.stardiopside.sound.controller.SoundCheckerController;
+import org.jspecify.annotations.Nullable;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.builder.SpringApplicationBuilder;
 import org.springframework.context.ConfigurableApplicationContext;
 
+import java.util.Objects;
 import java.util.ResourceBundle;
 
 @SpringBootApplication
 public class SoundChecker extends Application {
 
-    private ConfigurableApplicationContext applicationContext;
+    private @Nullable ConfigurableApplicationContext applicationContext;
 
     public static void main(String[] args) {
         launch(args);
@@ -32,7 +34,7 @@ public class SoundChecker extends Application {
     public void start(Stage primaryStage) throws Exception {
         var messages = ResourceBundle.getBundle("messages");
         var loader = new FXMLLoader(getClass().getResource("sound-checker.fxml"), messages);
-        loader.setControllerFactory(applicationContext::getBean);
+        loader.setControllerFactory(Objects.requireNonNull(applicationContext)::getBean);
         Parent root = loader.load();
         SoundCheckerController controller = loader.getController();
         controller.setStage(primaryStage);
@@ -42,6 +44,6 @@ public class SoundChecker extends Application {
 
     @Override
     public void stop() throws Exception {
-        SpringApplication.exit(applicationContext);
+        SpringApplication.exit(Objects.requireNonNull(applicationContext));
     }
 }

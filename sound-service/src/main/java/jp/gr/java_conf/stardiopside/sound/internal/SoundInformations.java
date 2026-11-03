@@ -6,6 +6,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.util.ConcurrentReferenceHashMap;
 
 import java.nio.file.Path;
+import java.util.Objects;
 import java.util.Optional;
 
 public final class SoundInformations {
@@ -26,6 +27,6 @@ public final class SoundInformations {
     }
 
     public static Optional<SoundInformation> getFromCache(Path path) {
-        return CACHE.computeIfAbsent(path, SoundInformations::get);
+        return Objects.requireNonNull(CACHE.computeIfAbsent(path, SoundInformations::get));
     }
 }

@@ -6,6 +6,7 @@ import jp.gr.java_conf.stardiopside.sound.event.SoundLineEvent;
 import jp.gr.java_conf.stardiopside.sound.event.SoundPositionEvent;
 import jp.gr.java_conf.stardiopside.sound.event.SoundPositionFinishEvent;
 import lombok.Getter;
+import org.jspecify.annotations.Nullable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.context.ApplicationEventPublisher;
@@ -29,7 +30,7 @@ public class SoundServiceImpl implements SoundService {
     private volatile boolean skipping;
 
     @Getter
-    private volatile Duration position;
+    private volatile @Nullable Duration position;
 
     private final ApplicationEventPublisher publisher;
 
